@@ -1,0 +1,32 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 设备 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<rect x='72' y='86' width='30' height='2' rx='1' fill='#149CFF'/>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>设备</text>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>诊断</text>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>设备</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>未连接设备</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>未选择设备          ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<rect x='116' y='146' width='1036' height='500' rx='8' fill='#202124'/>
+<rect x='611' y='240' width='22' height='15' rx='2' fill='#000000' stroke='#149CFF'/>
+<path d='M 622 255 L 622 260' stroke='#149CFF'/>
+<path d='M 616 260 L 628 260' stroke='#149CFF'/>
+<text x='514' y='329' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='24' font-weight='600' fill='#F3F5F7'>尚未发现 USB 显示设备</text>
+<text x='487' y='367' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>连接设备后重新检测，也可以先编辑离线主题。</text>
+<rect x='480' y='411' width='150' height='36' rx='8' fill='#149CFF'/>
+<text x='494' y='434' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#001525'>重新检测</text>
+<rect x='646' y='411' width='170' height='36' rx='8' fill='#2B2D30'/>
+<text x='660' y='434' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>离线编辑主题</text>
+<text x='512' y='503' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>草稿归属：无设备 · 不会发送到硬件</text>
+</g>
+</svg>

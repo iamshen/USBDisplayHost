@@ -1,0 +1,8 @@
+<Solution>
+    <Folder Name="/src/">
+        <Project Path="src/UsbDisplayHost.Core/UsbDisplayHost.Core.csproj" />
+        <Project Path="src/UsbDisplayHost.Windows/UsbDisplayHost.Windows.csproj" />
+        <Project Path="src/UsbDisplayHost.Rendering/UsbDisplayHost.Rendering.csproj" />
+        <Project Path="src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj" />
+    </Folder>
+</Solution>

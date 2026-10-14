@@ -1,0 +1,8 @@
+<UserControl x:Class="UsbDisplayHost.Desktop.Controls.DeviceStatus" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="Root">
+    <StackPanel>
+        <TextBlock Text="{Binding ConnectionText, ElementName=Root}" Margin="0,0,0,12" />
+        <TextBlock Text="{Binding ModeText, ElementName=Root}" Margin="0,0,0,12" />
+        <TextBlock Text="{Binding PowerText, ElementName=Root}" Margin="0,0,0,12" />
+        <TextBlock Text="{Binding StreamingText, ElementName=Root}" Margin="0,0,0,12" />
+    </StackPanel>
+</UserControl>

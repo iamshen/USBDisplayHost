@@ -1,0 +1,115 @@
+<Page x:Class="UsbDisplayHost.Desktop.Views.DiagnosticsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:controls="clr-namespace:UsbDisplayHost.Desktop.Controls"
+      Title="诊断" ScrollViewer.CanContentScroll="False">
+    <Grid Margin="{DynamicResource PageContentMargin}" MaxWidth="1120">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+        <TextBlock Text="诊断" Style="{DynamicResource PageTitleStyle}" Margin="0,0,0,24" />
+        <Grid Grid.Row="1" SizeChanged="OnContentSizeChanged">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <ScrollViewer x:Name="SummaryScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="240">
+                <StackPanel>
+                    <UniformGrid x:Name="SummaryPanels" Columns="3" Margin="0,0,0,16">
+                        <Border x:Name="HostSummaryCard" Style="{StaticResource PanelStyle}" Margin="0,0,12,0" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="传输状态" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                <TextBlock Text="{Binding ConnectionSummary}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border x:Name="FramesSummaryCard" Style="{StaticResource PanelStyle}" Margin="0,0,12,0" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="USB 已发送帧数" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                <TextBlock Text="{Binding CompletedFramesText}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelStyle}" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="日志写入" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                <TextBlock Text="{Binding LogStateText}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                    <Expander Header="运行详情" Style="{StaticResource DetailExpanderStyle}" Margin="-8,0,-8,12">
+                        <StackPanel Margin="8,12">
+                            <TextBlock Text="{Binding HostTransferText}" Style="{StaticResource OptionalTextStyle}" Margin="0,0,0,8" />
+                            <TextBlock Text="{Binding ActiveProductionText}" Style="{StaticResource OptionalTextStyle}" Margin="0,0,0,8" />
+                            <TextBlock Text="{Binding DeviceFeedbackText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,0,0,8" />
+                            <TextBlock Text="{Binding StorageText}" Style="{DynamicResource AuxiliaryTextStyle}" />
+                        </StackPanel>
+                    </Expander>
+                    <controls:InlineMessage Message="{Binding TransferErrorText}" Margin="0,0,0,12" />
+                </StackPanel>
+            </ScrollViewer>
+            <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                <WrapPanel>
+                    <ui:Button Appearance="Primary" Content="导出诊断…" Command="{Binding ExportCommand}" Margin="0,0,8,4" />
+                    <Button Content="打开日志目录" Command="{Binding OpenLogsCommand}" Margin="0,0,8,4" />
+                    <Button Content="取消导出" Command="{Binding ExportCancelCommand}" Margin="0,0,8,4" Visibility="{Binding ExportCommand.IsRunning, Converter={StaticResource BooleanVisibility}}" />
+                    <Button Content="核实导出" Command="{Binding VerifyExportCommand}" Margin="0,0,8,4" Visibility="{Binding HasUnconfirmedExport, Converter={StaticResource BooleanVisibility}}" />
+                    <Button Content="取消核实" Command="{Binding VerifyExportCancelCommand}" Margin="0,0,8,4" Visibility="{Binding VerifyExportCommand.IsRunning, Converter={StaticResource BooleanVisibility}}" />
+                    <Button Content="放弃核实" Command="{Binding DiscardExportVerificationCommand}" Margin="0,0,8,4" Visibility="{Binding HasUnconfirmedExport, Converter={StaticResource BooleanVisibility}}" />
+                </WrapPanel>
+                <TextBlock Text="{Binding ActionText}" Style="{StaticResource OptionalTextStyle}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite" />
+                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ExportProgress}" Height="3" Margin="0,8,0,0"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanVisibility}}" AutomationProperties.Name="诊断导出进度" />
+            </StackPanel>
+            <Border Grid.Row="2" Style="{StaticResource PanelStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <DockPanel Margin="20,18">
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding EventCountText}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" />
+                        <TextBlock Text="事件日志" Style="{DynamicResource GroupTitleStyle}" />
+                    </DockPanel>
+                    <Border Grid.Row="1" Background="{DynamicResource SurfaceRaisedBrush}" Padding="20,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="80" /><ColumnDefinition Width="64" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="时间" Style="{DynamicResource AuxiliaryTextStyle}" />
+                            <TextBlock Grid.Column="1" Text="级别" Style="{DynamicResource AuxiliaryTextStyle}" />
+                            <TextBlock Grid.Column="2" Text="阶段 / 事件" Style="{DynamicResource AuxiliaryTextStyle}" />
+                            <TextBlock Grid.Column="3" Text="错误编号" Style="{DynamicResource AuxiliaryTextStyle}" />
+                        </Grid>
+                    </Border>
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Events}" HorizontalContentAlignment="Stretch" Background="Transparent"
+                             BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="最近诊断事件">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="20,12" />
+                                <Setter Property="FocusVisualStyle" Value="{DynamicResource ProjectFocusVisualStyle}" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="Row" Padding="{TemplateBinding Padding}" Background="Transparent">
+                                                <ContentPresenter HorizontalAlignment="Stretch" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True"><Setter TargetName="Row" Property="Background" Value="{DynamicResource SelectionBrush}" /></Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Row" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" /></Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80" /><ColumnDefinition Width="64" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Timestamp}" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Severity}" FontSize="12" />
+                                    <TextBlock Grid.Column="2" Margin="0,0,12,0" FontSize="13">
+                                        <Run Text="{Binding Stage, Mode=OneWay}" /><Run Text=" / " /><Run Text="{Binding Code, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="3" Text="{Binding ErrorId}" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

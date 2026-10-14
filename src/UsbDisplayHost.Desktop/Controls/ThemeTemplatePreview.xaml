@@ -1,0 +1,52 @@
+<UserControl x:Class="UsbDisplayHost.Desktop.Controls.ThemeTemplatePreview" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:themes="clr-namespace:UsbDisplayHost.Desktop.ViewModels" Width="64" Height="36" Focusable="False" IsTabStop="False">
+    <UserControl.Resources>
+        <DataTemplate x:Key="ImageSample">
+            <Canvas Width="96" Height="54" Background="{DynamicResource CanvasBrush}" ClipToBounds="True">
+                <Ellipse Width="10" Height="10" Fill="{DynamicResource TextSecondaryBrush}" Canvas.Left="68" Canvas.Top="8" />
+                <Path Data="M0,54 L30,22 L58,54 Z" Fill="{DynamicResource SelectedOutlineBrush}" />
+                <Path Data="M35,54 L67,28 L96,54 Z" Fill="{DynamicResource TextSecondaryBrush}" />
+            </Canvas>
+        </DataTemplate>
+        <DataTemplate x:Key="ClockSample">
+            <Grid Width="96" Height="54" Background="{DynamicResource CanvasBrush}">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="12:34" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" TextAlignment="Center" />
+                    <TextBlock Text="星期五" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" TextAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="DashboardSample">
+            <Grid Width="96" Height="54" Background="{DynamicResource CanvasBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="6" VerticalAlignment="Center">
+                    <TextBlock Text="CPU" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
+                    <Rectangle Height="5" Fill="{DynamicResource SelectedOutlineBrush}" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="6" VerticalAlignment="Center">
+                    <TextBlock Text="内存" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
+                    <Rectangle Height="5" Fill="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Viewbox Stretch="Uniform">
+        <ContentControl Content="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}" Focusable="False" IsTabStop="False" AutomationProperties.Name="模板布局示意">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="ContentTemplate" Value="{StaticResource ImageSample}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Static themes:ThemeKind.Clock}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource ClockSample}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Static themes:ThemeKind.Dashboard}">
+                            <Setter Property="ContentTemplate" Value="{StaticResource DashboardSample}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+    </Viewbox>
+</UserControl>

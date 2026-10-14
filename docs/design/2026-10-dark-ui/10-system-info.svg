@@ -1,0 +1,51 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 诊断 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备</text>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<rect x='374' y='86' width='30' height='2' rx='1' fill='#149CFF'/>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>诊断</text>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>诊断</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>系统规格 · 扩展视图设计</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>AD102  /  A01        ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<text x='118' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>连接与日志</text>
+<text x='256' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>电脑监测</text>
+<text x='394' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#149CFF'>系统规格</text>
+<rect x='394' y='170' width='86' height='3' rx='1' fill='#149CFF'/>
+<rect x='906' y='136' width='102' height='36' rx='8' fill='#2B2D30'/>
+<text x='920' y='159' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>刷新</text>
+<rect x='1020' y='136' width='132' height='36' rx='8' fill='#2B2D30'/>
+<text x='1034' y='159' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>复制规格</text>
+<rect x='116' y='194' width='1036' height='506' rx='8' fill='#202124'/>
+<text x='140' y='233' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>此电脑</text>
+<text x='140' y='282' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备名称</text>
+<text x='350' y='282' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>DESKTOP-DEMO（示例）</text>
+<path d='M 140 305 L 1128 305' stroke='#363C43'/>
+<text x='140' y='339' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>操作系统</text>
+<text x='350' y='339' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>Windows 11（示例）</text>
+<path d='M 140 362 L 1128 362' stroke='#363C43'/>
+<text x='140' y='396' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>CPU</text>
+<text x='350' y='396' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>AMD Ryzen 7 9700X（示例）</text>
+<path d='M 140 419 L 1128 419' stroke='#363C43'/>
+<text x='140' y='453' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>GPU</text>
+<text x='350' y='453' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>NVIDIA GeForce RTX 4070（示例）</text>
+<path d='M 140 476 L 1128 476' stroke='#363C43'/>
+<text x='140' y='510' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主板</text>
+<text x='350' y='510' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>B650 主板（示例）</text>
+<path d='M 140 533 L 1128 533' stroke='#363C43'/>
+<text x='140' y='567' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>内存</text>
+<text x='350' y='567' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>DDR5 · 16 GB × 2（示例）</text>
+<path d='M 140 590 L 1128 590' stroke='#363C43'/>
+<text x='140' y='624' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>磁盘</text>
+<text x='350' y='624' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>NVMe SSD · 2 TB（示例）</text>
+</g>
+</svg>

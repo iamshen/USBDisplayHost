@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="CanvasBrushColor">#F4F6F8</Color>
+    <SolidColorBrush x:Key="CanvasBrush" Color="{DynamicResource CanvasBrushColor}" />
+    <Color x:Key="SurfaceBrushColor">#FFFFFF</Color>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{DynamicResource SurfaceBrushColor}" />
+    <Color x:Key="TextPrimaryBrushColor">#182230</Color>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource TextPrimaryBrushColor}" />
+    <Color x:Key="TextSecondaryBrushColor">#526071</Color>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource TextSecondaryBrushColor}" />
+    <Color x:Key="AccentBrushColor">#245BDB</Color>
+    <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource AccentBrushColor}" />
+    <Color x:Key="OnAccentBrushColor">#FFFFFF</Color>
+    <SolidColorBrush x:Key="OnAccentBrush" Color="{DynamicResource OnAccentBrushColor}" />
+    <Color x:Key="AccentHoverBrushColor">#1D4FC4</Color>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{DynamicResource AccentHoverBrushColor}" />
+    <Color x:Key="AccentPressedBrushColor">#1944A8</Color>
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="{DynamicResource AccentPressedBrushColor}" />
+    <Color x:Key="SelectionBrushColor">#EAF0FD</Color>
+    <SolidColorBrush x:Key="SelectionBrush" Color="{DynamicResource SelectionBrushColor}" />
+    <Color x:Key="BorderBrushColor">#D4DAE3</Color>
+    <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource BorderBrushColor}" />
+    <Color x:Key="ControlBorderBrushColor">#7A8798</Color>
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="{DynamicResource ControlBorderBrushColor}" />
+    <Color x:Key="SuccessBrushColor">#176B45</Color>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource SuccessBrushColor}" />
+    <Color x:Key="WarningBrushColor">#8A4B08</Color>
+    <SolidColorBrush x:Key="WarningBrush" Color="{DynamicResource WarningBrushColor}" />
+    <Color x:Key="ErrorBrushColor">#B42318</Color>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{DynamicResource ErrorBrushColor}" />
+    <Color x:Key="FocusBrushColor">#245BDB</Color>
+    <SolidColorBrush x:Key="FocusBrush" Color="{DynamicResource FocusBrushColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackground" Color="{DynamicResource AccentBrushColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="{DynamicResource AccentHoverBrushColor}" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="{DynamicResource AccentPressedBrushColor}" />
+    <SolidColorBrush x:Key="AccentButtonForeground" Color="{DynamicResource OnAccentBrushColor}" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="{DynamicResource OnAccentBrushColor}" />
+    <SolidColorBrush x:Key="ListBoxItemForeground" Color="{DynamicResource TextPrimaryBrushColor}" />
+    <SolidColorBrush x:Key="ListBoxItemSelectedBackgroundThemeBrush" Color="{DynamicResource SelectionBrushColor}" />
+    <SolidColorBrush x:Key="ListBoxItemSelectedForegroundThemeBrush" Color="{DynamicResource TextPrimaryBrushColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemForeground" Color="{DynamicResource TextPrimaryBrushColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemForegroundLeftFluent" Color="{DynamicResource TextPrimaryBrushColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOverLeftFluent" Color="{DynamicResource TextPrimaryBrushColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="{DynamicResource SelectionBrushColor}" />
+    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedLeftFluent" Color="{DynamicResource SelectionBrushColor}" />
+    <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="{DynamicResource AccentBrushColor}" />
+</ResourceDictionary>

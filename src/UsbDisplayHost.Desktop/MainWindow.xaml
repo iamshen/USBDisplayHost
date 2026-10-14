@@ -1,0 +1,191 @@
+<ui:FluentWindow x:Class="UsbDisplayHost.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:views="clr-namespace:UsbDisplayHost.Desktop.Views" xmlns:controls="clr-namespace:UsbDisplayHost.Desktop.Controls" Title="USB Display" Width="1180" Height="820" Icon="pack://application:,,,/Assets/Branding/app.ico" MinWidth="1" MinHeight="1" FontFamily="{DynamicResource ApplicationFontFamily}" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" Background="{DynamicResource CanvasBrush}">
+    <ui:FluentWindow.Resources>
+        <ItemsPanelTemplate x:Key="TopNavigationPanel">
+            <WrapPanel />
+        </ItemsPanelTemplate>
+        <ItemsPanelTemplate x:Key="CompactNavigationPanel">
+            <StackPanel />
+        </ItemsPanelTemplate>
+        <ItemsPanelTemplate x:Key="SideNavigationPanel">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+            </Grid>
+        </ItemsPanelTemplate>
+        <Style x:Key="NavigationItemStyle" TargetType="ListBoxItem">
+            <Setter Property="FocusVisualStyle" Value="{DynamicResource ProjectFocusVisualStyle}" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Tile" Background="Transparent" CornerRadius="6" Margin="3,4">
+                            <Grid>
+                                <StackPanel x:Name="LabelPanel" Orientation="Horizontal" Margin="14,10">
+                                    <ui:SymbolIcon x:Name="Icon" Symbol="{Binding Icon}" FontSize="18" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBlock x:Name="Label" Text="{Binding Label}" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Border x:Name="Indicator" Height="2" Background="{DynamicResource AccentBrush}" VerticalAlignment="Bottom" Margin="20,0" Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="Side">
+                                <Setter TargetName="LabelPanel" Property="Margin" Value="16,13" />
+                                <Setter TargetName="Icon" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="Label" Property="Margin" Value="4,0,0,0" />
+                                <Setter TargetName="Indicator" Property="Height" Value="24" />
+                                <Setter TargetName="Indicator" Property="Width" Value="3" />
+                                <Setter TargetName="Indicator" Property="HorizontalAlignment" Value="Left" />
+                                <Setter TargetName="Indicator" Property="VerticalAlignment" Value="Center" />
+                                <Setter TargetName="Indicator" Property="Margin" Value="0" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="Compact">
+                                <Setter TargetName="Icon" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="Label" Property="Margin" Value="12,0,0,0" />
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                                <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="Icon" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="Side" />
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                            </MultiDataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Grid.Row" Value="0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Label}" Value="应用设置">
+                    <Setter Property="Grid.Row" Value="5" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Label}" Value="诊断">
+                    <Setter Property="Grid.Row" Value="4" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Label}" Value="主题">
+                    <Setter Property="Grid.Row" Value="1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Label}" Value="设备设置">
+                    <Setter Property="Grid.Row" Value="2" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </ui:FluentWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar Title="USB Display" Background="{DynamicResource NavigationBrush}">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/Branding/logo-64.png" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        <Grid x:Name="ShellGrid" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="NavigationRow" Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="NavigationColumn" Width="0" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="Header" Grid.Column="2" Margin="0,0,32,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,6,0,6" DataContext="{Binding DeviceSelector, RelativeSource={RelativeSource AncestorType=Window}}">
+                    <TextBlock Text="未连接设备" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DiscoveredDevices.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <ComboBox ItemsSource="{Binding DiscoveredDevices}" SelectedItem="{Binding SelectedCandidate}" DisplayMemberPath="Title" Width="200" AutomationProperties.Name="设备候选选择" ToolTip="选择候选后点击确认；连接在设备页执行">
+                        <ComboBox.Style>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DiscoveredDevices.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
+                    <Button Content="选择" Command="{Binding ConfirmSelectionCommand}" Margin="8,0,0,0" AutomationProperties.Name="确认选定设备">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DiscoveredDevices.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            <Button x:Name="CompactMenuButton" Grid.Column="1" Content="☰  页面菜单" Click="OnCompactMenuClick" HorizontalAlignment="Left" Margin="16,4" Visibility="Collapsed" />
+            <Button x:Name="MoreNavigationButton" Grid.Column="1" Content="更多 ▾" Click="OnMoreNavigationClick" HorizontalAlignment="Right" Margin="0,4,8,4" Visibility="Collapsed" AutomationProperties.Name="更多页面">
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem x:Name="DiagnosticsMenuItem" Header="诊断" Click="OnDiagnosticsMenuClick" />
+                        <MenuItem x:Name="SettingsMenuItem" Header="应用设置" Click="OnSettingsMenuClick" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+            <ListBox x:Name="PageNavigation" Grid.Column="1" HorizontalAlignment="Stretch" Margin="32,0,0,0" Tag="Top" ItemsPanel="{StaticResource TopNavigationPanel}" ItemContainerStyle="{StaticResource NavigationItemStyle}" Background="{DynamicResource NavigationBrush}" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionChanged="OnPageSelectionChanged" PreviewKeyDown="OnNavigationKeyDown" AutomationProperties.Name="主导航">
+                <ListBox.Template>
+                    <ControlTemplate TargetType="ListBox">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ScrollViewer Focusable="False" HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}" VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </ListBox.Template>
+            </ListBox>
+            <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <controls:InlineMessage Message="{Binding ErrorText}" Margin="32,8" />
+                <ui:NavigationView x:Name="RootNavigationView" Grid.Row="1" IsPaneVisible="False" IsPaneToggleVisible="False" PaneDisplayMode="LeftMinimal" OpenPaneLength="0" CompactPaneLength="0" FrameMargin="0" IsBackButtonVisible="Collapsed" Background="{DynamicResource CanvasBrush}">
+                    <ui:NavigationView.MenuItems>
+                        <ui:NavigationViewItem Content="设备" TargetPageType="{x:Type views:DevicesPage}" />
+                        <ui:NavigationViewItem Content="主题" TargetPageType="{x:Type views:ThemesPage}" />
+                        <ui:NavigationViewItem Content="设备设置" TargetPageType="{x:Type views:DeviceSettingsPage}" />
+                        <ui:NavigationViewItem Content="诊断" TargetPageType="{x:Type views:DiagnosticsPage}" />
+                        <ui:NavigationViewItem Content="应用设置" TargetPageType="{x:Type views:ApplicationSettingsPage}" />
+                    </ui:NavigationView.MenuItems>
+                </ui:NavigationView>
+            </Grid>
+            <ui:SnackbarPresenter x:Name="RootSnackbarPresenter" Grid.RowSpan="2" Grid.ColumnSpan="3" VerticalAlignment="Bottom" Margin="16" Panel.ZIndex="10" />
+        </Grid>
+        <ui:ContentDialogHost x:Name="RootDialogHost" Grid.RowSpan="2" Panel.ZIndex="20" />
+    </Grid>
+</ui:FluentWindow>
