@@ -1,50 +1,88 @@
-# Repository Guidelines
+# 仓库协作指南
 
-## Project Structure & Module Organization
+## 工作边界
 
-USBDisplayHost is currently a design-stage Windows USB display application; no solution, source projects, tests, or application assets exist yet.
+- 先阅读相关代码、文档和工作区差异，再修改；保留已有及无关改动，不擅自回滚、覆盖或清理。
+- 按当前任务范围实施。仅要求分析、评审或提案时，不修改生产代码；OpenSpec 提案和任务清单本身不代表实施授权。
+- 未经用户主动明确授权，严禁编写单元测试、测试用例或测试代码，严禁执行任何测试。文档、OpenSpec 和验收清单中的测试要求不构成授权。
+- 不得自行提交，所有 Git 提交交由用户执行。
+- 项目文档、交付说明和新增注释使用中文；技术标识保留原名。交付文档描述最终方案，协作约束集中在本文件。
 
-- `README.md` summarizes scope and links the documentation.
-- `docs/01_需求分析.md` through `docs/06_UI设计规范.md` define requirements, behavior, architecture, tasks, engineering rules, and UI design.
-- `docs/参考资料/` contains original references; preserve them unchanged.
-- `openspec/changes/build-usb-display-host-v1/` contains the implementation proposal, design, capability specs, and task checklist.
-- Planned `src/UsbDisplayHost.{Desktop,Core,Windows,Rendering}/` projects separate WPF/MVVM, platform-independent logic, native adapters, and offscreen rendering. The design proposes MSTest projects under `tests/UsbDisplayHost.<Module>.Tests/`; creating or running tests requires explicit user authorization.
+## 项目定位与资料入口
 
-Keep Core independent of WPF and native handles. Windows and Rendering depend on Core; Desktop composes all three.
+USBDisplayHost 是基于 C# / .NET 10、WPF/XAML、WPF UI 和 CommunityToolkit.Mvvm 的 Windows 原生 USB 显示设备上位机。
 
-## Build and Development Commands
+按任务查阅对应资料，避免在本文件重复维护功能进度：
 
-Run from the repository root:
+| 路径                                             | 用途                                   |
+| ------------------------------------------------ | -------------------------------------- |
+| `README.md`                                    | 项目范围、构建入口、模块状态和文档索引 |
+| `docs/01_需求分析.md`、`docs/02_PRD.md`      | 需求边界、用户流程和功能行为           |
+| `docs/03_软件技术架构.md`                      | 模块、线程、通信与恢复设计             |
+| `docs/04_项目管理.md`、`docs/05_项目规范.md` | 任务追踪和工程规范                     |
+| `docs/06_UI设计规范.md`                        | WPF 页面、交互状态、视觉与可访问性要求 |
+| `docs/contracts/`                              | 设备、固件和协议契约及待确认输入       |
+| `docs/release/`、`docs/verification/`        | 发布约束、实施记录和验证证据           |
+| `openspec/changes/build-usb-display-host-v1/`  | 当前实施提案、设计、能力规格和任务清单 |
+| `docs/参考资料/`                               | 原始参考资料，保持原样，不修改         |
 
-- `git diff --check`: check tracked changes for whitespace errors.
-- `openspec validate build-usb-display-host-v1 --strict --no-interactive`: validate the current specifications; requires the OpenSpec CLI.
+设计要求、代码实现与验证结果分别核实。历史构建记录不代表当前工作区已验证，已编译模块不代表设备链路或完整功能已完成。
 
-Application commands are **planned**, pending engineering-baseline tasks 2.1–2.3 and a Windows machine with the pinned .NET 10 SDK:
+## 工程职责与依赖
 
-- `dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --locked-mode`: restore locked dependencies once the project and lockfiles exist.
-- `dotnet build src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj -c Release --no-restore`: compile the affected project; replace the path with the relevant project.
-- `dotnet run --project src/UsbDisplayHost.Desktop`: launch the WPF application.
+| 工程                              | 职责                                       | 项目依赖                 |
+| --------------------------------- | ------------------------------------------ | ------------------------ |
+| `src/UsbDisplayHost.Core/`      | 平台无关的模型、业务规则、协调器和适配接口 | 无                       |
+| `src/UsbDisplayHost.Windows/`   | Windows 原生通信、存储及系统适配           | Core                     |
+| `src/UsbDisplayHost.Rendering/` | 离屏绘图与图像编码                         | Core                     |
+| `src/UsbDisplayHost.Desktop/`   | WPF 页面、ViewModel、导航及应用组合        | Core、Windows、Rendering |
 
-Document verified commands in README when scaffolding lands. Ordinary builds must not run tests, open devices, or install drivers.
+- Core 不依赖 WPF、Windows API 或原生句柄；原生调用留在适配层，不放入 ViewModel。
+- 界面使用 XAML、绑定和命令，沿用现有 WPF UI 资源与组件。
+- 设备显示内容通过独立内容模型离屏渲染，不截取管理窗口作为设备画面。
+- 草稿、当前会话配置、本地恢复配置和设备实际反馈保持区分；异步结果遵守现有会话代次、修订和资源所有权约束。
+- 协议实现以已确认契约为依据，不将参考资料中的示例值当作已冻结参数；协议变更同步更新字段说明和匹配固件版本。
 
-## Coding Style & Naming Conventions
+## 实施约定
 
-For new C#/XAML files, use four-space indentation. Use PascalCase for types/public members, camelCase for locals, and the `Async` suffix for asynchronous methods. Use bindings and commands; keep native calls outside ViewModels. Enable nullable references and .NET analyzers during scaffolding; no formatter or `.editorconfig` is configured yet.
+- 新增 C# / XAML 文件使用四空格缩进；类型和公开成员使用 PascalCase，局部变量使用 camelCase，异步方法使用 `Async` 后缀。
+- 沿用 `Directory.Build.props` 中的 nullable 和 .NET 分析器配置，依赖版本集中在 `Directory.Packages.props` 管理。
+- .NET SDK 以 `global.json` 为准，依赖按现有锁文件还原。确需修改依赖时，同步维护集中版本与受影响的锁文件。
+- 行为变化同步更新相关文档和 OpenSpec，保留 REQ / FR / T / TC 追踪关系；任务完成标记必须有对应实现或验证依据。
+- UI 调整遵守既有页面规范，保留任务范围外的字段、默认值、验证规则和业务流程。
 
-Keep project documentation in Chinese and preserve REQ/FR/T/TC traceability when changing behavior.
+## 构建与验证
 
-## 测试与验证
+命令从仓库根目录执行，默认使用 PowerShell。根据改动选择必要检查，不因文档调整启动应用或执行构建。
 
-除非用户主动明确允许，严禁编写任何单元测试、测试用例及测试代码，严禁主动执行或运行任何测试。优先仅对受影响项目执行目标构建与编译验证。
+| 场景                     | 命令或要求                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| 文档或代码差异检查       | `git diff --check`；有既有问题时区分本次引入与原有问题                                                                  |
+| 当前 OpenSpec 变更       | `openspec validate build-usb-display-host-v1 --strict --no-interactive`，需要 OpenSpec CLI                              |
+| 生产工程 Release 构建    | `./build.ps1 -Action Build`，执行锁定还原和目标构建                                                                     |
+| 仅还原依赖               | `./build.ps1 -Action Restore`                                                                                           |
+| 已还原后的受影响工程编译 | `dotnet build src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj -c Release --no-restore`，按影响范围替换工程路径 |
+| 发布目录生成             | `./build.ps1 -Action Publish`，用于发布任务，生成 `.artifacts/publish/win-x64` 自包含目录                             |
+| 启动 WPF 应用            | `dotnet run --project src/UsbDisplayHost.Desktop`，仅在任务包含运行且满足测试授权约束时使用                             |
 
-现有文档、OpenSpec 任务或验收清单中的测试要求不构成用户授权；未获授权的测试保持未执行状态。获准执行硬件测试时，必须显式选择环境和设备。
+- 代码修改优先对受影响工程执行目标编译；跨工程或应用组合变化使用 Desktop 构建。
+- 普通构建不得运行应用、测试、设备操作或驱动安装。Publish 生成目录不代表安装、发布或更新验收成功。
+- 创建测试工程或执行测试前必须取得明确授权；未授权项目保持未执行状态。硬件测试获准后，必须显式选择环境和设备。
+- UI 改动在获准运行验证后附目标视口的实际 WPF 截图；未获授权或无法运行时，如实记录缺少截图和运行证据，不以模拟图代替。
+- 构建入口或工程配置变化时，同步更新 README 中的使用说明；只把实际执行成功的命令写成已验证。
 
-## 提交、安全与交付
+## 安全与交付
 
-开发分支使用 `feature/<short-name>`。提交使用简洁的 Conventional Commits，例如 `feat(recycle): 增加取货交接记录`、`fix(auth): 限制跨商户访问`；实际 scope 应对应目标仓库模块。每个仓库单独提交；PR 写明业务影响、涉及仓库、关联工作项/OpenSpec、验证命令与结果，UI 改动附目标视口的实际 WPF 截图。协议改动同时更新字段说明和匹配固件版本。保留无关工作区改动。
+- 不提交或复述密钥、令牌、证书密码、测试账号密码及生产配置。敏感值使用既有环境变量、Secret、Secure Files 或安全存储链路。
+- 用户明确授权保存的本地验收凭据仅按授权范围存放，并确保不进入版本控制。
+- 需要新建开发分支时使用 `feature/<short-name>`。供用户执行的提交说明采用简洁的 Conventional Commits，例如 `feat(desktop): 完善主题预览`、`fix(transport): 修正分片长度校验`。
+- 交付说明列出改动结果、影响范围、实际验证命令与结果，以及尚未覆盖的必要验证；未执行的检查明确标注。
+- PR 描述包含业务影响、关联工作项或 OpenSpec、验证结果；涉及 UI 或协议时附对应截图或契约说明。
+- 严格区分文档检查、编译、应用运行、真实设备和端到端验收，不将本地构建、静态检查或模拟数据结果表述为生产部署或硬件验收成功。
 
-不得提交或复述客户端密钥、令牌、证书密码、测试账号密码及生产配置。敏感值使用目标仓库既有环境变量、Secret、Secure Files 或安全存储链路。用户明确提供并授权保存的本地验收登录凭据，仅可按授权范围存放于本地，并确保不进入版本控制。
+## 现行方案与正式文档
 
-不要把本地构建、静态检查或模拟数据结果表述为生产部署、真实设备或端到端验收成功。
-
-不得自行提交，所有提交应该交由用户自行执行。
+- 面向不了解讨论过程的读者，直接描述当前有效的方案、规则和适用边界；明确区分已批准方案、已实现能力和待验证事项。
+- 修订时替换受影响的条目，保留未受影响的有效内容；不追加对话、纠正经过或临时实现的修改痕迹。
+- 不把已否决、撤回或替代的方案写入现行方案和正式交付物；保留当前有效的业务限制、安全约束与兼容性要求。
+- CHANGELOG、迁移记录、ADR 和 OpenSpec 归档按各自用途保存必要历史；临时探索记录单独存放，不默认加载。

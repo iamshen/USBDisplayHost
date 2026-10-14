@@ -1,0 +1,58 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 主题 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备</text>
+<rect x='162' y='86' width='30' height='2' rx='1' fill='#149CFF'/>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>诊断</text>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>主题</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>草稿归属 · AD102 / A01</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>AD102  /  A01        ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<rect x='116' y='146' width='348' height='508' rx='8' fill='#202124'/>
+<text x='136' y='179' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>选择模板</text>
+<rect x='136' y='202' width='94' height='68' rx='6' fill='#2B2D30' stroke='#363C43'/>
+<text x='149' y='238' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>图片</text>
+<rect x='240' y='202' width='94' height='68' rx='6' fill='#2B2D30' stroke='#E8EAED'/>
+<text x='253' y='238' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>时钟</text>
+<text x='313' y='259' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#E8EAED'>✓</text>
+<rect x='344' y='202' width='94' height='68' rx='6' fill='#2B2D30' stroke='#363C43'/>
+<text x='357' y='238' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>仪表盘</text>
+<rect x='138' y='304' width='18' height='18' rx='3' fill='#E8EAED'/>
+<text x='140' y='317' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#001525'>✓</text>
+<text x='166' y='317' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>24 小时制</text>
+<rect x='138' y='342' width='18' height='18' rx='3' fill='#E8EAED'/>
+<text x='140' y='355' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#001525'>✓</text>
+<text x='166' y='355' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>显示日期</text>
+<text x='138' y='408' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>背景色</text>
+<rect x='138' y='420' width='304' height='36' rx='6' fill='#2B2D30' stroke='#363C43'/>
+<text x='150' y='443' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>#131416</text>
+<text x='138' y='493' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>文字色</text>
+<rect x='138' y='505' width='304' height='36' rx='6' fill='#2B2D30' stroke='#363C43'/>
+<text x='150' y='528' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>#F3F5F7</text>
+<text x='138' y='620' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>草稿来源  ﹀</text>
+<text x='506' y='182' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>草稿预览</text>
+<text x='986' y='181' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>1920 × 1080</text>
+<rect x='506' y='216' width='624' height='351' rx='4' fill='#131416' stroke='#45484C'/>
+<text x='530' y='252' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>MONDAY</text>
+<text x='662' y='414.81' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='89' font-weight='600' fill='#F3F5F7'>10:24</text>
+<text x='699.44' y='475.19' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>2026 / 10 / 12</text>
+<text x='506' y='602' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>预览就绪 · 尚未应用到设备</text>
+<path d='M 116 672 L 1152 672' stroke='#363C43'/>
+<text x='118' y='708' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>草稿已修改</text>
+<rect x='768' y='689' width='84' height='36' rx='8' fill='#2B2D30'/>
+<text x='782' y='712' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>更多  ···</text>
+<rect x='864' y='689' width='120' height='36' rx='8' fill='#2B2D30'/>
+<text x='878' y='712' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>保存草稿</text>
+<rect x='996' y='689' width='156' height='36' rx='8' fill='#149CFF'/>
+<text x='1010' y='712' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#001525'>应用到设备</text>
+</g>
+</svg>

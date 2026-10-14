@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <StartupObject>UsbDisplayHost.Desktop.Program</StartupObject>
+        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Assets/Branding/app.ico</ApplicationIcon>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="WPF-UI" />
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../UsbDisplayHost.Core/UsbDisplayHost.Core.csproj" />
+        <ProjectReference Include="../UsbDisplayHost.Windows/UsbDisplayHost.Windows.csproj" />
+        <ProjectReference Include="../UsbDisplayHost.Rendering/UsbDisplayHost.Rendering.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Resource Include="Assets/Branding/*.png" />
+        <Resource Include="Assets/Branding/app.ico" />
+        <Content Include="Assets/Branding/app.ico"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="../../licenses/**/*"
+                 Link="licenses/%(RecursiveDir)%(Filename)%(Extension)"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+</Project>

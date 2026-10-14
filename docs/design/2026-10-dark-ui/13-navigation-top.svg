@@ -1,0 +1,45 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 应用设置 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备</text>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>诊断</text>
+<rect x='464' y='86' width='60' height='2' rx='1' fill='#149CFF'/>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>应用设置</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>外观 · 导航布局</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>AD102  /  A01        ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<rect x='116' y='146' width='1036' height='340' rx='8' fill='#202124'/>
+<text x='142' y='187' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='18' font-weight='600' fill='#F3F5F7'>导航布局</text>
+<text x='142' y='221' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>选择适合你的操作方式</text>
+<rect x='142' y='250' width='464' height='204' rx='8' fill='#2B2D30' stroke='#E8EAED'/>
+<rect x='166' y='270' width='416' height='128' rx='4' fill='#000000'/>
+<rect x='178' y='284' width='392' height='24' rx='3' fill='#202124'/>
+<rect x='192' y='294' width='42' height='3' rx='1' fill='#149CFF'/>
+<rect x='178' y='324' width='250' height='60' rx='3' fill='#202124'/>
+<text x='166' y='434' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='15' font-weight='600' fill='#F3F5F7'>顶部导航</text>
+<text x='500' y='433' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#E8EAED'>✓ 已选择</text>
+<rect x='632' y='250' width='464' height='204' rx='8' fill='#2B2D30' stroke='#363C43'/>
+<rect x='656' y='270' width='416' height='128' rx='4' fill='#000000'/>
+<rect x='668' y='282' width='52' height='104' rx='3' fill='#202124'/>
+<rect x='676' y='298' width='3' height='16' rx='1' fill='#149CFF'/>
+<rect x='736' y='282' width='250' height='104' rx='3' fill='#202124'/>
+<text x='656' y='434' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='15' font-weight='600' fill='#F3F5F7'>侧边导航</text>
+<text x='142' y='538' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>切换后保留当前页面、设备连接和未保存草稿。</text>
+<text x='142' y='571' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>窄窗口自动收起为菜单，窗口变宽后恢复所选布局。</text>
+<path d='M 116 672 L 1152 672' stroke='#363C43'/>
+<text x='118' y='711' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>当前预览：顶部导航</text>
+<rect x='864' y='689' width='140' height='36' rx='8' fill='#2B2D30'/>
+<text x='878' y='712' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>撤销预览</text>
+<rect x='1016' y='689' width='136' height='36' rx='8' fill='#149CFF'/>
+<text x='1030' y='712' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#001525'>保存设置</text>
+</g>
+</svg>

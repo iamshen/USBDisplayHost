@@ -1,0 +1,51 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 操作反馈与确认 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备</text>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<rect x='374' y='86' width='30' height='2' rx='1' fill='#149CFF'/>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>诊断</text>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>操作反馈与确认</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>组件设计 · 关键状态</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>AD102  /  A01        ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<rect x='116' y='146' width='1036' height='98' rx='8' fill='#322A1C'/>
+<text x='138' y='181' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3C777'>操作结果尚未确认</text>
+<text x='138' y='215' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>请先核实当前状态，再继续操作。错误编号：DEMO-1042</text>
+<rect x='998' y='175' width='132' height='36' rx='8' fill='#2B2D30'/>
+<text x='1012' y='198' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>核实状态</text>
+<rect x='116' y='264' width='1036' height='98' rx='8' fill='#1C302B'/>
+<text x='138' y='299' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#7CD7AB'>主题已应用，本地保存未完成</text>
+<text x='138' y='333' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>重试只保存恢复配置，不重复发送主题。</text>
+<rect x='958' y='293' width='172' height='36' rx='8' fill='#2B2D30'/>
+<text x='972' y='316' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>仅重试保存</text>
+<rect x='116' y='382' width='496' height='288' rx='12' fill='#202124' stroke='#363C43'/>
+<text x='140' y='430' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='22' font-weight='600' fill='#F3F5F7'>离开副屏并切换主题？</text>
+<text x='140' y='478' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>Windows 可能重新排列扩展屏上的窗口。</text>
+<text x='140' y='509' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>确认后重新连接设备并核验主题首帧。</text>
+<rect x='140' y='542' width='18' height='18' rx='3' fill='#2B2D30' stroke='#66727C'/>
+<text x='168' y='555' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>不再显示此提示</text>
+<rect x='342' y='609' width='100' height='36' rx='8' fill='#2B2D30'/>
+<text x='356' y='632' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>取消</text>
+<rect x='458' y='609' width='128' height='36' rx='8' fill='#149CFF'/>
+<text x='472' y='632' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#001525'>切换主题</text>
+<rect x='632' y='382' width='520' height='288' rx='12' fill='#202124' stroke='#363C43'/>
+<text x='656' y='430' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='22' font-weight='600' fill='#F3F5F7'>保存草稿后离开？</text>
+<text x='656' y='478' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>AD102 / A01 有尚未保存的编辑。</text>
+<text x='656' y='509' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>保存草稿不会应用到设备。</text>
+<rect x='656' y='609' width='100' height='36' rx='8' fill='#2B2D30'/>
+<text x='670' y='632' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>取消</text>
+<rect x='772' y='609' width='140' height='36' rx='8' fill='#2B2D30'/>
+<text x='786' y='632' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>放弃本次编辑</text>
+<rect x='928' y='609' width='200' height='36' rx='8' fill='#149CFF'/>
+<text x='942' y='632' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#001525'>保存草稿</text>
+</g>
+</svg>

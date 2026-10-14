@@ -1,0 +1,65 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 诊断 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备</text>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<rect x='374' y='86' width='30' height='2' rx='1' fill='#149CFF'/>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>诊断</text>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>诊断</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>连接与日志 · 当前会话</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>AD102  /  A01        ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<text x='118' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#149CFF'>连接与日志</text>
+<rect x='118' y='170' width='86' height='3' rx='1' fill='#149CFF'/>
+<text x='256' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>电脑监测</text>
+<text x='394' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>系统规格</text>
+<rect x='872' y='136' width='132' height='36' rx='8' fill='#2B2D30'/>
+<text x='886' y='159' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#F3F5F7'>打开日志目录</text>
+<rect x='1016' y='136' width='136' height='36' rx='8' fill='#149CFF'/>
+<text x='1030' y='159' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#001525'>导出诊断</text>
+<rect x='116' y='194' width='508' height='144' rx='8' fill='#202124'/>
+<rect x='644' y='194' width='508' height='144' rx='8' fill='#202124'/>
+<text x='138' y='231' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>主机传输</text>
+<text x='520' y='230' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#7CD7AB'>●  运行中</text>
+<text x='138' y='278' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='22' font-weight='600' fill='#F3F5F7'>USB 写入完成</text>
+<text x='138' y='311' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>主机侧记录，不代表设备已呈现</text>
+<text x='666' y='231' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>设备反馈</text>
+<text x='666' y='278' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='22' font-weight='400' fill='#B2BBC4'>呈现状态不可用</text>
+<text x='666' y='311' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>当前反馈未提供屏幕呈现确认</text>
+<rect x='116' y='358' width='1036' height='356' rx='8' fill='#202124'/>
+<text x='138' y='394' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>最近事件</text>
+<text x='1012' y='394' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>3 条记录</text>
+<text x='138' y='442' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>时间</text>
+<text x='274' y='442' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>级别</text>
+<text x='390' y='442' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>阶段</text>
+<text x='582' y='442' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>代码</text>
+<text x='888' y='442' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>错误编号</text>
+<path d='M 138 460 L 1130 460' stroke='#363C43'/>
+<text x='138' y='494' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>10:24:18</text>
+<text x='274' y='494' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>信息</text>
+<text x='390' y='494' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>传输</text>
+<text x='582' y='494' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>FrameCompleted</text>
+<text x='888' y='494' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>—</text>
+<path d='M 138 517 L 1130 517' stroke='#363C43'/>
+<text x='138' y='552' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>10:24:17</text>
+<text x='274' y='552' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>信息</text>
+<text x='390' y='552' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>会话</text>
+<text x='582' y='552' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>Connected</text>
+<text x='888' y='552' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>—</text>
+<path d='M 138 575 L 1130 575' stroke='#363C43'/>
+<text x='138' y='610' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3C777'>10:23:52</text>
+<text x='274' y='610' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3C777'>警告</text>
+<text x='390' y='610' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3C777'>本地保存</text>
+<text x='582' y='610' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3C777'>SaveUnconfirmed</text>
+<text x='888' y='610' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3C777'>DEMO-1042</text>
+<path d='M 138 633 L 1130 633' stroke='#363C43'/>
+</g>
+</svg>

@@ -1,0 +1,47 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='820' viewBox='0 0 1180 820'><title>USB Display 诊断 设计稿</title>
+<rect x='0' y='0' width='1180' height='820' rx='0' fill='#000000'/>
+<rect x='0' y='0' width='1180' height='40' rx='0' fill='#000000'/>
+<rect x='16' y='12' width='16' height='16' rx='4' fill='#E8EAED'/>
+<text x='43' y='24' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='600' fill='#F3F5F7'>USB Display</text>
+<text x='1046' y='25' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='400' fill='#B2BBC4'>—       □       ×</text>
+<text x='72' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备</text>
+<text x='162' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>主题</text>
+<text x='252' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>设备设置</text>
+<rect x='374' y='86' width='30' height='2' rx='1' fill='#149CFF'/>
+<text x='374' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='600' fill='#149CFF'>诊断</text>
+<text x='464' y='71' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>应用设置</text>
+<path d='M 0 88 L 1180 88' stroke='#292B2E'/>
+<text x='72' y='135' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='26' font-weight='600' fill='#F3F5F7'>诊断</text>
+<text x='74' y='160' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>电脑监测 · 扩展视图设计</text>
+<rect x='888' y='44' width='220' height='36' rx='6' fill='#202124'/>
+<text x='904' y='67' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#F3F5F7'>AD102  /  A01        ﹀</text>
+<text x='72' y='805' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='10' font-weight='400' fill='#B2BBC4'>设计稿 v1.2 · 示例数据，非运行截图</text>
+<g transform='translate(-44 40)'>
+<text x='118' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>连接与日志</text>
+<text x='256' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#149CFF'>电脑监测</text>
+<rect x='256' y='170' width='86' height='3' rx='1' fill='#149CFF'/>
+<text x='394' y='157' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='14' font-weight='400' fill='#B2BBC4'>系统规格</text>
+<rect x='116' y='194' width='508' height='240' rx='8' fill='#202124'/>
+<text x='140' y='233' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>CPU</text>
+<text x='140' y='301' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='40' font-weight='600' fill='#F3F5F7'>24%</text>
+<rect x='140' y='326' width='456' height='4' rx='2' fill='#414850'/>
+<rect x='140' y='326' width='110' height='4' rx='2' fill='#E8EAED'/>
+<text x='140' y='367' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>温度  不可用        功耗  不可用</text>
+<text x='140' y='408' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>最后更新 10:24:18 · 1 秒前</text>
+<rect x='644' y='194' width='508' height='240' rx='8' fill='#202124'/>
+<text x='668' y='233' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>物理内存</text>
+<text x='668' y='301' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='40' font-weight='600' fill='#F3F5F7'>61%</text>
+<rect x='668' y='326' width='456' height='4' rx='2' fill='#414850'/>
+<rect x='668' y='326' width='278' height='4' rx='2' fill='#E8EAED'/>
+<text x='668' y='367' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>系统物理内存占用百分比</text>
+<text x='668' y='408' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='12' font-weight='400' fill='#B2BBC4'>最后更新 10:24:18 · 1 秒前</text>
+<rect x='116' y='454' width='508' height='240' rx='8' fill='#202124'/>
+<text x='140' y='493' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>GPU</text>
+<text x='140' y='561' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='40' font-weight='600' fill='#B2BBC4'>不可用</text>
+<text x='140' y='626' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>当前未接入此项采集</text>
+<rect x='644' y='454' width='508' height='240' rx='8' fill='#202124'/>
+<text x='668' y='493' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='16' font-weight='600' fill='#F3F5F7'>存储</text>
+<text x='668' y='561' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='40' font-weight='600' fill='#B2BBC4'>不可用</text>
+<text x='668' y='626' font-family='Microsoft YaHei UI,Segoe UI,sans-serif' font-size='13' font-weight='400' fill='#B2BBC4'>当前未接入此项采集</text>
+</g>
+</svg>

@@ -1,0 +1,66 @@
+<!doctype html><html lang='zh-CN'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>USB Display 深色 UI 设计稿</title><style>
+*{box-sizing:border-box}body{margin:0;background:#000000;color:#f3f5f7;font:14px/1.7 'Segoe UI','Microsoft YaHei UI',sans-serif}header,main{max-width:1240px;margin:auto;padding:28px}h1{font-size:30px}h2{font-size:22px}p{color:#b2bbc4}a{color:#149CFF;text-decoration:none}a:focus-visible{outline:2px solid #149CFF}nav{display:flex;flex-wrap:wrap;gap:10px 24px}section{margin:24px 0 64px;scroll-margin-top:24px}img{max-width:100%;height:auto;border:1px solid #363c43;border-radius:8px}header{border-bottom:1px solid #363c43}nav a:hover{text-decoration:underline}
+</style><header><h1>USB Display / 黑灰与亮蓝</h1><p>设计提案 v1.2 · 32 张设计稿 · 纯黑背景 / 少量亮蓝 / 可配置导航 / WPF UI</p><p>静态设计方案，示例数据不表示设备运行状态；不调用设备或后端。</p><p><a href='新版UI设计方案.md'>完整设计规范</a> · <a href='交付检查.md'>交付检查</a></p><nav><a href='#01-devices'>设备</a>
+<a href='#02-themes-clock'>主题 · 时钟</a>
+<a href='#03-device-settings'>设备设置</a>
+<a href='#04-diagnostics'>诊断 · 连接与日志</a>
+<a href='#05-application-settings'>应用设置</a>
+<a href='#06-offline'>设备 · 离线</a>
+<a href='#07-themes-image'>主题 · 图片</a>
+<a href='#08-themes-dashboard'>主题 · 仪表盘</a>
+<a href='#09-monitoring'>诊断 · 电脑监测（扩展）</a>
+<a href='#10-system-info'>诊断 · 系统规格（扩展）</a>
+<a href='#11-states'>操作反馈与确认</a>
+<a href='#12-compact'>640 × 400 紧凑布局</a>
+<a href='#13-navigation-top'>外观 · 顶部导航</a>
+<a href='#14-navigation-side'>外观 · 侧边导航</a>
+<a href='#15-device-selection'>选择设备 · 请明确选择要连接的设备</a>
+<a href='#16-connecting'>连接设备 · 正在读取设备状态</a>
+<a href='#17-screen-mode'>设备 · 副屏模式已确认</a>
+<a href='#18-power-off'>设备 · 设备已熄屏</a>
+<a href='#19-stream-paused'>设备 · 主题推流已暂停</a>
+<a href='#20-mode-switching'>切换模式 · 正在等待设备重新连接</a>
+<a href='#21-mode-unknown'>切换模式 · 尚无法确认设备当前模式</a>
+<a href='#22-recovering'>恢复连接 · 等待原设备重新连接</a>
+<a href='#23-recovery-failed'>连接故障 · 设备恢复未完成</a>
+<a href='#24-tray'>托盘与窗口 · 窗口已收至托盘</a>
+<a href='#25-exit'>退出应用 · 退出切回副屏未完成</a>
+<a href='#26-update-check'>软件更新 · 正在检查更新</a>
+<a href='#27-update-available'>软件更新 · 发现新版本 1.1.0（示例）</a>
+<a href='#28-update-download'>软件更新 · 已下载 18 / 42 MB · 43%</a>
+<a href='#29-update-ready'>软件更新 · 更新已准备就绪</a>
+<a href='#30-update-failure'>软件更新 · 检查或安装未完成</a>
+<a href='#31-update-confirmed'>软件更新 · 已更新至 1.1.0</a>
+<a href='#32-metrics-stale'>诊断 · 部分数据不可用或已过期</a></nav></header><main><section id='01-devices'><h2>设备</h2><p><a href='01-devices.svg'>可编辑 SVG</a> · <a href='01-devices.png'>原尺寸 PNG</a></p><img src='01-devices.png' alt='设备设计稿' loading='lazy'></section>
+<section id='02-themes-clock'><h2>主题 · 时钟</h2><p><a href='02-themes-clock.svg'>可编辑 SVG</a> · <a href='02-themes-clock.png'>原尺寸 PNG</a></p><img src='02-themes-clock.png' alt='主题 · 时钟设计稿' loading='lazy'></section>
+<section id='03-device-settings'><h2>设备设置</h2><p><a href='03-device-settings.svg'>可编辑 SVG</a> · <a href='03-device-settings.png'>原尺寸 PNG</a></p><img src='03-device-settings.png' alt='设备设置设计稿' loading='lazy'></section>
+<section id='04-diagnostics'><h2>诊断 · 连接与日志</h2><p><a href='04-diagnostics.svg'>可编辑 SVG</a> · <a href='04-diagnostics.png'>原尺寸 PNG</a></p><img src='04-diagnostics.png' alt='诊断 · 连接与日志设计稿' loading='lazy'></section>
+<section id='05-application-settings'><h2>应用设置</h2><p><a href='05-application-settings.svg'>可编辑 SVG</a> · <a href='05-application-settings.png'>原尺寸 PNG</a></p><img src='05-application-settings.png' alt='应用设置设计稿' loading='lazy'></section>
+<section id='06-offline'><h2>设备 · 离线</h2><p><a href='06-offline.svg'>可编辑 SVG</a> · <a href='06-offline.png'>原尺寸 PNG</a></p><img src='06-offline.png' alt='设备 · 离线设计稿' loading='lazy'></section>
+<section id='07-themes-image'><h2>主题 · 图片</h2><p><a href='07-themes-image.svg'>可编辑 SVG</a> · <a href='07-themes-image.png'>原尺寸 PNG</a></p><img src='07-themes-image.png' alt='主题 · 图片设计稿' loading='lazy'></section>
+<section id='08-themes-dashboard'><h2>主题 · 仪表盘</h2><p><a href='08-themes-dashboard.svg'>可编辑 SVG</a> · <a href='08-themes-dashboard.png'>原尺寸 PNG</a></p><img src='08-themes-dashboard.png' alt='主题 · 仪表盘设计稿' loading='lazy'></section>
+<section id='09-monitoring'><h2>诊断 · 电脑监测（扩展）</h2><p><a href='09-monitoring.svg'>可编辑 SVG</a> · <a href='09-monitoring.png'>原尺寸 PNG</a></p><img src='09-monitoring.png' alt='诊断 · 电脑监测（扩展）设计稿' loading='lazy'></section>
+<section id='10-system-info'><h2>诊断 · 系统规格（扩展）</h2><p><a href='10-system-info.svg'>可编辑 SVG</a> · <a href='10-system-info.png'>原尺寸 PNG</a></p><img src='10-system-info.png' alt='诊断 · 系统规格（扩展）设计稿' loading='lazy'></section>
+<section id='11-states'><h2>操作反馈与确认</h2><p><a href='11-states.svg'>可编辑 SVG</a> · <a href='11-states.png'>原尺寸 PNG</a></p><img src='11-states.png' alt='操作反馈与确认设计稿' loading='lazy'></section>
+<section id='12-compact'><h2>640 × 400 紧凑布局</h2><p><a href='12-compact.svg'>可编辑 SVG</a> · <a href='12-compact.png'>原尺寸 PNG</a></p><img src='12-compact.png' alt='640 × 400 紧凑布局设计稿' loading='lazy'></section>
+<section id='13-navigation-top'><h2>外观 · 顶部导航</h2><p><a href='13-navigation-top.svg'>可编辑 SVG</a> · <a href='13-navigation-top.png'>原尺寸 PNG</a></p><img src='13-navigation-top.png' alt='外观 · 顶部导航设计稿' loading='lazy'></section>
+<section id='14-navigation-side'><h2>外观 · 侧边导航</h2><p><a href='14-navigation-side.svg'>可编辑 SVG</a> · <a href='14-navigation-side.png'>原尺寸 PNG</a></p><img src='14-navigation-side.png' alt='外观 · 侧边导航设计稿' loading='lazy'></section>
+<section id='15-device-selection'><h2>选择设备 · 请明确选择要连接的设备</h2><p><a href='15-device-selection.svg'>可编辑 SVG</a> · <a href='15-device-selection.png'>原尺寸 PNG</a></p><img src='15-device-selection.png' alt='选择设备 · 请明确选择要连接的设备设计稿' loading='lazy'></section>
+<section id='16-connecting'><h2>连接设备 · 正在读取设备状态</h2><p><a href='16-connecting.svg'>可编辑 SVG</a> · <a href='16-connecting.png'>原尺寸 PNG</a></p><img src='16-connecting.png' alt='连接设备 · 正在读取设备状态设计稿' loading='lazy'></section>
+<section id='17-screen-mode'><h2>设备 · 副屏模式已确认</h2><p><a href='17-screen-mode.svg'>可编辑 SVG</a> · <a href='17-screen-mode.png'>原尺寸 PNG</a></p><img src='17-screen-mode.png' alt='设备 · 副屏模式已确认设计稿' loading='lazy'></section>
+<section id='18-power-off'><h2>设备 · 设备已熄屏</h2><p><a href='18-power-off.svg'>可编辑 SVG</a> · <a href='18-power-off.png'>原尺寸 PNG</a></p><img src='18-power-off.png' alt='设备 · 设备已熄屏设计稿' loading='lazy'></section>
+<section id='19-stream-paused'><h2>设备 · 主题推流已暂停</h2><p><a href='19-stream-paused.svg'>可编辑 SVG</a> · <a href='19-stream-paused.png'>原尺寸 PNG</a></p><img src='19-stream-paused.png' alt='设备 · 主题推流已暂停设计稿' loading='lazy'></section>
+<section id='20-mode-switching'><h2>切换模式 · 正在等待设备重新连接</h2><p><a href='20-mode-switching.svg'>可编辑 SVG</a> · <a href='20-mode-switching.png'>原尺寸 PNG</a></p><img src='20-mode-switching.png' alt='切换模式 · 正在等待设备重新连接设计稿' loading='lazy'></section>
+<section id='21-mode-unknown'><h2>切换模式 · 尚无法确认设备当前模式</h2><p><a href='21-mode-unknown.svg'>可编辑 SVG</a> · <a href='21-mode-unknown.png'>原尺寸 PNG</a></p><img src='21-mode-unknown.png' alt='切换模式 · 尚无法确认设备当前模式设计稿' loading='lazy'></section>
+<section id='22-recovering'><h2>恢复连接 · 等待原设备重新连接</h2><p><a href='22-recovering.svg'>可编辑 SVG</a> · <a href='22-recovering.png'>原尺寸 PNG</a></p><img src='22-recovering.png' alt='恢复连接 · 等待原设备重新连接设计稿' loading='lazy'></section>
+<section id='23-recovery-failed'><h2>连接故障 · 设备恢复未完成</h2><p><a href='23-recovery-failed.svg'>可编辑 SVG</a> · <a href='23-recovery-failed.png'>原尺寸 PNG</a></p><img src='23-recovery-failed.png' alt='连接故障 · 设备恢复未完成设计稿' loading='lazy'></section>
+<section id='24-tray'><h2>托盘与窗口 · 窗口已收至托盘</h2><p><a href='24-tray.svg'>可编辑 SVG</a> · <a href='24-tray.png'>原尺寸 PNG</a></p><img src='24-tray.png' alt='托盘与窗口 · 窗口已收至托盘设计稿' loading='lazy'></section>
+<section id='25-exit'><h2>退出应用 · 退出切回副屏未完成</h2><p><a href='25-exit.svg'>可编辑 SVG</a> · <a href='25-exit.png'>原尺寸 PNG</a></p><img src='25-exit.png' alt='退出应用 · 退出切回副屏未完成设计稿' loading='lazy'></section>
+<section id='26-update-check'><h2>软件更新 · 正在检查更新</h2><p><a href='26-update-check.svg'>可编辑 SVG</a> · <a href='26-update-check.png'>原尺寸 PNG</a></p><img src='26-update-check.png' alt='软件更新 · 正在检查更新设计稿' loading='lazy'></section>
+<section id='27-update-available'><h2>软件更新 · 发现新版本 1.1.0（示例）</h2><p><a href='27-update-available.svg'>可编辑 SVG</a> · <a href='27-update-available.png'>原尺寸 PNG</a></p><img src='27-update-available.png' alt='软件更新 · 发现新版本 1.1.0（示例）设计稿' loading='lazy'></section>
+<section id='28-update-download'><h2>软件更新 · 已下载 18 / 42 MB · 43%</h2><p><a href='28-update-download.svg'>可编辑 SVG</a> · <a href='28-update-download.png'>原尺寸 PNG</a></p><img src='28-update-download.png' alt='软件更新 · 已下载 18 / 42 MB · 43%设计稿' loading='lazy'></section>
+<section id='29-update-ready'><h2>软件更新 · 更新已准备就绪</h2><p><a href='29-update-ready.svg'>可编辑 SVG</a> · <a href='29-update-ready.png'>原尺寸 PNG</a></p><img src='29-update-ready.png' alt='软件更新 · 更新已准备就绪设计稿' loading='lazy'></section>
+<section id='30-update-failure'><h2>软件更新 · 检查或安装未完成</h2><p><a href='30-update-failure.svg'>可编辑 SVG</a> · <a href='30-update-failure.png'>原尺寸 PNG</a></p><img src='30-update-failure.png' alt='软件更新 · 检查或安装未完成设计稿' loading='lazy'></section>
+<section id='31-update-confirmed'><h2>软件更新 · 已更新至 1.1.0</h2><p><a href='31-update-confirmed.svg'>可编辑 SVG</a> · <a href='31-update-confirmed.png'>原尺寸 PNG</a></p><img src='31-update-confirmed.png' alt='软件更新 · 已更新至 1.1.0设计稿' loading='lazy'></section>
+<section id='32-metrics-stale'><h2>诊断 · 部分数据不可用或已过期</h2><p><a href='32-metrics-stale.svg'>可编辑 SVG</a> · <a href='32-metrics-stale.png'>原尺寸 PNG</a></p><img src='32-metrics-stale.png' alt='诊断 · 部分数据不可用或已过期设计稿' loading='lazy'></section></main></html>
