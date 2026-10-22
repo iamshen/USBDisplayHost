@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-15",
+  "session": "console",
+  "sessionId": 3,
+  "display": 2,
+  "displayMode": "仅在2上显示",
+  "resolution": "2560x1440",
+  "originalScalePercent": 100,
+  "targetScalePercents": [
+    125,
+    150,
+    200
+  ],
+  "scaleRestored": true,
+  "finalScalePercent": 100,
+  "visitedScalePercents": [
+    125,
+    150,
+    200
+  ],
+  "restoreVerifiedAt": "2026-10-15T07:55:25.211Z",
+  "finalResolution": "2560x1440"
+}

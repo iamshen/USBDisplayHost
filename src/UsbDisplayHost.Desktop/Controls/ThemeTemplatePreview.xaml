@@ -1,33 +1,36 @@
-<UserControl x:Class="UsbDisplayHost.Desktop.Controls.ThemeTemplatePreview" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:themes="clr-namespace:UsbDisplayHost.Desktop.ViewModels" Width="64" Height="36" Focusable="False" IsTabStop="False">
+<UserControl x:Class="UsbDisplayHost.Desktop.Controls.ThemeTemplatePreview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:themes="clr-namespace:UsbDisplayHost.Desktop.ViewModels"
+             Width="64" Height="36" Focusable="False" IsTabStop="False" IsHitTestVisible="False">
     <UserControl.Resources>
         <DataTemplate x:Key="ImageSample">
             <Canvas Width="96" Height="54" Background="{DynamicResource CanvasBrush}" ClipToBounds="True">
-                <Ellipse Width="10" Height="10" Fill="{DynamicResource TextSecondaryBrush}" Canvas.Left="68" Canvas.Top="8" />
-                <Path Data="M0,54 L30,22 L58,54 Z" Fill="{DynamicResource SelectedOutlineBrush}" />
-                <Path Data="M35,54 L67,28 L96,54 Z" Fill="{DynamicResource TextSecondaryBrush}" />
+                <Ellipse Width="9" Height="9" Fill="{DynamicResource SelectedOutlineBrush}" Canvas.Left="68" Canvas.Top="10" />
+                <Path Data="M0,54 L32,20 L68,54 Z" Fill="{DynamicResource TextSecondaryBrush}" />
+                <Path Data="M40,54 L70,30 L96,54 Z" Fill="{DynamicResource SurfaceRaisedBrush}" />
             </Canvas>
         </DataTemplate>
         <DataTemplate x:Key="ClockSample">
             <Grid Width="96" Height="54" Background="{DynamicResource CanvasBrush}">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="12:34" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" TextAlignment="Center" />
-                    <TextBlock Text="星期五" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" TextAlignment="Center" />
+                    <TextBlock Text="12:34" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="Light" TextAlignment="Center" />
+                    <Rectangle Width="30" Height="2" Fill="{DynamicResource TextSecondaryBrush}" Margin="0,5,0,0" />
                 </StackPanel>
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="DashboardSample">
             <Grid Width="96" Height="54" Background="{DynamicResource CanvasBrush}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <StackPanel Margin="6" VerticalAlignment="Center">
-                    <TextBlock Text="CPU" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
-                    <Rectangle Height="5" Fill="{DynamicResource SelectedOutlineBrush}" Margin="0,4,0,0" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Margin="6" VerticalAlignment="Center">
-                    <TextBlock Text="内存" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
-                    <Rectangle Height="5" Fill="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                <StackPanel Margin="12,9" VerticalAlignment="Center">
+                    <Grid>
+                        <TextBlock Text="CPU" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" LineHeight="12" LineStackingStrategy="BlockLineHeight" />
+                        <Rectangle Width="24" Height="3" Fill="{DynamicResource SelectedOutlineBrush}" HorizontalAlignment="Right" />
+                    </Grid>
+                    <Rectangle Height="3" Fill="{DynamicResource SurfaceRaisedBrush}" Margin="0,2,0,6" />
+                    <Grid>
+                        <TextBlock Text="MEM" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" LineHeight="12" LineStackingStrategy="BlockLineHeight" />
+                        <Rectangle Width="32" Height="3" Fill="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" />
+                    </Grid>
                 </StackPanel>
             </Grid>
         </DataTemplate>

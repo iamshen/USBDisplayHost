@@ -32,14 +32,20 @@ public partial class DiagnosticsPage : Page
     }
 
     private void OnTick(object? sender, EventArgs e) => Refresh();
+    private void OnWorkspaceSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // 紧凑窗口可滚动到全部操作，事件列表仍由有限高度的 Grid 承载。
+        DiagnosticsWorkspace.Height = Math.Max(480, e.NewSize.Height);
+    }
+
     private void OnContentSizeChanged(object sender, SizeChangedEventArgs e)
     {
         // 摘要保持有限高度，让事件列表拥有独立的虚拟化视口。
-        bool stacked = e.NewSize.Width < 560;
+        bool stacked = e.NewSize.Width < 460;
         SummaryPanels.Columns = stacked ? 1 : 3;
         HostSummaryCard.Margin = stacked ? new Thickness(0, 0, 0, 12) : new Thickness(0, 0, 12, 0);
         FramesSummaryCard.Margin = HostSummaryCard.Margin;
-        SummaryScroll.MaxHeight = Math.Max(0, e.NewSize.Height * 0.45);
+        SummaryScroll.MaxHeight = Math.Max(0, e.NewSize.Height * 0.42);
     }
     private void Refresh()
     {

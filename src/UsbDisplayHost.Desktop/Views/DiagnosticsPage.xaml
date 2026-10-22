@@ -4,39 +4,64 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:UsbDisplayHost.Desktop.Controls"
       Title="诊断" ScrollViewer.CanContentScroll="False">
-    <Grid Margin="{DynamicResource PageContentMargin}" MaxWidth="1120">
+    <Page.Resources>
+        <Style x:Key="MetricValueStyle" TargetType="TextBlock" BasedOn="{StaticResource GroupTitleStyle}">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="Margin" Value="0,8,0,4" />
+        </Style>
+        <Style x:Key="EventSeverityStyle" TargetType="TextBlock" BasedOn="{StaticResource AuxiliaryTextStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Severity}" Value="警告"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}" /></DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="错误"><Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" /></DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+    <ScrollViewer Margin="{DynamicResource PageContentMargin}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="OnWorkspaceSizeChanged">
+    <Grid x:Name="DiagnosticsWorkspace" MaxWidth="1120" Height="480">
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-        <TextBlock Text="诊断" Style="{DynamicResource PageTitleStyle}" Margin="0,0,0,24" />
+        <StackPanel Margin="0,0,0,24">
+            <TextBlock Text="诊断" Style="{DynamicResource PageTitleStyle}" />
+            <TextBlock Text="查看传输状态与事件记录，导出诊断以便排查问题。" Style="{DynamicResource PageDescriptionStyle}" />
+        </StackPanel>
         <Grid Grid.Row="1" SizeChanged="OnContentSizeChanged">
             <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
             <ScrollViewer x:Name="SummaryScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="240">
                 <StackPanel>
                     <UniformGrid x:Name="SummaryPanels" Columns="3" Margin="0,0,0,16">
-                        <Border x:Name="HostSummaryCard" Style="{StaticResource PanelStyle}" Margin="0,0,12,0" Padding="20">
+                        <Border x:Name="HostSummaryCard" Style="{StaticResource PanelStyle}" Margin="0,0,12,0" Padding="16">
                             <StackPanel>
                                 <TextBlock Text="传输状态" Style="{DynamicResource AuxiliaryTextStyle}" />
-                                <TextBlock Text="{Binding ConnectionSummary}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock Text="{Binding ConnectionSummary}" Style="{StaticResource MetricValueStyle}" />
+                                <TextBlock Text="当前设备会话" Style="{DynamicResource AuxiliaryTextStyle}" />
                             </StackPanel>
                         </Border>
-                        <Border x:Name="FramesSummaryCard" Style="{StaticResource PanelStyle}" Margin="0,0,12,0" Padding="20">
+                        <Border x:Name="FramesSummaryCard" Style="{StaticResource PanelStyle}" Margin="0,0,12,0" Padding="16">
                             <StackPanel>
                                 <TextBlock Text="USB 已发送帧数" Style="{DynamicResource AuxiliaryTextStyle}" />
-                                <TextBlock Text="{Binding CompletedFramesText}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock Text="{Binding CompletedFramesText}" Style="{StaticResource MetricValueStyle}" />
+                                <TextBlock Text="主机完整发送计数" Style="{DynamicResource AuxiliaryTextStyle}" />
                             </StackPanel>
                         </Border>
-                        <Border Style="{StaticResource PanelStyle}" Padding="20">
+                        <Border Style="{StaticResource PanelStyle}" Padding="16">
                             <StackPanel>
                                 <TextBlock Text="日志写入" Style="{DynamicResource AuxiliaryTextStyle}" />
-                                <TextBlock Text="{Binding LogStateText}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock Text="{Binding LogStateText}" Style="{StaticResource MetricValueStyle}" />
+                                <TextBlock Text="本地日志存储" Style="{DynamicResource AuxiliaryTextStyle}" />
                             </StackPanel>
                         </Border>
                     </UniformGrid>
                     <Expander Header="运行详情" Style="{StaticResource DetailExpanderStyle}" Margin="-8,0,-8,12">
                         <StackPanel Margin="8,12">
-                            <TextBlock Text="{Binding HostTransferText}" Style="{StaticResource OptionalTextStyle}" Margin="0,0,0,8" />
-                            <TextBlock Text="{Binding ActiveProductionText}" Style="{StaticResource OptionalTextStyle}" Margin="0,0,0,8" />
-                            <TextBlock Text="{Binding DeviceFeedbackText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,0,0,8" />
-                            <TextBlock Text="{Binding StorageText}" Style="{DynamicResource AuxiliaryTextStyle}" />
+                            <TextBlock Text="主机管线" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding HostTransferText}" Style="{StaticResource OptionalTextStyle}" Margin="0,6,0,0" />
+                            <TextBlock Text="{Binding ActiveProductionText}" Style="{StaticResource OptionalTextStyle}" Margin="0,6,0,0" />
+                            <Border Style="{StaticResource DividerStyle}" Margin="0,12" />
+                            <TextBlock Text="设备反馈" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding DeviceFeedbackText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,6,0,0" />
+                            <Border Style="{StaticResource DividerStyle}" Margin="0,12" />
+                            <TextBlock Text="日志存储" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding StorageText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,6,0,0" />
                         </StackPanel>
                     </Expander>
                     <controls:InlineMessage Message="{Binding TransferErrorText}" Margin="0,0,0,12" />
@@ -72,7 +97,7 @@
                         </Grid>
                     </Border>
                     <ListBox Grid.Row="2" ItemsSource="{Binding Events}" HorizontalContentAlignment="Stretch" Background="Transparent"
-                             BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible"
                              VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" AutomationProperties.Name="最近诊断事件">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
@@ -82,7 +107,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
-                                            <Border x:Name="Row" Padding="{TemplateBinding Padding}" Background="Transparent">
+                                            <Border x:Name="Row" Padding="{TemplateBinding Padding}" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                                                 <ContentPresenter HorizontalAlignment="Stretch" />
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -98,18 +123,30 @@
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="80" /><ColumnDefinition Width="64" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Timestamp}" Style="{DynamicResource AuxiliaryTextStyle}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Severity}" FontSize="12" />
-                                    <TextBlock Grid.Column="2" Margin="0,0,12,0" FontSize="13">
-                                        <Run Text="{Binding Stage, Mode=OneWay}" /><Run Text=" / " /><Run Text="{Binding Code, Mode=OneWay}" />
-                                    </TextBlock>
-                                    <TextBlock Grid.Column="3" Text="{Binding ErrorId}" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                    <TextBlock Text="{Binding Timestamp}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,2,0,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Severity}" Style="{StaticResource EventSeverityStyle}" Margin="0,2,0,0" />
+                                    <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                                        <TextBlock Text="{Binding Stage}" FontSize="13" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Code}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="3" Text="{Binding ErrorId}" Style="{DynamicResource AuxiliaryTextStyle}" ToolTip="{Binding ErrorId}" Margin="0,2,0,0" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24" IsHitTestVisible="False">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers><DataTrigger Binding="{Binding Events.Count}" Value="0"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="暂无诊断事件" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Text="新的运行事件会显示在这里。" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,6,0,0" TextAlignment="Center" />
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>
     </Grid>
+    </ScrollViewer>
 </Page>

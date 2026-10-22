@@ -29,7 +29,7 @@ public partial class DevicesPage : Page
         DisplayGrid.ColumnDefinitions[1].Width = stacked ? new System.Windows.GridLength(0) : new System.Windows.GridLength(1, System.Windows.GridUnitType.Star);
         Grid.SetColumn(CurrentDisplay, stacked ? 0 : 1);
         Grid.SetRow(CurrentDisplay, stacked ? 1 : 0);
-        DeviceCard.Margin = stacked ? new System.Windows.Thickness(0) : new System.Windows.Thickness(0, 0, 32, 0);
+        DeviceCard.Margin = stacked ? new System.Windows.Thickness(0, 0, 0, 16) : new System.Windows.Thickness(0, 0, 20, 0);
     }
 
     private void OnEditThemeClick(object sender, System.Windows.RoutedEventArgs e)

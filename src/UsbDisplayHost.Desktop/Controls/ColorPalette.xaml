@@ -9,21 +9,34 @@
         <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem">
                 <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
-                <Setter Property="ToolTip" Value="{Binding Name}" />
+                <Setter Property="AutomationProperties.HelpText" Value="{Binding Value}" />
+                <Setter Property="ToolTip">
+                    <Setter.Value>
+                        <MultiBinding StringFormat="{}{0} · {1}">
+                            <Binding Path="Name" />
+                            <Binding Path="Value" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
                 <Setter Property="FocusVisualStyle" Value="{DynamicResource ProjectFocusVisualStyle}" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ListBoxItem">
-                            <Border x:Name="Ring" Width="36" Height="36" Margin="0,0,8,0" Padding="4" CornerRadius="18" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}">
+                            <Border x:Name="Ring" Width="36" Height="36" Margin="0,0,8,0" Padding="3" CornerRadius="18" BorderThickness="2" BorderBrush="Transparent" Background="Transparent">
                                 <Border Background="{Binding Value}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource ControlBorderBrush}">
-                                    <TextBlock x:Name="Check" Text="✓" Foreground="{Binding CheckColor}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden" />
+                                    <TextBlock x:Name="Check" Text="✓" Foreground="{Binding CheckColor}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden" />
                                 </Border>
                             </Border>
                             <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Ring" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                                    <Setter TargetName="Ring" Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+                                </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter TargetName="Ring" Property="BorderBrush" Value="{DynamicResource SelectedOutlineBrush}" />
                                     <Setter TargetName="Check" Property="Visibility" Value="Visible" />
                                 </Trigger>
+                                <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55" /></Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>

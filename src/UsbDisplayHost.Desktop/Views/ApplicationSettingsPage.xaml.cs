@@ -19,6 +19,15 @@ public partial class ApplicationSettingsPage : Page
         Loaded += OnLoaded;
     }
 
+    private void OnSettingsLayoutSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        bool stacked = e.NewSize.Width < 820;
+        SettingsLayout.ColumnDefinitions[1].Width = stacked ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        Grid.SetColumn(AdditionalSettings, stacked ? 0 : 1);
+        Grid.SetRow(AdditionalSettings, stacked ? 1 : 0);
+        WindowSettings.Margin = stacked ? new Thickness(0, 0, 0, 16) : new Thickness(0, 0, 16, 0);
+    }
+
     private void OnActionBarSizeChanged(object sender, SizeChangedEventArgs e)
     {
         bool stacked = e.NewSize.Width < 560;

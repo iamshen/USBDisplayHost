@@ -13,7 +13,8 @@ public sealed partial class DevicesPageViewModel
     private bool brightnessRunning, restoringBrightness;
     private DeviceKey? brightnessDevice;
     private long brightnessGeneration;
-    [ObservableProperty] private double brightnessTarget;
+    // 离线初始目标与精确输入一致，不代表设备亮度读回。
+    [ObservableProperty] private double brightnessTarget = 50;
 
     public bool CanAdjustBrightness => !stopping && protocol is { HasPendingSave: false }
         && !IsSelecting && !IsDisconnecting && !IsRetryingPendingSave && !IsChangingStreaming

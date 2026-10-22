@@ -3,15 +3,30 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:UsbDisplayHost.Desktop.Controls"
+      xmlns:themes="clr-namespace:UsbDisplayHost.Desktop.ViewModels"
       Title="主题" ScrollViewer.CanContentScroll="False">
+    <Page.Resources>
+        <Style x:Key="ColorValueStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Width" Value="116" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="MaxLength" Value="7" />
+            <Setter Property="ToolTip" Value="输入十六进制颜色，例如 #FFFFFF" />
+        </Style>
+    </Page.Resources>
     <Grid Margin="{DynamicResource PageContentMargin}" MaxWidth="1120">
-        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-        <TextBlock Text="主题" Style="{DynamicResource PageTitleStyle}" Margin="0,0,0,24" />
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,0,16,0">
-                <ListBox ItemsSource="{Binding Templates}" SelectedValuePath="Value" SelectedValue="{Binding SelectedTemplate, Mode=TwoWay}"
+        <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <ScrollViewer x:Name="EditorViewport" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="OnEditorViewportSizeChanged">
+            <StackPanel Margin="0,0,12,0">
+                <StackPanel x:Name="PageHeader" Margin="0,0,0,20">
+                    <TextBlock Text="主题" Style="{DynamicResource PageTitleStyle}" />
+                    <TextBlock Text="选择内容与配色，预览设备画面。" Style="{DynamicResource PageDescriptionStyle}" />
+                </StackPanel>
+                <ListBox x:Name="TemplateSelector" ItemsSource="{Binding Templates}" SelectedValuePath="Value" SelectedValue="{Binding SelectedTemplate, Mode=TwoWay}" SelectionMode="Single"
                          IsEnabled="{Binding CanEdit}" Background="Transparent" BorderThickness="0" Padding="0" IsTabStop="False"
-                         AutomationProperties.Name="显示内容" Margin="-4,0,-4,24">
+                         AutomationProperties.Name="显示内容" Margin="-4,0,-4,20">
                     <ListBox.Template><ControlTemplate TargetType="ListBox"><ItemsPresenter /></ControlTemplate></ListBox.Template>
                     <ListBox.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate></ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>
@@ -21,22 +36,53 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
-                                        <Border x:Name="Tile" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="4,0">
+                                        <Border x:Name="Tile" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource SurfaceCornerRadius}" Padding="16,14" Margin="4,0">
                                             <Grid>
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                    <ui:SymbolIcon Symbol="{Binding Icon}" FontSize="22" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
-                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border x:Name="Illustration" CornerRadius="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                    <controls:ThemeTemplatePreview Value="{Binding Value}" />
+                                                </Border>
+                                                <ui:SymbolIcon x:Name="CompactIcon" Symbol="{Binding Icon}" FontSize="20" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="NoWrap" />
+                                                    <TextBlock x:Name="Description" Margin="0,2,0,0" TextWrapping="NoWrap">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock" BasedOn="{StaticResource AuxiliaryTextStyle}">
+                                                                <Setter Property="Text" Value="照片与背景" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Value}" Value="{x:Static themes:ThemeKind.Clock}"><Setter Property="Text" Value="时间与日期" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Value}" Value="{x:Static themes:ThemeKind.Dashboard}"><Setter Property="Text" Value="系统运行指标" /></DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
                                                 </StackPanel>
-                                                <Border x:Name="Mark" Width="18" Height="3" CornerRadius="1" Background="{DynamicResource AccentBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-14" Visibility="Hidden" />
+                                                <Border x:Name="SelectionMark" Grid.Column="2" Width="16" Height="16" Margin="8,0,0,0" VerticalAlignment="Center" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource ControlBorderBrush}">
+                                                    <Path x:Name="SelectionCheck" Data="M 0,3 L 2.5,5.5 L 7,0" Stroke="{DynamicResource OnAccentBrush}" StrokeThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden" />
+                                                </Border>
                                             </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" /></Trigger>
                                             <Trigger Property="IsSelected" Value="True">
                                                 <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                 <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
-                                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                                                <Setter TargetName="CompactIcon" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                                <Setter TargetName="SelectionMark" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                                <Setter TargetName="SelectionMark" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                <Setter TargetName="SelectionCheck" Property="Visibility" Value="Visible" />
                                             </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" /></Trigger>
+                                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55" /></Trigger>
+                                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="Compact">
+                                                <Setter TargetName="Illustration" Property="Visibility" Value="Collapsed" />
+                                                <Setter TargetName="Description" Property="Visibility" Value="Collapsed" />
+                                                <Setter TargetName="CompactIcon" Property="Visibility" Value="Visible" />
+                                                <Setter TargetName="Tile" Property="Padding" Value="12,12" />
+                                            </DataTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
@@ -44,21 +90,33 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>
-                <Grid x:Name="ContentGrid" SizeChanged="OnSizeChanged">
+                <Grid x:Name="ContentGrid" SizeChanged="OnContentSizeChanged">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="320" /></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <StackPanel x:Name="PreviewPanel" Margin="0,0,24,0">
-                        <DockPanel Margin="0,0,0,12">
-                            <TextBlock Text="预览" Style="{DynamicResource GroupTitleStyle}" />
-                        </DockPanel>
-                        <Border Background="{DynamicResource NavigationBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
-                            <Viewbox x:Name="PreviewViewport" Stretch="Uniform" MaxHeight="360">
-                                <Border Width="640" Height="360" Background="{DynamicResource CanvasBrush}" ClipToBounds="True">
-                                    <Image Source="{Binding PreviewImage}" Stretch="Uniform" AutomationProperties.Name="主题画面预览" />
+                        <Border Style="{StaticResource PanelStyle}" Padding="0">
+                            <StackPanel>
+                                <Grid x:Name="PreviewHeading" Margin="20,16">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="画面预览" Style="{DynamicResource GroupTitleStyle}" />
+                                    <Border Grid.Column="1" Background="{DynamicResource SurfaceRaisedBrush}" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                        <TextBlock Text="16 : 9" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                    </Border>
+                                </Grid>
+                                <Border x:Name="PreviewFrame" Background="{DynamicResource NavigationBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1" Padding="16,20">
+                                    <Viewbox x:Name="PreviewViewport" Stretch="Uniform" MaxHeight="360">
+                                        <Border Width="640" Height="360" Background="{DynamicResource CanvasBrush}" ClipToBounds="True">
+                                            <Image Source="{Binding PreviewImage}" Stretch="Uniform" AutomationProperties.Name="主题画面预览" />
+                                        </Border>
+                                    </Viewbox>
                                 </Border>
-                            </Viewbox>
+                                <Grid x:Name="PreviewCaption" Margin="20,12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <ui:SymbolIcon Symbol="Desktop24" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="本机预览 · 点击应用后发送到设备" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                </Grid>
+                            </StackPanel>
                         </Border>
-                        <TextBlock Text="预览不会发送到设备" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,12,0,0" />
                         <controls:InlineMessage Message="{Binding PreviewErrorText}" Margin="0,12,0,0" />
                         <Button Content="重试预览" Command="{Binding RetryPreviewCommand}" HorizontalAlignment="Left" Margin="0,8,0,0">
                             <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Style.Triggers><DataTrigger Binding="{Binding PreviewErrorText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Button.Style>
@@ -66,38 +124,50 @@
                     </StackPanel>
                     <Border x:Name="FieldsPanel" Grid.Column="1" Style="{StaticResource PanelStyle}" Padding="20" VerticalAlignment="Top">
                         <StackPanel IsEnabled="{Binding CanEdit}">
-                            <TextBlock Text="内容设置" Style="{DynamicResource GroupTitleStyle}" Margin="0,0,0,20" />
+                            <TextBlock Text="内容设置" Style="{DynamicResource GroupTitleStyle}" Margin="0,0,0,16" />
                             <StackPanel Visibility="{Binding IsImage, Converter={StaticResource BooleanVisibility}}">
-                                <Button Content="选择图片…" Command="{Binding SelectImageCommand}" HorizontalAlignment="Stretch" />
-                                <TextBlock Text="{Binding ImageDescription}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,20" />
+                                <Button Command="{Binding SelectImageCommand}" HorizontalAlignment="Stretch" AutomationProperties.Name="选择图片">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Image24" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="选择图片…" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <TextBlock Text="{Binding ImageDescription}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding ImageDescription}" />
+                                <TextBlock Text="支持 PNG、JPEG 图片" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,2,0,16" />
                                 <TextBlock Text="图片适配" Margin="0,0,0,8" />
                                 <ComboBox ItemsSource="{Binding Fits}" DisplayMemberPath="Name" SelectedValuePath="Value"
                                           SelectedValue="{Binding Fit, Mode=TwoWay}" AutomationProperties.Name="图片适配方式" />
                             </StackPanel>
                             <StackPanel Visibility="{Binding IsClock, Converter={StaticResource BooleanVisibility}}">
                                 <CheckBox Content="24 小时制" IsChecked="{Binding Use24HourClock}" />
-                                <CheckBox Content="显示日期" IsChecked="{Binding ShowDate}" Margin="0,8,0,0" />
+                                <CheckBox Content="显示日期" IsChecked="{Binding ShowDate}" Margin="0,4,0,0" />
+                                <TextBlock Text="跟随本机时间自动更新" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,0" />
                             </StackPanel>
                             <StackPanel Visibility="{Binding IsDashboard, Converter={StaticResource BooleanVisibility}}">
-                                <TextBlock Text="显示指标" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,0,0,4" />
-                                <CheckBox Content="CPU 使用率" IsChecked="{Binding ShowCpuUsage}" />
-                                <CheckBox Content="内存占用" IsChecked="{Binding ShowMemoryUsage}" Margin="0,4,0,0" />
-                                <CheckBox Content="主机温度" IsChecked="{Binding ShowHostTemperature}" Margin="0,4,0,0" />
-                                <CheckBox Content="设备温度" IsChecked="{Binding ShowDeviceTemperature}" Margin="0,4,0,0" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                    <CheckBox Content="CPU 使用率" IsChecked="{Binding ShowCpuUsage}" Margin="0,0,8,0" />
+                                    <CheckBox Grid.Column="1" Content="内存占用" IsChecked="{Binding ShowMemoryUsage}" />
+                                    <CheckBox Grid.Row="1" Content="主机温度" IsChecked="{Binding ShowHostTemperature}" Margin="0,4,8,0" />
+                                    <CheckBox Grid.Row="1" Grid.Column="1" Content="设备温度" IsChecked="{Binding ShowDeviceTemperature}" Margin="0,4,0,0" />
+                                </Grid>
+                                <TextBlock Text="无数据来源的指标显示为不可用" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,0" />
                             </StackPanel>
-                            <Border Style="{StaticResource DividerStyle}" />
+                            <Border Style="{StaticResource DividerStyle}" Margin="0,16" />
+                            <TextBlock Text="色彩" FontWeight="SemiBold" Margin="0,0,0,12" />
                             <DockPanel>
-                                <TextBox DockPanel.Dock="Right" Width="112" Text="{Binding BackgroundColor, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" AutomationProperties.Name="背景色，十六进制 RGB" />
+                                <TextBox DockPanel.Dock="Right" Style="{StaticResource ColorValueStyle}" Text="{Binding BackgroundColor, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="背景色，十六进制 RGB" />
                                 <TextBlock Text="背景色" VerticalAlignment="Center" />
                             </DockPanel>
-                            <controls:ColorPalette SelectedColor="{Binding BackgroundColor}" Label="背景色色板" Margin="0,12,0,0" />
+                            <controls:ColorPalette SelectedColor="{Binding BackgroundColor}" Label="背景色色板" Margin="0,8,0,0" />
                             <StackPanel Margin="0,16,0,0">
                                 <StackPanel.Style><Style TargetType="StackPanel"><Style.Triggers><DataTrigger Binding="{Binding IsImage}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></StackPanel.Style>
                                 <DockPanel>
-                                    <TextBox DockPanel.Dock="Right" Width="112" Text="{Binding ForegroundColor, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" AutomationProperties.Name="文字色，十六进制 RGB" />
+                                    <TextBox DockPanel.Dock="Right" Style="{StaticResource ColorValueStyle}" Text="{Binding ForegroundColor, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="文字色，十六进制 RGB" />
                                     <TextBlock Text="文字色" VerticalAlignment="Center" />
                                 </DockPanel>
-                                <controls:ColorPalette SelectedColor="{Binding ForegroundColor}" Label="文字色色板" Margin="0,12,0,0" />
+                                <controls:ColorPalette SelectedColor="{Binding ForegroundColor}" Label="文字色色板" Margin="0,8,0,0" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -109,16 +179,16 @@
                         Visibility="{Binding SelectImageCommand.IsRunning, Converter={StaticResource BooleanVisibility}}" />
             </StackPanel>
         </ScrollViewer>
-        <Border Grid.Row="2" Style="{StaticResource ActionBarStyle}">
+        <Border Grid.Row="1" Style="{StaticResource ActionBarStyle}">
             <Grid x:Name="ActionBar" SizeChanged="OnActionBarSizeChanged">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                 <TextBlock x:Name="ActionStatus" Text="{Binding EditorStatus}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" Margin="0,0,16,0" />
-                <StackPanel x:Name="PrimaryActions" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <WrapPanel x:Name="PrimaryActions" Grid.Column="1" HorizontalAlignment="Right">
                     <Button Content="恢复默认" Command="{Binding RestoreDefaultsCommand}" Margin="0,0,8,0" />
                     <Button Content="撤销" Command="{Binding UndoCommand}" Margin="0,0,8,0" />
                     <ui:Button Appearance="Primary" Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}" MinWidth="128" />
-                </StackPanel>
+                </WrapPanel>
                 <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right">
                     <Button Content="重试保存配置" Command="{Binding RetryApplicationSaveCommand}" Margin="8,8,0,0"
                             Visibility="{Binding HasApplicationSave, Converter={StaticResource BooleanVisibility}}" />

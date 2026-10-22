@@ -14,16 +14,16 @@ namespace UsbDisplayHost.Desktop;
 
 public partial class MainWindow : FluentWindow
 {
-    private sealed record PageLink(string Label, SymbolRegular Icon, Type PageType);
+    private sealed record PageLink(string Label, SymbolRegular Icon, Type PageType, string Description);
     private readonly ApplicationSettingsPageViewModel settings;
     public DevicesPageViewModel DeviceSelector { get; }
     private readonly PageLink[] pages =
     [
-        new("设备", SymbolRegular.Desktop24, typeof(DevicesPage)),
-        new("主题", SymbolRegular.Image24, typeof(ThemesPage)),
-        new("设备设置", SymbolRegular.Settings24, typeof(DeviceSettingsPage)),
-        new("诊断", SymbolRegular.Pulse24, typeof(DiagnosticsPage)),
-        new("应用设置", SymbolRegular.AppGeneric24, typeof(ApplicationSettingsPage))
+        new("设备", SymbolRegular.Desktop24, typeof(DevicesPage), "连接设备，查看画面与运行状态"),
+        new("主题", SymbolRegular.Image24, typeof(ThemesPage), "编辑、预览并应用屏幕内容"),
+        new("设备设置", SymbolRegular.Settings24, typeof(DeviceSettingsPage), "调整屏幕方向、画质与亮度"),
+        new("诊断", SymbolRegular.Pulse24, typeof(DiagnosticsPage), "查看运行信息与事件日志"),
+        new("应用设置", SymbolRegular.AppGeneric24, typeof(ApplicationSettingsPage), "管理窗口、启动与设备模式偏好")
     ];
     private bool compactMenuOpen;
     private bool synchronizingNavigation;
@@ -139,7 +139,8 @@ public partial class MainWindow : FluentWindow
         if (RootNavigationView.SelectedItem is NavigationViewItem selected)
         {
             synchronizingNavigation = true;
-            PageNavigation.SelectedItem = pages.FirstOrDefault(page => page.PageType == selected.TargetPageType);
+            var page = pages.FirstOrDefault(candidate => candidate.PageType == selected.TargetPageType);
+            PageNavigation.SelectedItem = page is not null && PageNavigation.Items.Contains(page) ? page : null;
             synchronizingNavigation = false;
         }
         compactMenuOpen = false;
@@ -178,8 +179,16 @@ public partial class MainWindow : FluentWindow
         MoreNavigationButton.ContextMenu.PlacementTarget = MoreNavigationButton;
         MoreNavigationButton.ContextMenu.IsOpen = true;
     }
-    private void OnDiagnosticsMenuClick(object sender, RoutedEventArgs e) => RootNavigationView.Navigate(typeof(DiagnosticsPage));
-    private void OnSettingsMenuClick(object sender, RoutedEventArgs e) => RootNavigationView.Navigate(typeof(ApplicationSettingsPage));
+    private void OnDiagnosticsMenuClick(object sender, RoutedEventArgs e)
+    {
+        RootNavigationView.Navigate(typeof(DiagnosticsPage));
+        UpdateNavigationLayout();
+    }
+    private void OnSettingsMenuClick(object sender, RoutedEventArgs e)
+    {
+        RootNavigationView.Navigate(typeof(ApplicationSettingsPage));
+        UpdateNavigationLayout();
+    }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
@@ -198,12 +207,16 @@ public partial class MainWindow : FluentWindow
             synchronizingNavigation = true;
             PageNavigation.ItemsSource = partial ? primaryPages : pages;
             if (RootNavigationView.SelectedItem is NavigationViewItem item)
-            { PageNavigation.SelectedItem = pages.FirstOrDefault(page => page.PageType == item.TargetPageType); }
+            {
+                var page = pages.FirstOrDefault(candidate => candidate.PageType == item.TargetPageType);
+                PageNavigation.SelectedItem = page is not null && PageNavigation.Items.Contains(page) ? page : null;
+            }
             synchronizingNavigation = false;
         }
         double pageMargin = compact ? 16 : 32;
         System.Windows.Application.Current.Resources["PageContentMargin"] = new Thickness(pageMargin, compact ? 16 : 24, pageMargin, compact ? 16 : 24);
         Header.Margin = new Thickness(0, 0, pageMargin, 0);
+        WorkspaceError.Margin = new Thickness(pageMargin, 8, pageMargin, 0);
         NavigationColumn.Width = new GridLength(side ? 184 : 0);
         Grid.SetColumn(PageNavigation, side ? 0 : 1);
         Grid.SetRowSpan(PageNavigation, side ? 2 : 1);
@@ -222,10 +235,16 @@ public partial class MainWindow : FluentWindow
         CompactMenuButton.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
         MoreNavigationButton.Visibility = partial ? Visibility.Visible : Visibility.Collapsed;
         var currentPage = (RootNavigationView.SelectedItem as NavigationViewItem)?.TargetPageType;
+        string currentLabel = pages.FirstOrDefault(page => page.PageType == currentPage)?.Label ?? "设备";
+        CompactPageLabel.Text = currentLabel;
+        CompactChevron.Symbol = compactMenuOpen ? SymbolRegular.ChevronUp16 : SymbolRegular.ChevronDown16;
+        System.Windows.Automation.AutomationProperties.SetName(CompactMenuButton,
+            $"{(compactMenuOpen ? "收起" : "打开")}页面导航，当前：{currentLabel}");
         MoreNavigationButton.Content = currentPage == typeof(DiagnosticsPage) ? "诊断 ▾"
             : currentPage == typeof(ApplicationSettingsPage) ? "应用设置 ▾" : "更多 ▾";
+        System.Windows.Automation.AutomationProperties.SetName(MoreNavigationButton, $"更多页面，当前：{currentLabel}");
         DiagnosticsMenuItem.IsChecked = currentPage == typeof(DiagnosticsPage);
         SettingsMenuItem.IsChecked = currentPage == typeof(ApplicationSettingsPage);
-        Header.MinHeight = 48;
+        Header.MinHeight = 56;
     }
 }

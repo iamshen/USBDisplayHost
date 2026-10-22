@@ -41,8 +41,10 @@ public sealed class NotificationAreaIcon : IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         data.Flags = 1 | 2 | 4 | 128;
-        IsAvailable = NativeMethods.Shell_NotifyIconW(0, ref data);
-        if (!IsAvailable) { throw new InvalidOperationException("托盘图标无法加入通知区域"); }
+        // DPI 变化也会广播 TaskbarCreated；原图标仍存在时，更新同一图标而非将重复加入判为失效。
+        IsAvailable = NativeMethods.Shell_NotifyIconW(0, ref data)
+            || NativeMethods.Shell_NotifyIconW(1, ref data);
+        if (!IsAvailable) { throw new InvalidOperationException("托盘图标无法加入或更新通知区域"); }
         if (!NativeMethods.Shell_NotifyIconW(4, ref data))
         {
             NativeMethods.Shell_NotifyIconW(2, ref data);

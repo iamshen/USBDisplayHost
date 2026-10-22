@@ -9,13 +9,13 @@ public partial class DeviceStatus : UserControl
     public static readonly DependencyProperty SnapshotProperty = DependencyProperty.Register(nameof(Snapshot),
         typeof(DeviceSnapshot), typeof(DeviceStatus), new PropertyMetadata(DeviceSnapshot.Disconnected, OnSnapshotChanged));
     private static readonly DependencyPropertyKey ConnectionTextPropertyKey = DependencyProperty.RegisterReadOnly(
-        nameof(ConnectionText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("连接：未连接"));
+        nameof(ConnectionText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("未连接"));
     private static readonly DependencyPropertyKey ModeTextPropertyKey = DependencyProperty.RegisterReadOnly(
-        nameof(ModeText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("模式：未知"));
+        nameof(ModeText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("未知"));
     private static readonly DependencyPropertyKey PowerTextPropertyKey = DependencyProperty.RegisterReadOnly(
-        nameof(PowerText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("电源：未知"));
+        nameof(PowerText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("未知"));
     private static readonly DependencyPropertyKey StreamingTextPropertyKey = DependencyProperty.RegisterReadOnly(
-        nameof(StreamingText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("推流：已停止"));
+        nameof(StreamingText), typeof(string), typeof(DeviceStatus), new PropertyMetadata("已停止"));
     public static readonly DependencyProperty ConnectionTextProperty = ConnectionTextPropertyKey.DependencyProperty;
     public static readonly DependencyProperty ModeTextProperty = ModeTextPropertyKey.DependencyProperty;
     public static readonly DependencyProperty PowerTextProperty = PowerTextPropertyKey.DependencyProperty;
@@ -30,14 +30,14 @@ public partial class DeviceStatus : UserControl
     {
         var control = (DeviceStatus)sender;
         var value = args.NewValue as DeviceSnapshot ?? DeviceSnapshot.Disconnected;
-        control.SetValue(ConnectionTextPropertyKey, "连接：" + (value.Connection switch
+        control.SetValue(ConnectionTextPropertyKey, value.Connection switch
         {
             ConnectionState.Disconnected => "未连接", ConnectionState.Discovered => "已发现", ConnectionState.Opening => "连接中",
             ConnectionState.Ready => "已就绪", ConnectionState.Recovering => "恢复中", ConnectionState.Faulted => "故障", _ => "未知"
-        }));
-        control.SetValue(ModeTextPropertyKey, "模式：" + (value.Mode switch { DeviceMode.Theme => "主题", DeviceMode.SecondaryDisplay => "副屏", _ => "未知" }));
-        control.SetValue(PowerTextPropertyKey, "电源：" + (value.Power switch { PowerState.On => "已亮屏", PowerState.Off => "已熄屏", _ => "未知" }));
-        control.SetValue(StreamingTextPropertyKey, "推流：" + (value.Streaming switch
-        { StreamingState.Running => "发送中", StreamingState.Paused => "已暂停", StreamingState.Faulted => "故障", StreamingState.Stopped => "已停止", _ => "未知" }));
+        });
+        control.SetValue(ModeTextPropertyKey, value.Mode switch { DeviceMode.Theme => "主题", DeviceMode.SecondaryDisplay => "副屏", _ => "未知" });
+        control.SetValue(PowerTextPropertyKey, value.Power switch { PowerState.On => "已亮屏", PowerState.Off => "已熄屏", _ => "未知" });
+        control.SetValue(StreamingTextPropertyKey, value.Streaming switch
+        { StreamingState.Running => "发送中", StreamingState.Paused => "已暂停", StreamingState.Faulted => "故障", StreamingState.Stopped => "已停止", _ => "未知" });
     }
 }

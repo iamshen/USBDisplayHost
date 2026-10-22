@@ -49,7 +49,7 @@ public partial class DeviceSettingsPage : Page
 
     private void OnActionBarSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        bool stacked = e.NewSize.Width < 640;
+        bool stacked = e.NewSize.Width < 560;
         Grid.SetColumnSpan(ActionStatus, stacked ? 2 : 1);
         Grid.SetColumn(PrimaryActions, stacked ? 0 : 1);
         Grid.SetColumnSpan(PrimaryActions, stacked ? 2 : 1);

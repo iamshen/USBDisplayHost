@@ -3,6 +3,26 @@
                     xmlns:configuration="clr-namespace:UsbDisplayHost.Core.Configuration;assembly=UsbDisplayHost.Core">
     <Style TargetType="TextBlock" BasedOn="{StaticResource BodyTextStyle}" />
     <Style x:Key="SettingsCaptionStyle" TargetType="TextBlock" BasedOn="{StaticResource AuxiliaryTextStyle}" />
+    <Style x:Key="SettingsGroupIconStyle" TargetType="Border">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Margin" Value="0,0,12,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="SettingsGlyphStyle" TargetType="Path">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="StrokeStartLineCap" Value="Round" />
+        <Setter Property="StrokeEndLineCap" Value="Round" />
+        <Setter Property="StrokeLineJoin" Value="Round" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
     <Style x:Key="SettingsOptionalTextStyle" TargetType="TextBlock" BasedOn="{StaticResource AuxiliaryTextStyle}">
         <Setter Property="Margin" Value="0,8,0,0" />
         <Style.Triggers>
@@ -22,10 +42,48 @@
         <Setter Property="Padding" Value="20" />
     </Style>
     <Style x:Key="SettingsBadgeStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
-        <Setter Property="CornerRadius" Value="4" />
-        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="Background" Value="{DynamicResource CanvasBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="10,4" />
         <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="SettingsLayoutOptionStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource ProjectFocusVisualStyle}" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Tile" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"
+                            Background="{DynamicResource CanvasBrush}" CornerRadius="6" Padding="12,10">
+                        <Grid>
+                            <ContentPresenter Margin="0,0,20,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="SelectedMark" Text="✓" FontSize="12" Foreground="{DynamicResource AccentBrush}"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Hidden" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
+                            <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="SelectedMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource AccentPressedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.55" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style x:Key="SettingsDividerStyle" TargetType="Border">
         <Setter Property="Height" Value="1" />

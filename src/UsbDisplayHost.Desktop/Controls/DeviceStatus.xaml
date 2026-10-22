@@ -1,8 +1,39 @@
 <UserControl x:Class="UsbDisplayHost.Desktop.Controls.DeviceStatus" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="Root">
-    <StackPanel>
-        <TextBlock Text="{Binding ConnectionText, ElementName=Root}" Margin="0,0,0,12" />
-        <TextBlock Text="{Binding ModeText, ElementName=Root}" Margin="0,0,0,12" />
-        <TextBlock Text="{Binding PowerText, ElementName=Root}" Margin="0,0,0,12" />
-        <TextBlock Text="{Binding StreamingText, ElementName=Root}" Margin="0,0,0,12" />
-    </StackPanel>
+    <Grid Margin="0,0,0,8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" MinHeight="32" />
+            <RowDefinition Height="Auto" MinHeight="32" />
+            <RowDefinition Height="Auto" MinHeight="32" />
+            <RowDefinition Height="Auto" MinHeight="32" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="连接状态" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,24,0" />
+        <TextBlock Grid.Column="1" Text="{Binding ConnectionText, ElementName=Root}" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"
+                   AutomationProperties.Name="{Binding ConnectionText, ElementName=Root, StringFormat=连接状态：{0}}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource BodyTextStyle}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ConnectionText, ElementName=Root}" Value="已就绪">
+                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ConnectionText, ElementName=Root}" Value="故障">
+                            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <TextBlock Grid.Row="1" Text="显示模式" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ModeText, ElementName=Root}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                   AutomationProperties.Name="{Binding ModeText, ElementName=Root, StringFormat=显示模式：{0}}" />
+        <TextBlock Grid.Row="2" Text="屏幕电源" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PowerText, ElementName=Root}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                   AutomationProperties.Name="{Binding PowerText, ElementName=Root, StringFormat=屏幕电源：{0}}" />
+        <TextBlock Grid.Row="3" Text="画面发送" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding StreamingText, ElementName=Root}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                   AutomationProperties.Name="{Binding StreamingText, ElementName=Root, StringFormat=画面发送：{0}}" />
+    </Grid>
 </UserControl>
