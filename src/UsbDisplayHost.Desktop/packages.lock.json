@@ -8,6 +8,12 @@
         "resolved": "8.4.2",
         "contentHash": "WadCzGEc2U+3e20avRLng4qNtt4zoOGWrdUISqJWrHe3/FSnrYjuM5Sb4yQb09LhkBXrrI4Zt3dLKgRMbItsrg=="
       },
+      "Velopack": {
+        "type": "Direct",
+        "requested": "[1.2.161, )",
+        "resolved": "1.2.161",
+        "contentHash": "OpHNacIumnkhaaX3ZlQ/TCR4YPOJvud2/PAOoWb6o+mIrLwIVA275I5wAgt4q/1O2VrJeDwR1qFQyqzG4lUArg=="
+      },
       "WPF-UI": {
         "type": "Direct",
         "requested": "[4.3.0, )",
@@ -28,7 +34,7 @@
       "usbdisplayhost.rendering": {
         "type": "Project",
         "dependencies": {
-          "UsbDisplayHost.Core": "[1.0.0, )"
+          "UsbDisplayHost.Core": "[0.1.0, )"
         }
       },
       "usbdisplayhost.windows": {
@@ -37,7 +43,7 @@
           "Serilog": "[4.4.0, )",
           "Serilog.Sinks.Async": "[2.1.0, )",
           "Serilog.Sinks.File": "[7.0.0, )",
-          "UsbDisplayHost.Core": "[1.0.0, )"
+          "UsbDisplayHost.Core": "[0.1.0, )"
         }
       },
       "Serilog": {

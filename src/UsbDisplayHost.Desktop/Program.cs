@@ -2,6 +2,7 @@ using UsbDisplayHost.Windows.Diagnostics;
 using UsbDisplayHost.Windows.Lifecycle;
 using UsbDisplayHost.Windows.Storage;
 using UsbDisplayHost.Core.Diagnostics;
+using Velopack;
 
 namespace UsbDisplayHost.Desktop;
 
@@ -10,7 +11,13 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        // 组合根拥有平台适配器；未来更新 hooks 必须在创建 WPF Application 前接入。
+        // 安装回调先于单实例和设备服务处理。
+        VelopackApp.Build()
+            .SetArgs(args)
+            .SetAutoApplyOnStartup(false)
+            .OnBeforeUninstallFastCallback(_ => WindowsStartupRegistration.RemoveCurrentApplicationEntry())
+            .Run();
+
         IErrorReporter errorReporter = new BootstrapErrorReporter();
         DiagnosticLog? diagnostics = null;
 

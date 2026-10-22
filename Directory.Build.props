@@ -1,5 +1,7 @@
 <Project>
     <PropertyGroup>
+        <Version>0.1.0</Version>
+        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>

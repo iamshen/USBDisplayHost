@@ -3,6 +3,7 @@
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
     <ItemGroup>
+        <PackageVersion Include="Velopack" Version="1.2.161" />
         <PackageVersion Include="WPF-UI" Version="4.3.0" />
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageVersion Include="Serilog" Version="4.4.0" />

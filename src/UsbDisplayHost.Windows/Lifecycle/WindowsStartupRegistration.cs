@@ -12,6 +12,18 @@ public sealed class WindowsStartupRegistration(IErrorReporter errorReporter) : I
     private readonly object syncRoot = new();
     private readonly Guid owner = Guid.NewGuid();
 
+    // 卸载时只移除指向当前应用的自启项。
+    public static void RemoveCurrentApplicationEntry()
+    {
+        string command = Command();
+        using var key = Registry.CurrentUser.OpenSubKey(RunPath, writable: true);
+        object? value = key?.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+        if (value is string text && text == command && key!.GetValueKind(ValueName) == RegistryValueKind.String)
+        {
+            key.DeleteValue(ValueName, throwOnMissingValue: false);
+        }
+    }
+
     public Task<OperationResult<StartupRegistrationState>> QueryAsync(CancellationToken cancellationToken) => RunAsync(() =>
     {
         string command = Command();
