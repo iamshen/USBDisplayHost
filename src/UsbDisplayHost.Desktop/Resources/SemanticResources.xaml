@@ -83,6 +83,11 @@
         <Setter Property="CornerRadius" Value="{DynamicResource SurfaceCornerRadius}" />
         <Setter Property="Padding" Value="24" />
     </Style>
+    <Style x:Key="SectionStyle" TargetType="Border">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
     <Style TargetType="TextBlock" BasedOn="{StaticResource BodyTextStyle}" />
     <Style TargetType="Page">
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />

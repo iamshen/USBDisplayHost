@@ -11,111 +11,86 @@
         <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
         <ScrollViewer x:Name="SettingsScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,16,0">
-                <Grid Margin="0,0,0,24">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="应用设置" Style="{DynamicResource PageTitleStyle}" />
-                        <TextBlock Text="管理窗口、启动行为与软件更新。" Style="{DynamicResource PageDescriptionStyle}" />
-                    </StackPanel>
-                    <Border Grid.Column="1" Style="{StaticResource SettingsBadgeStyle}" Margin="16,0,0,0" VerticalAlignment="Top">
-                        <TextBlock Text="本机偏好" Style="{StaticResource SettingsCaptionStyle}" />
-                    </Border>
-                </Grid>
+                <TextBlock Text="应用设置" Style="{DynamicResource PageTitleStyle}" Margin="0,0,0,24" />
                 <Grid x:Name="SettingsLayout" SizeChanged="OnSettingsLayoutSizeChanged">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <Border x:Name="WindowSettings" Style="{StaticResource SettingsSectionStyle}" Margin="0,0,16,0" VerticalAlignment="Top" IsEnabled="{Binding CanEdit}">
+                    <Border x:Name="WindowSettings" Style="{StaticResource SectionStyle}" Margin="0,0,32,0" VerticalAlignment="Top" IsEnabled="{Binding CanEdit}">
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
-                                <Border Style="{StaticResource SettingsGroupIconStyle}">
-                                    <Path Style="{StaticResource SettingsGlyphStyle}" Data="M 2,3 L 18,3 18,17 2,17 Z M 2,7 L 18,7 M 5,5 L 5.1,5 M 8,5 L 8.1,5" />
-                                </Border>
-                                <TextBlock Text="窗口与启动" Style="{DynamicResource GroupTitleStyle}" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <TextBlock Text="导航布局" />
-                            <TextBlock Text="切换后立即预览，保存后记住选择" Style="{StaticResource SettingsCaptionStyle}" Margin="0,4,0,12" />
-                            <Grid>
+                            <TextBlock Text="窗口与启动" Style="{DynamicResource GroupTitleStyle}" Margin="0,0,0,16" />
+                            <TextBlock Text="导航布局" Margin="0,0,0,12" />
+                            <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                <RadioButton IsChecked="{Binding IsTopNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" Margin="0,0,8,0" AutomationProperties.Name="顶部导航">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Grid Width="22" Height="18" Margin="0,0,10,0" VerticalAlignment="Center">
-                                            <Border BorderThickness="1" BorderBrush="{DynamicResource TextSecondaryBrush}" CornerRadius="2" />
-                                            <Border Height="4" Background="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Top" Margin="3,3" CornerRadius="1" />
-                                        </Grid>
-                                        <TextBlock Text="顶部导航" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </RadioButton>
-                                <RadioButton Grid.Column="1" IsChecked="{Binding IsSideNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" AutomationProperties.Name="侧边导航">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Grid Width="22" Height="18" Margin="0,0,10,0" VerticalAlignment="Center">
-                                            <Border BorderThickness="1" BorderBrush="{DynamicResource TextSecondaryBrush}" CornerRadius="2" />
-                                            <Border Width="4" Background="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Left" Margin="3,3" CornerRadius="1" />
-                                        </Grid>
-                                        <TextBlock Text="侧边导航" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </RadioButton>
+                                <RadioButton Content="顶部导航" IsChecked="{Binding IsTopNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" Margin="0,0,8,0" AutomationProperties.Name="顶部导航" />
+                                <RadioButton Grid.Column="1" Content="侧边导航" IsChecked="{Binding IsSideNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" AutomationProperties.Name="侧边导航" />
                             </Grid>
-                            <Border Style="{StaticResource SettingsDividerStyle}" Margin="0,20" />
-                            <DockPanel>
+                            <DockPanel Margin="0,0,0,20">
                                 <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding CloseBehaviors}" DisplayMemberPath="Label" SelectedValuePath="CloseToTray"
                                           SelectedValue="{Binding CloseToTray, Mode=TwoWay}" Width="160" Margin="16,0,0,0" AutomationProperties.Name="关闭窗口行为" />
                                 <TextBlock Text="关闭主窗口时" VerticalAlignment="Center" />
                             </DockPanel>
-                            <Border Style="{StaticResource SettingsDividerStyle}" Margin="0,16" />
                             <DockPanel>
                                 <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding StartWithWindows}" OnContent="" OffContent="" VerticalAlignment="Center" Margin="16,0,0,0" AutomationProperties.Name="开机自动启动" />
                                 <StackPanel>
                                     <TextBlock Text="开机自动启动" />
-                                    <TextBlock Text="{Binding StartupStateText}" Style="{StaticResource SettingsCaptionStyle}" Margin="0,4,0,0" />
+                                    <TextBlock Text="{Binding StartupStateText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,4,0,0" />
                                 </StackPanel>
                             </DockPanel>
                         </StackPanel>
                     </Border>
                     <StackPanel x:Name="AdditionalSettings" Grid.Column="1">
-                        <Border Style="{StaticResource SettingsSectionStyle}" IsEnabled="{Binding CanEdit}">
+                        <Border Style="{StaticResource SectionStyle}" IsEnabled="{Binding CanEdit}">
                             <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                    <Border Style="{StaticResource SettingsGroupIconStyle}">
-                                        <Path Style="{StaticResource SettingsGlyphStyle}" Data="M 2,5 L 17,5 M 13,1 L 17,5 13,9 M 18,15 L 3,15 M 7,11 L 3,15 7,19" />
-                                    </Border>
-                                    <TextBlock Text="设备模式" Style="{DynamicResource GroupTitleStyle}" VerticalAlignment="Center" />
-                                </StackPanel>
-                                <DockPanel>
+                                <TextBlock Text="设备模式" Style="{DynamicResource GroupTitleStyle}" Margin="0,0,0,16" />
+                                <DockPanel Margin="0,0,0,20">
                                     <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding SwitchToThemeOnStartup}" IsEnabled="{Binding CanRevokeStartupMode}"
                                                      OnContent="" OffContent="" Margin="16,0,0,0" AutomationProperties.Name="启动时切换到主题模式" />
                                     <TextBlock Text="启动时切换到主题模式" VerticalAlignment="Center" />
                                 </DockPanel>
-                                <Border Style="{StaticResource SettingsDividerStyle}" Margin="0,12" />
                                 <DockPanel>
                                     <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding SwitchToSecondaryOnExit}" IsEnabled="{Binding CanRevokeExitMode}"
                                                      OnContent="" OffContent="" Margin="16,0,0,0" AutomationProperties.Name="退出时切回副屏模式" />
                                     <TextBlock Text="退出时切回副屏模式" VerticalAlignment="Center" />
                                 </DockPanel>
-                                <TextBlock Text="连接支持模式切换的设备后可启用" Style="{StaticResource SettingsCaptionStyle}" Margin="0,16,0,0" />
+                                <TextBlock Text="连接支持模式切换的设备后可启用" Margin="0,12,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource AuxiliaryTextStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding CanEdit}" Value="True" />
+                                                        <Condition Binding="{Binding CanRevokeStartupMode}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding CanEdit}" Value="True" />
+                                                        <Condition Binding="{Binding CanRevokeExitMode}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </Border>
-                        <Border Style="{StaticResource SettingsSectionStyle}" Margin="0,16,0,0">
+                        <Border Style="{StaticResource SectionStyle}" Margin="0,32,0,0">
                             <StackPanel>
                                 <DockPanel Margin="0,0,0,16">
-                                    <Border DockPanel.Dock="Right" Style="{StaticResource SettingsBadgeStyle}" Margin="12,0,0,0">
-                                        <TextBlock Text="{Binding CurrentVersion, StringFormat=v{0}}" Style="{StaticResource SettingsCaptionStyle}" />
-                                    </Border>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Style="{StaticResource SettingsGroupIconStyle}">
-                                            <Path Style="{StaticResource SettingsGlyphStyle}" Data="M 17,7 A 7,7 0 1 0 17,14 M 17,2 L 17,7 12,7 M 10,6 L 10,13 M 7,10 L 10,13 13,10" />
-                                        </Border>
-                                        <TextBlock Text="软件更新" Style="{DynamicResource GroupTitleStyle}" VerticalAlignment="Center" />
-                                    </StackPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding CurrentVersion, StringFormat=版本 {0}}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock Text="软件更新" Style="{DynamicResource GroupTitleStyle}" />
                                 </DockPanel>
-                                <DockPanel>
+                                <DockPanel Margin="0,0,0,20">
                                     <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding AutomaticallyCheckUpdates}" IsEnabled="{Binding CanEdit}"
                                                      OnContent="" OffContent="" Margin="16,0,0,0" AutomationProperties.Name="自动检查更新" />
                                     <TextBlock Text="自动检查更新" VerticalAlignment="Center" />
                                 </DockPanel>
-                                <Border Style="{StaticResource SettingsDividerStyle}" Margin="0,12" />
                                 <DockPanel>
                                     <Button DockPanel.Dock="Right" Content="检查更新" IsEnabled="False" Margin="16,0,0,0" ToolTip="更新服务暂未接入" ToolTipService.ShowOnDisabled="True" />
-                                    <TextBlock Text="更新服务暂未接入" Style="{StaticResource SettingsCaptionStyle}" VerticalAlignment="Center" />
+                                    <TextBlock Text="更新服务暂未接入" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" />
                                 </DockPanel>
                             </StackPanel>
                         </Border>
@@ -131,7 +106,7 @@
             <Grid x:Name="ActionBar" SizeChanged="OnActionBarSizeChanged">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                <TextBlock x:Name="ActionStatus" Text="{Binding StatusText}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" Margin="0,0,16,0" AutomationProperties.LiveSetting="Polite" />
+                <TextBlock x:Name="ActionStatus" AutomationProperties.LiveSetting="Polite" Text="{Binding StatusText}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" Margin="0,0,16,0" />
                 <StackPanel x:Name="PrimaryActions" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="撤销更改" Command="{Binding DiscardEditsCommand}" Margin="0,0,8,0" />
                     <ui:Button Appearance="Primary" Content="保存设置" Command="{Binding SaveCommand}" MinWidth="120" />

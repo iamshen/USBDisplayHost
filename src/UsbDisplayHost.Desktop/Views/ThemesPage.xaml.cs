@@ -46,23 +46,19 @@ public partial class ThemesPage : Page
     {
         bool stacked = ContentGrid.ActualWidth < 780;
         bool compactHeight = EditorViewport.ActualHeight < 280;
-        TemplateSelector.Tag = ContentGrid.ActualWidth < 720 ? "Compact" : null;
         ContentGrid.ColumnDefinitions[1].Width = new GridLength(stacked ? 0 : 320);
         Grid.SetColumn(FieldsPanel, stacked ? 0 : 1);
         Grid.SetRow(FieldsPanel, stacked ? 1 : 0);
         PreviewPanel.Margin = stacked ? new Thickness(0, 0, 0, 24) : new Thickness(0, 0, 24, 0);
-        PreviewHeading.Margin = compactHeight ? new Thickness(16, 8, 16, 8) : new Thickness(20, 16, 20, 16);
-        PreviewFrame.Padding = compactHeight ? new Thickness(12, 8, 12, 8) : new Thickness(16, 20, 16, 20);
-        PreviewCaption.Visibility = compactHeight ? Visibility.Collapsed : Visibility.Visible;
         if (compactHeight)
         {
-            // 短窗口中整张预览卡可滚动进入视口；预留标题、内边距与边框的高度。
+            // 短窗口保留预览和来源说明的滚动空间。
             PreviewViewport.MaxHeight = Math.Clamp(EditorViewport.ActualHeight - 64, 112, 140);
         }
         else
         {
             double availablePreviewHeight = EditorViewport.ActualHeight - PageHeader.ActualHeight - PageHeader.Margin.Bottom
-                - TemplateSelector.ActualHeight - TemplateSelector.Margin.Bottom - 144;
+                - TemplateSelector.ActualHeight - TemplateSelector.Margin.Bottom - 64;
             PreviewViewport.MaxHeight = Math.Clamp(availablePreviewHeight, 180, stacked ? 240 : 360);
         }
     }

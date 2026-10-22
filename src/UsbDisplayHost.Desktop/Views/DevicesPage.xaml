@@ -9,23 +9,19 @@
         <StackPanel MaxWidth="1120">
             <DockPanel Margin="0,0,0,24">
                 <Button DockPanel.Dock="Right" Content="重新检测" Command="{Binding RescanCommand}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="16,0,0,0" />
-                <StackPanel>
-                    <TextBlock Text="设备" Style="{DynamicResource PageTitleStyle}" />
-                    <TextBlock Text="连接显示设备，管理画面与运行状态。" Style="{DynamicResource PageDescriptionStyle}" />
-                </StackPanel>
+                <TextBlock Text="设备" Style="{DynamicResource PageTitleStyle}" />
             </DockPanel>
             <Grid x:Name="DisplayGrid" SizeChanged="OnDisplaySizeChanged">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                 <Border x:Name="DeviceCard" Margin="0,0,24,0">
                     <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource PanelStyle}">
+                        <Style TargetType="Border" BasedOn="{StaticResource SectionStyle}">
                             <Style.Triggers><DataTrigger Binding="{Binding Snapshot.DeviceKey}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
                         </Style>
                     </Border.Style>
                     <StackPanel>
-                        <TextBlock Text="当前设备" Style="{DynamicResource AuxiliaryTextStyle}" />
-                        <TextBlock Text="{Binding DeviceText}" Style="{DynamicResource GroupTitleStyle}" ToolTip="{Binding DeviceText}" Margin="0,6,0,0" />
+                        <TextBlock Text="{Binding DeviceText}" Style="{DynamicResource GroupTitleStyle}" ToolTip="{Binding DeviceText}" />
                         <TextBlock Text="{Binding ResolutionText, StringFormat=分辨率：{0}}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,6,0,20" />
                         <Viewbox Stretch="Uniform" MaxHeight="330">
                             <Border Width="576" Height="324" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6">
@@ -51,12 +47,11 @@
                 </Border>
                 <Border x:Name="CurrentDisplay" Grid.Column="1">
                     <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource PanelStyle}">
+                        <Style TargetType="Border" BasedOn="{StaticResource SectionStyle}">
                             <Style.Triggers><DataTrigger Binding="{Binding Snapshot.DeviceKey}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
                         </Style>
                     </Border.Style>
                     <StackPanel>
-                        <TextBlock Text="设备控制" Style="{DynamicResource GroupTitleStyle}" Margin="0,0,0,20" />
                         <controls:DeviceStatus Snapshot="{Binding Snapshot}" />
                         <Border Style="{StaticResource DividerStyle}" />
                         <ui:Button Appearance="Primary" Content="编辑主题" Click="OnEditThemeClick" HorizontalAlignment="Stretch" Margin="0,0,0,12" />
@@ -148,35 +143,17 @@
                         <Button Content="{Binding DisconnectActionText}" Command="{Binding DisconnectCommand}" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
-                <Border Grid.ColumnSpan="2" Padding="0">
+                <Border Grid.ColumnSpan="2" Padding="0,8,0,0">
                     <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource PanelStyle}">
+                        <Style TargetType="Border" BasedOn="{StaticResource SectionStyle}">
                             <Setter Property="Visibility" Value="Collapsed" />
                             <Style.Triggers><DataTrigger Binding="{Binding Snapshot.DeviceKey}" Value="{x:Null}"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
                         </Style>
                     </Border.Style>
                     <StackPanel>
-                        <Grid Margin="24">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="72" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                            <Border Width="52" Height="52" CornerRadius="8" Background="{DynamicResource SurfaceRaisedBrush}" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                <ui:SymbolIcon Symbol="Desktop24" FontSize="28" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            </Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="连接你的 USB 显示设备" FontSize="22" FontWeight="SemiBold" />
-                                <TextBlock Text="接入设备后，即可查看画面、切换显示模式与控制播放。" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,0" />
-                                <WrapPanel Margin="0,20,0,0">
-                                    <ui:Button Appearance="Primary" Content="先预览主题" Click="OnEditThemeClick" HorizontalAlignment="Left" Margin="0,0,12,0" />
-                                    <TextBlock Text="无需连接，也可以开始设计画面" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" Margin="0,6" />
-                                </WrapPanel>
-                            </StackPanel>
-                        </Grid>
-                        <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="24,14">
-                            <WrapPanel>
-                                <TextBlock Margin="0,4,24,4"><Run Text="01" Foreground="{DynamicResource TextSecondaryBrush}" /><Run Text="  通过 USB 接入" /></TextBlock>
-                                <TextBlock Margin="0,4,24,4"><Run Text="02" Foreground="{DynamicResource TextSecondaryBrush}" /><Run Text="  选择并连接设备" /></TextBlock>
-                                <TextBlock Margin="0,4,0,4"><Run Text="03" Foreground="{DynamicResource TextSecondaryBrush}" /><Run Text="  应用你的主题" /></TextBlock>
-                            </WrapPanel>
-                        </Border>
+                        <TextBlock Text="通过 USB 连接副屏" Style="{DynamicResource GroupTitleStyle}" />
+                        <TextBlock Text="连接后，在下方选择设备。" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,16" />
+                        <Button Content="先预览主题" Click="OnEditThemeClick" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
             </Grid>
@@ -184,17 +161,14 @@
             <controls:InlineMessage Message="{Binding ProtocolErrorText}" Margin="0,12,0,0" />
             <controls:InlineMessage Message="{Binding DeviceErrorText}" Margin="0,12,0,0" />
             <controls:InlineMessage Message="{Binding SubscriptionErrorText}" Margin="0,12,0,0" />
-            <Border Style="{StaticResource PanelStyle}" Margin="0,20,0,0">
+            <Border Style="{StaticResource SectionStyle}" Margin="0,32,0,0">
                 <StackPanel>
                     <DockPanel>
-                        <Border DockPanel.Dock="Right" Style="{StaticResource StatusBadgeStyle}" Margin="12,0,0,0">
-                            <TextBlock Text="{Binding DiscoveryStatusText}" Style="{DynamicResource AuxiliaryTextStyle}" />
-                        </Border>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding DiscoveryStatusText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="12,0,0,0" VerticalAlignment="Center" />
                         <TextBlock Text="可用设备" Style="{DynamicResource GroupTitleStyle}" VerticalAlignment="Center" />
                     </DockPanel>
-                    <TextBlock Text="通过 USB 接入设备，然后在列表中选择连接。" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,0" />
                     <controls:InlineMessage Message="{Binding DiscoveryErrorText}" Margin="0,12,0,0" />
-                    <Border Background="{DynamicResource CanvasBrush}" CornerRadius="6" Padding="16" Margin="0,16,0,0">
+                    <Border Margin="0,16,0,0">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -209,15 +183,11 @@
                                  HorizontalContentAlignment="Stretch" Margin="0,16,0,0" Background="Transparent" BorderThickness="0" AutomationProperties.Name="可用设备">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="8,12">
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                        <ui:SymbolIcon Symbol="Desktop24" FontSize="24" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0" />
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" ToolTip="{Binding Title}" />
-                                            <TextBlock Text="{Binding InterfacesText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,6,0,0" />
-                                            <controls:InlineMessage Message="{Binding ErrorText}" Margin="0,6,0,0" />
-                                        </StackPanel>
-                                    </Grid>
+                                    <StackPanel Margin="8,12">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" ToolTip="{Binding Title}" />
+                                        <TextBlock Text="{Binding InterfacesText}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,6,0,0" />
+                                        <controls:InlineMessage Message="{Binding ErrorText}" Margin="0,6,0,0" />
+                                    </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
