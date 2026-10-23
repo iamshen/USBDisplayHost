@@ -1,5 +1,9 @@
 # 项目交接要点
 
+## Issue 机器人标签
+
+- 表单齐全不代表信息足以复现。机器人仅维护 `form-incomplete`，不能移除维护者用于索要日志或澄清的 `needs-info`；自动修复遇到任一标签都先等待。验证覆盖缺项添加、重复检查不刷屏、补齐移除和人工标签保留。
+
 ## GitHub Release 更新
 
 - 更新源是公开的 `iamshen/USBDisplayHost`，通道 `win-x64`。vpk 1.2.161 的完整包名包含通道：`USBDisplayHost-<Version>-win-x64-full.nupkg`；不要凭示例省略中间字段。
