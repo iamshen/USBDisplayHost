@@ -1,0 +1,47 @@
+name: 问题反馈
+description: 报告崩溃、设备连接、显示或其他异常
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 请先搜索已有问题。日志和截图请去除个人信息、令牌及敏感路径；无法获取的信息可填写“未知”并说明原因。
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本
+      placeholder: 例如 0.1.2
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 系统与设备
+      description: Windows 版本、设备型号及固件版本；不涉及设备时填写“不涉及设备”。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从什么状态开始，依次执行了什么操作？偶发问题请说明频率。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 包含错误编号或提示；可附已脱敏的截图。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志与补充信息
+      description: 可选。日志位于 %LocalAppData%\UsbDisplayHost.Data；请仅附与问题有关的脱敏内容。

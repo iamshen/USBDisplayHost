@@ -1,0 +1,46 @@
+name: Issue 信息检查
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled, unlabeled]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: issue-checks-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const params = { ...context.repo, issue_number: context.issue.number };
+            const { data: issue } = await github.rest.issues.get(params);
+            if (issue.state !== 'open' || issue.pull_request) return;
+            const labels = issue.labels.map(l => typeof l === 'string' ? l : l.name);
+            const body = (issue.body || '').replace(/<!--[\s\S]*?-->/g, '');
+            const sections = new Map([...body.matchAll(/^### ([^\r\n]+)\r?\n([\s\S]*?)(?=^### |$(?![\s\S]))/gm)].map(m => [m[1].trim(), m[2].trim()]));
+            const required = labels.includes('bug') ? ['应用版本', '系统与设备', '复现步骤', '预期结果', '实际结果'] : labels.includes('enhancement') ? ['使用场景与问题', '期望改进'] : [];
+            const missing = required.filter(key => !sections.get(key) || /^(_No response_|待填写|TODO|TBD)$/i.test(sections.get(key)));
+            if (!issue.title.replace(/^\[(Bug|建议)\]\s*/i, '').trim()) missing.push('具体标题');
+            if (!body.trim()) missing.push('问题说明');
+            const marker = '<!-- issue-info-check -->';
+            const comments = await github.paginate(github.rest.issues.listComments, { ...params, per_page: 100 });
+            const previous = comments.find(c => c.user?.login === 'github-actions[bot]' && c.body?.startsWith(marker));
+            if (missing.length) {
+              if (!labels.includes('form-incomplete')) await github.rest.issues.addLabels({ ...params, labels: ['form-incomplete'] });
+              const message = `${marker}\n请补充以下信息：${missing.join('、')}。\n\n请编辑原 Issue，使用对应的三级标题（例如 \`### 复现步骤\`）。无法获取的信息可写“未知”并说明原因。补齐后机器人会移除 \`form-incomplete\`；不会自动关闭 Issue。`;
+              if (!previous) await github.rest.issues.createComment({ ...params, body: message });
+              else if (previous.body !== message) await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body: message });
+            } else {
+              if (labels.includes('form-incomplete')) await github.rest.issues.removeLabel({ ...params, name: 'form-incomplete' });
+              if (previous) {
+                const message = `${marker}\n必填信息已补齐。具体问题和复现情况仍需审核确认。`;
+                if (previous.body !== message) await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body: message });
+              }
+            }
