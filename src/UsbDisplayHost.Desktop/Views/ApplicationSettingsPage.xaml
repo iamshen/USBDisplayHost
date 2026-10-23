@@ -80,7 +80,7 @@
                         <Border Style="{StaticResource SectionStyle}" Margin="0,32,0,0">
                             <StackPanel>
                                 <DockPanel Margin="0,0,0,16">
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding CurrentVersion, StringFormat=版本 {0}}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Updates.CurrentVersion, StringFormat=版本 {0}}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" />
                                     <TextBlock Text="软件更新" Style="{DynamicResource GroupTitleStyle}" />
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,20">
@@ -88,10 +88,20 @@
                                                      OnContent="" OffContent="" Margin="16,0,0,0" AutomationProperties.Name="自动检查更新" />
                                     <TextBlock Text="自动检查更新" VerticalAlignment="Center" />
                                 </DockPanel>
-                                <DockPanel>
-                                    <Button DockPanel.Dock="Right" Content="检查更新" IsEnabled="False" Margin="16,0,0,0" ToolTip="更新服务暂未接入" ToolTipService.ShowOnDisabled="True" />
-                                    <TextBlock Text="更新服务暂未接入" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" />
-                                </DockPanel>
+                                <StackPanel DataContext="{Binding Updates}">
+                                    <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" Style="{DynamicResource AuxiliaryTextStyle}" />
+                                    <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" Height="6" Margin="0,12,0,0" AutomationProperties.Name="更新下载进度">
+                                        <ProgressBar.Style><Style TargetType="ProgressBar"><Setter Property="Visibility" Value="Collapsed" /><Style.Triggers><DataTrigger Binding="{Binding IsProgressVisible}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers></Style></ProgressBar.Style>
+                                    </ProgressBar>
+                                    <controls:InlineMessage Message="{Binding ErrorText}" Margin="0,8,0,0" />
+                                    <WrapPanel Margin="0,12,0,0">
+                                        <Button Content="{Binding ActionText}" Command="{Binding ActCommand}" Margin="0,0,8,8" />
+                                        <Button Content="取消" Command="{Binding ActCancelCommand}" Margin="0,0,8,8">
+                                            <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Visibility" Value="Collapsed" /><Style.Triggers><DataTrigger Binding="{Binding CanCancel}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers></Style></Button.Style>
+                                        </Button>
+                                        <Button Content="GitHub 下载页" Command="{Binding OpenReleasesCommand}" Margin="0,0,0,8" />
+                                    </WrapPanel>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </StackPanel>

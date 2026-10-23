@@ -109,6 +109,17 @@ public sealed class DeviceDiscoveryLifetime(Dispatcher dispatcher, DevicesPageVi
     { lock (sync) { return closing is null && session?.RequestRescan() == true; } }
     public Task<OperationResult<Unit>> CloseAsync()
     { lock (sync) { return closing ??= CloseCoreAsync(); } }
+
+    public async Task<OperationResult<Unit>> SuspendForUpdateAsync()
+    {
+        // 暂停发现及探测句柄，但保留 ViewModel 生命周期，更新器启动失败后可重新检测。
+        if (closing is not null) { return await closing; }
+        if (presenter is not null) { await presenter.DisposeAsync(); }
+        var result = session is not null ? await session.CloseAsync()
+            : discoveryOwner is not null ? await discoveryOwner.CloseAsync() : new OperationResult<Unit>.Success(new());
+        if (result is OperationResult<Unit>.Success) { presenter = null; session = null; discoveryOwner = null; }
+        return result;
+    }
     private async Task<OperationResult<Unit>> CloseCoreAsync()
     {
         try

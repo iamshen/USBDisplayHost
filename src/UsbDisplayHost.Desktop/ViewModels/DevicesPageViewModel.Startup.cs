@@ -8,16 +8,16 @@ public sealed partial class DevicesPageViewModel
 {
     private Task? startupProtocol;
 
-    public Task InitializeProtocolAsync(ApplicationSettingsPageViewModel settings) =>
-        startupProtocol ??= InitializeProtocolCoreAsync(settings);
+    public Task InitializeProtocolAsync(ApplicationSettingsPageViewModel settings, bool updateRestart = false) =>
+        startupProtocol ??= InitializeProtocolCoreAsync(settings, updateRestart);
 
-    private async Task InitializeProtocolCoreAsync(ApplicationSettingsPageViewModel settings)
+    private async Task InitializeProtocolCoreAsync(ApplicationSettingsPageViewModel settings, bool updateRestart)
     {
         try
         {
             await settings.InitializeAsync();
             if (stopping || beginDiscovery is null || protocol is null || IsProtocolBusy) { return; }
-            bool switchAtStartup = settings.IsReady && settings.ErrorText.Length == 0 && !settings.HasUnconfirmedSave
+            bool switchAtStartup = !updateRestart && settings.IsReady && settings.ErrorText.Length == 0 && !settings.HasUnconfirmedSave
                 && settings.SavedSettings.SwitchToThemeOnStartup;
             await RunProtocolAsync(async () =>
             {

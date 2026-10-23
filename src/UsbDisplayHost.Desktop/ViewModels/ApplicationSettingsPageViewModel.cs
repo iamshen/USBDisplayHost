@@ -18,6 +18,7 @@ public partial class ApplicationSettingsPageViewModel(ApplicationSettingsService
     private bool canSave;
     private bool hasSavedFile;
     private bool unsupportedVersion;
+    public AppUpdateViewModel? Updates { get; set; }
     public bool HasUnconfirmedSave => service.PendingSave is not null;
     public Guid? UnconfirmedSaveId => service.PendingSave?.ConfirmationId;
 
@@ -269,6 +270,7 @@ public partial class ApplicationSettingsPageViewModel(ApplicationSettingsService
 
     public async Task StopAsync()
     {
+        if (Updates is not null) { await Updates.StopAsync(); }
         stopping = true;
         lifetime.Cancel();
         SaveCommand.Cancel();

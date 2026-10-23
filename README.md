@@ -1,6 +1,6 @@
 # USB Display 上位机
 
-文档更新：2026-10-22。当前范围：五页原生工作区、设备协议组合与离线安装打包，完整运行及硬件验收未完成。
+文档更新：2026-10-23。当前范围：五页原生工作区、设备协议组合、GitHub 更新与安装包自动打包，完整运行及硬件验收未完成。
 
 本项目面向 AD102 与当前固件的 1920×1080 屏幕，开发 Windows 原生桌面上位机，提供主题显示、设备控制、硬件信息展示和主题态／副屏态切换。
 
@@ -18,7 +18,7 @@
 - JSON 本地配置、Serilog 本地滚动日志、仓库内任务与验收记录。
 - Velopack 安装与软件更新，通过 HTTPS 发布源检查版本；用户发起下载和重启安装，断网仍可使用核心功能。
 
-以上为设计基线；窗口已接入 WPF UI、MVVM Toolkit 和结构化日志，Velopack 1.2.161 已接入离线安装生命周期和打包入口。自动更新、签名和正式发布输入仍待任务 2.5／12.x。编码器兼容性、固件能力和驱动绑定仍须样机验证。
+以上为设计基线；窗口已接入 WPF UI、MVVM Toolkit 和结构化日志，Velopack 1.2.161 已接入安装生命周期、GitHub 检查下载与确认重启安装。签名和真实升级验收仍待任务 2.5／12.x。编码器兼容性、固件能力和驱动绑定仍须样机验证。
 
 实际输入与未完成依赖记录：[样机／驱动](docs/contracts/device-baseline.md)、[主题数据面](docs/contracts/data-plane.md)、[HID 控制](docs/contracts/hid-control.md)、[安装更新通道](docs/release/update-channel.md)。这些记录区分已确定输入和待交付条件，不构成已验收的设备兼容契约。
 
@@ -50,7 +50,7 @@ SDK 已由 `global.json` 精确锁定；集中包版本及四份锁文件启用�
 
 Restore 执行锁定还原；Build 执行目标 Release 构建；Publish 清理生成目录后输出 win-x64 自包含文件到 `.artifacts/publish/win-x64`，不启用裁剪或 AOT。Package 执行相同发布步骤，再恢复仓库固定版本的 vpk，生成 `.artifacts/installers/win-x64/<Version>/USBDisplayHost-win-x64-Setup.exe`。版本来自 `Directory.Build.props`，当前为 `0.1.0`。SDK 依赖与工具首次还原需要网络，目标机器安装无需在线下载 .NET。
 
-所有入口均不运行应用、测试、设备操作或驱动安装；Package 使用 `--skipVeloAppCheck` 跳过会执行应用的入口探测。安装包未签名，自动更新尚未接入，不能把打包成功当作安装验收。使用方式、数据保留和驱动边界见 [离线安装说明](docs/release/offline-installation.md)，实际命令与结果见 [离线打包记录](docs/verification/offline-installer-2026-10-22.md)。测试工程及入口尚未创建，2.2／2.3／12.x 的完整验收仍待完成。
+所有入口均不运行应用、测试、设备操作或驱动安装；Package 使用 `--skipVeloAppCheck` 跳过会执行应用的入口探测。安装包未签名，不能把打包成功当作安装验收。使用方式、数据保留和驱动边界见 [离线安装说明](docs/release/offline-installation.md)。推送 `main` 自动生成 Actions 产物，推送与项目版本一致的 `vX.Y.Z` 标签自动发布 GitHub Release，详见 [发布及更新说明](docs/release/github-release.md)。测试工程及入口尚未创建，2.2／2.3／12.x 的完整验收仍待完成。
 
 无设备 UI 运行使用以下入口。`--ui-only` 不附加设备协议，不启动 USB 发现、启动自动切换或设备电源生命周期；重新检测与设备控制保持不可用。应用偏好、素材导入和诊断仍使用当前用户的数据目录，相关保存属于真实本地写入；主题编辑本身只保留在内存。
 

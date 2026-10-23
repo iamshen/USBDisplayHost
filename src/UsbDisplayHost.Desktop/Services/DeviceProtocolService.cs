@@ -44,6 +44,12 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
 
     public async Task<OperationResult<Unit>> ConnectAsync(DeviceSelectionAdmission admission, CancellationToken token)
     {
+        var result = await ConnectCoreAsync(admission, token);
+        return RecordProtocolResult(result, admission.Selection.Key, "Connect");
+    }
+
+    private async Task<OperationResult<Unit>> ConnectCoreAsync(DeviceSelectionAdmission admission, CancellationToken token)
+    {
         if (HasPendingResources || sessions.HasRetainedSession)
         { return Failure("ConnectionStillOwned", "原连接资源尚未释放"); }
         try
@@ -51,10 +57,11 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
             var selected = coordinator.Current;
             if (selected.DeviceKey != admission.Selection.Key || selected.Connection != ConnectionState.Discovered)
             { return Failure("SelectionChanged", "选定设备已变化"); }
+            // 接口缺失时先返回具体原因，不先打开 HID 并发送状态探测。
+            if (GetConnectionInterfaceError(admission.Selection) is { } bindingError)
+            { return new OperationResult<Unit>.Failure(bindingError); }
             var probe = discovery.HidProbe ?? throw new InvalidOperationException("HID discovery is unavailable.");
-            var hidIdentity = admission.Selection.Interfaces.SingleOrDefault(identity =>
-                identity.InterfacePath.EndsWith($"#{{{Ad102V2DiscoveryConfiguration.HidInterfaceClass:D}}}", StringComparison.OrdinalIgnoreCase));
-            if (hidIdentity is null) { return Failure("HidInterfaceMissing", "未找到当前设备的 V2 HID 控制接口"); }
+            var hidIdentity = admission.Selection.Interfaces.Single(IsHidInterface);
             var opened = await probe.OpenAd102V2SessionAsync(admission,
                 new(Ad102V2DiscoveryConfiguration.HidInterfaceClass, hidIdentity.InterfacePath), hidIdentity,
                 TimeProvider.System, 2000, token);
@@ -81,7 +88,6 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
             {
                 var data = admission.Selection.Interfaces.Where(identity => identity.ProductId == 0xADA0
                     && identity.InterfacePath != hidIdentity.InterfacePath).ToArray();
-                if (data.Length != 1) { return Failure("DisplayBindingMissing", "主题 Display WinUSB 接口未就绪或存在歧义，请核对驱动后重新检测"); }
                 string path = data[0].InterfacePath;
                 if (!Guid.TryParse(path[(path.LastIndexOf('#') + 1)..], out var interfaceClass))
                 { return Failure("DisplayInterfaceClassMissing", "无法读取 Display 接口类"); }
@@ -252,6 +258,50 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
     }
 
     private static OperationResult<Unit> Convert<T>(OperationResult<T> result) => Ad102V2DeviceSession.Convert<Unit, T>(result);
+
+    private static bool IsHidInterface(DeviceIdentity identity) => identity.InterfacePath.EndsWith(
+        $"#{{{Ad102V2DiscoveryConfiguration.HidInterfaceClass:D}}}", StringComparison.OrdinalIgnoreCase);
+
+    private static AppError? GetConnectionInterfaceError(DeviceSelection selection)
+    {
+        var controls = selection.Interfaces.Where(IsHidInterface).ToArray();
+        if (controls.Length != 1)
+        {
+            return AppError.Create(controls.Length == 0 ? "HidInterfaceMissing" : "HidInterfaceAmbiguous",
+                controls.Length == 0 ? "未找到当前设备的 V2 HID 控制接口" : "同一设备发现多个 V2 HID 控制接口",
+                "请等待设备枚举完成，核对 HID 驱动与接口归属后重新检测");
+        }
+        if (controls[0].ProductId != 0xADA0) { return null; }
+        int count = selection.Interfaces.Count(identity => identity.ProductId == 0xADA0 && !IsHidInterface(identity));
+        return count switch
+        {
+            1 => null,
+            0 => AppError.Create("DisplayBindingMissing", "已发现主题设备，但未发现可用的 Display WinUSB 数据接口",
+                "请在设备管理器确认主题设备的 Display 接口使用 WinUSB，且已注册 DeviceInterfaceGUID 或 DeviceInterfaceGUIDs，然后重新检测"),
+            _ => AppError.Create("DisplayBindingAmbiguous", "同一主题设备发现多个 Display 数据接口，无法确定发送目标",
+                "请核对 Display 接口的驱动绑定和接口 GUID，排除重复注册后重新检测")
+        };
+    }
+
+    private OperationResult<Unit> RecordProtocolResult(OperationResult<Unit> result, DeviceKey key, string operation)
+    {
+        if (reporter is IDiagnosticService diagnostics)
+        {
+            AppError? error = result switch
+            {
+                OperationResult<Unit>.Failure failure => failure.Error,
+                OperationResult<Unit>.Unknown unknown => unknown.Error,
+                _ => null
+            };
+            var current = coordinator.Current;
+            diagnostics.Write(error is null ? DiagnosticSeverity.Information : DiagnosticSeverity.Warning,
+                $"DeviceProtocol.{operation}", error?.Code ?? (result is OperationResult<Unit>.Success ? "Completed" : "Cancelled"),
+                new(DiagnosticContext.Anonymize(key), current.SessionGeneration, current.PendingOperationId,
+                    $"{current.Connection}.{current.Mode}.{current.Power}.{current.Streaming}"), error?.ErrorId);
+        }
+        return result;
+    }
+
     private static OperationResult<Unit> Failure(string code, string reason) =>
         new OperationResult<Unit>.Failure(AppError.Create(code, reason, "核对设备状态和诊断后重试"));
 }

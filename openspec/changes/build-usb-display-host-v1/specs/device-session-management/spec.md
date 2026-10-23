@@ -34,6 +34,16 @@
 - **WHEN** 已发现设备但缺少确认能力或绑定了错误驱动
 - **THEN** 仅提供已证实可用动作，解释修复方式，不通过试发命令探测扩展能力
 
+#### Scenario: WinUSB 使用单值接口 GUID 注册
+
+- **WHEN** 主题设备的 WinUSB 驱动使用字符串 `DeviceInterfaceGUID` 或多字符串 `DeviceInterfaceGUIDs` 注册接口
+- **THEN** 应用均读取并去重实际 GUID，随后通过实际描述符核实 Display 功能，不因注册名称不同漏掉数据接口
+
+#### Scenario: 主题 PID 已出现但 Display 接口不完整
+
+- **WHEN** 同一设备已枚举为主题 PID，但发现结果缺少 Display WinUSB 接口或存在多个候选
+- **THEN** 连接前区分接口缺失与歧义，提示核对驱动绑定和 GUID；切换超时核验不选中残缺接口、不打开其 HID 或发送状态探测，不将 PID 出现当作就绪
+
 ### Requirement: 连接状态与电源状态独立
 
 系统 SHALL 分别呈现连接、模式、电源和推流状态；副屏态 SHALL 不打开或抢占厂商显示数据面。熄屏设备重新连接时 SHALL 保持已保存电源意图，不无条件亮屏或推流。追踪：FR-09、FR-13，TC-17、TC-18、TC-23。

@@ -24,10 +24,14 @@ public static class Ad102V2DiscoveryConfiguration
                     using var instance = device.OpenSubKey(instanceName);
                     if (instance is null || !string.Equals(instance.GetValue("Service") as string, "WinUSB", StringComparison.OrdinalIgnoreCase)) { continue; }
                     using var parameters = instance.OpenSubKey("Device Parameters");
-                    var raw = parameters?.GetValue("DeviceInterfaceGUIDs");
-                    IEnumerable<string> values = raw is string[] list ? list : raw is string text ? [text] : [];
-                    foreach (string value in values)
-                    { if (Guid.TryParse(value, out var guid) && guid != Guid.Empty) { classes.Add(guid); } }
+                    // WinUSB 同时支持单值 DeviceInterfaceGUID 和多值 DeviceInterfaceGUIDs。
+                    foreach (string valueName in new[] { "DeviceInterfaceGUID", "DeviceInterfaceGUIDs" })
+                    {
+                        var raw = parameters?.GetValue(valueName);
+                        IEnumerable<string> values = raw is string[] list ? list : raw is string text ? [text] : [];
+                        foreach (string value in values)
+                        { if (Guid.TryParse(value, out var guid) && guid != Guid.Empty) { classes.Add(guid); } }
+                    }
                 }
             }
         }

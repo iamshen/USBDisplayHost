@@ -63,7 +63,7 @@ public partial class MainWindow : FluentWindow
     public void NavigateToThemes() => RootNavigationView.Navigate(typeof(ThemesPage));
 
     public async Task<MessageBoxResult> ShowDecisionAsync(string message, MessageBoxButton buttons,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, bool installUpdate = false)
     {
         Dispatcher.VerifyAccess();
         if (isDialogOpen || cancellationToken.IsCancellationRequested) { return MessageBoxResult.Cancel; }
@@ -72,14 +72,14 @@ public partial class MainWindow : FluentWindow
         {
             var result = await dialogs.ShowAsync(new ContentDialog
             {
-                Title = "退出 USB Display",
+                Title = installUpdate ? "安装软件更新" : "退出 USB Display",
                 Content = new System.Windows.Controls.TextBlock
                 {
                     Text = message, TextWrapping = TextWrapping.Wrap, MaxWidth = 440
                 },
-                PrimaryButtonText = buttons == MessageBoxButton.OK ? "" : buttons == MessageBoxButton.YesNo ? "退出" : "保存后退出",
+                PrimaryButtonText = installUpdate ? "重启并安装" : buttons == MessageBoxButton.OK ? "" : buttons == MessageBoxButton.YesNo ? "退出" : "保存后退出",
                 SecondaryButtonText = buttons == MessageBoxButton.YesNoCancel ? "放弃并退出" : "",
-                CloseButtonText = buttons == MessageBoxButton.OK ? "知道了" : buttons == MessageBoxButton.YesNo ? "保持窗口" : "取消",
+                CloseButtonText = installUpdate ? "稍后" : buttons == MessageBoxButton.OK ? "知道了" : buttons == MessageBoxButton.YesNo ? "保持窗口" : "取消",
                 DefaultButton = ContentDialogButton.Close
             }, cancellationToken);
             if (cancellationToken.IsCancellationRequested) { return MessageBoxResult.Cancel; }

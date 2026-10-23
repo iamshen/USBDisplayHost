@@ -1,6 +1,6 @@
 # USB Display 离线安装说明
 
-当前版本：0.1.0；目标架构：Windows x64。当前安装包未签名，安装、卸载及真实设备兼容性尚未验证，不作为正式发布版。
+当前版本：0.1.1；目标架构：Windows x64。当前安装包未签名，安装、卸载及真实设备兼容性尚未验证，不作为正式发布验收通过。
 
 ## 安装与使用
 
@@ -26,7 +26,7 @@
 
 通过 Windows“已安装的应用”卸载 USB Display。卸载回调只删除与当前程序路径完全匹配的 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\USBDisplayHost` 自启项，不改其他路径的同名项；用户数据默认保留，共享驱动不删除。需要完全移除个人数据时，先备份，再自行删除上述独立数据目录。实际卸载行为待验证。
 
-当前没有自动检查、下载或安装更新服务。应用启动不会自动应用已缓存的新版本；设置页保留“更新服务未接入”的现有状态。需要手动更换版本时，先备份独立数据目录、确认配置格式兼容并退出程序，再使用可信的完整安装包。跨版本修复和回退尚未验证，不保证旧程序能读取新格式配置。
+安装版可在“应用设置 → 软件更新”从 GitHub 检查并下载新版，用户确认后关闭设备会话并重启安装；应用启动不会自动应用缓存包。0.1.0 没有在线更新入口，第一次需手动安装新 Setup。操作及发布说明见 [GitHub 更新](github-release.md)。需要手动更换版本时，先备份独立数据目录、确认配置格式兼容并退出程序，再使用可信的完整安装包。跨版本修复和回退尚未验证，不保证旧程序能读取新格式配置。
 
 ## 开发侧生成
 
@@ -43,13 +43,13 @@
 | SDK / vpk | Velopack 1.2.161，SDK 在集中版本和锁文件中固定，工具在 `.config/dotnet-tools.json` 固定 |
 | 包身份 / 显示名称 | `USBDisplayHost` / `USB Display` |
 | 版本来源 | `Directory.Build.props` 的 `Version`；应用程序集与安装包共用 |
-| 本地包通道 | `win-x64`，没有配置远程更新源 |
+| 包通道 | `win-x64`，公开源为 `iamshen/USBDisplayHost` 的 GitHub Releases |
 | 发布目录 | `.artifacts/publish/win-x64/`；每次 Publish / Package 清理后生成 |
 | 安装包目录 | `.artifacts/installers/win-x64/<Version>/` |
 | 对外交付入口 | `USBDisplayHost-win-x64-Setup.exe`，本轮仅作未签名内部产物 |
-| 工具附带产物 | 完整 `.nupkg` 与本地索引，仅保留构建产物，不上传或接入在线更新 |
+| 工具附带产物 | 完整 `.nupkg`、更新索引和 `SHA256SUMS.txt`；标签触发 Actions 上传到 Release |
 
-版本使用三段数字，如 `0.1.0`；后续递增时同步更新本文并重新生成受影响锁文件。包身份保持稳定，不因版本变化重新命名。依赖调整使用显式解除锁定的维护命令，正常构建继续锁定还原：
+版本使用三段数字，如 `0.1.1`；后续递增时同步更新本文；版本或依赖变化时重新生成受影响锁文件，项目引用版本也需要同步。包身份保持稳定，不因版本变化重新命名。调整使用显式解除锁定的维护命令，正常构建继续锁定还原：
 
 ```powershell
 dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force-evaluate -p:RestoreLockedMode=false
@@ -57,6 +57,6 @@ dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force-
 
 打包使用 `--noPortable`、`--delta None`，不生成便携包或增量包；使用 `--skipVeloAppCheck` 禁止打包器启动主程序探测入口。因此打包成功只证明产物生成，不证明安装生命周期已运行验证。包内含 `INSTALLATION.zh-CN.md` 与 `licenses/`。
 
-当前没有签名参数、证书或发布地址。签名交付及自动更新另行接入；正式发布必须完成应用和安装辅助程序的签名验签，以及获授权的安装、卸载、跨版本和设备验收。
+当前没有签名参数或证书。GitHub 发布和应用内更新已接入源码；正式发布验收仍须完成应用和安装辅助程序的签名验签，以及获授权的安装、卸载、跨版本和设备验收。
 
 参考：[Velopack 安装器](https://docs.velopack.io/packaging/installer)、[Windows 安装目录](https://docs.velopack.io/packaging/operating-systems/windows)、[C# 生命周期](https://docs.velopack.io/getting-started/csharp)。实际行为以锁定的 1.2.161 源码和后续运行证据为准。

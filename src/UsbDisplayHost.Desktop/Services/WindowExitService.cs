@@ -3,6 +3,7 @@ using System.Windows;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Core.Configuration;
 using UsbDisplayHost.Core.Operations;
+using UsbDisplayHost.Core.Updates;
 
 namespace UsbDisplayHost.Desktop.Services;
 
@@ -35,14 +36,14 @@ public sealed class WindowExitService(Application application, ThemeWorkspaceLif
         => await ShowDialogAsync(window, message, MessageBoxButton.YesNoCancel);
 
     private async Task<MessageBoxResult> ShowDialogAsync(Window window, string message,
-        MessageBoxButton buttons = MessageBoxButton.OK)
+        MessageBoxButton buttons = MessageBoxButton.OK, bool installUpdate = false)
     {
         if (systemExit) { return MessageBoxResult.Cancel; }
         try
         {
             if (buttons == MessageBoxButton.OK) { window.IsEnabled = true; }
             var result = window is MainWindow main
-                ? await main.ShowDecisionAsync(message.Replace("选择“否”", "选择“放弃并退出”", StringComparison.Ordinal), buttons, dialogCancellation.Token)
+                ? await main.ShowDecisionAsync(message.Replace("选择“否”", "选择“放弃并退出”", StringComparison.Ordinal), buttons, dialogCancellation.Token, installUpdate)
                 : MessageBox.Show(window, message, "USB Display", buttons, MessageBoxImage.Information);
             return systemExit ? MessageBoxResult.Cancel : result;
         }
@@ -135,15 +136,28 @@ public sealed class WindowExitService(Application application, ThemeWorkspaceLif
         finally { closing = false; }
     }
 
-    public async Task RequestExitAsync(Window window)
+    public Task RequestExitAsync(Window window) => RequestExitCoreAsync(window, null);
+
+    public Task RequestUpdateAsync(Window window, IAppUpdateService updates) => RequestExitCoreAsync(window, updates);
+
+    private async Task RequestExitCoreAsync(Window window, IAppUpdateService? updates)
     {
         if (exiting || systemExit) { return; }
         exiting = true;
+        bool preparingUpdate = false;
+        bool handedOff = false;
         try
         {
             if (tray is not null) { await tray.WaitForPendingNoticeAsync(); }
             if (systemExit) { return; }
             window.Show();
+            if (updates is not null)
+            {
+                if (updates.Snapshot.State != AppUpdateState.ReadyToInstall) { return; }
+                if (await ShowDialogAsync(window,
+                    $"是否重启并安装 {updates.Snapshot.TargetVersion}？将先处理未保存内容并关闭设备会话，更新后保留设备当前模式。",
+                    MessageBoxButton.YesNo, installUpdate: true) != MessageBoxResult.Yes) { return; }
+            }
             await workspace.Settings.InitializeAsync();
             if (systemExit) { return; }
             if (workspace.Themes.IsBusy || workspace.Settings.IsBusy || workspace.IsDeviceSessionBusy)
@@ -228,7 +242,7 @@ public sealed class WindowExitService(Application application, ThemeWorkspaceLif
                 else if (await workspace.RetryControlSaveAsync() is not OperationResult<Unit>.Success)
                 { await ShowDialogAsync(window, "设置保存仍未确认，请在设备页查看错误或明确放弃保存结果。"); return; }
             }
-            if (workspace.NeedsExitModeSwitch)
+            if (updates is null && workspace.NeedsExitModeSwitch)
             {
                 var switched = await workspace.SwitchToSecondaryForExitAsync();
                 if (switched is not OperationResult<Unit>.Success)
@@ -244,7 +258,9 @@ public sealed class WindowExitService(Application application, ThemeWorkspaceLif
             }
             if (systemExit) { return; }
             window.IsEnabled = false;
-            var sessionClose = await workspace.PrepareExitAsync(discardSaveId);
+            preparingUpdate = updates is not null;
+            var sessionClose = updates is null ? await workspace.PrepareExitAsync(discardSaveId)
+                : await workspace.PrepareUpdateAsync(discardSaveId);
             if (sessionClose is not OperationResult<Unit>.Success)
             {
                 var error = sessionClose switch
@@ -258,6 +274,20 @@ public sealed class WindowExitService(Application application, ThemeWorkspaceLif
                 return;
             }
             if (systemExit) { return; }
+            if (updates is not null)
+            {
+                // 原生 I/O 和配置保存均已确认结束。更新器仅等待正常退出，不在会话关闭前启动。
+                var handoff = await updates.HandOffInstallationAsync(dialogCancellation.Token);
+                if (handoff is not OperationResult<Unit>.Success)
+                {
+                    workspace.ResumeAfterUpdateLaunchFailure();
+                    string reason = handoff is OperationResult<Unit>.Failure failure
+                        ? $"{failure.Error.Reason}。错误编号：{failure.Error.ErrorId}" : "安装交接已取消";
+                    await ShowDialogAsync(window, reason + "。当前程序已保留，可重新检测并连接设备。");
+                    return;
+                }
+                handedOff = true;
+            }
             var workspaceStop = await workspace.StopAsync();
             if (workspaceStop is not OperationResult<Unit>.Success)
             {
@@ -282,6 +312,7 @@ public sealed class WindowExitService(Application application, ThemeWorkspaceLif
         }
         finally
         {
+            if (preparingUpdate && !handedOff && !systemExit) { workspace.ResumeAfterUpdateLaunchFailure(); }
             if (!application.Dispatcher.HasShutdownStarted)
             {
                 window.IsEnabled = true;

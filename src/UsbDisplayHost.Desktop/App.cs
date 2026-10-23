@@ -13,6 +13,7 @@ using UsbDisplayHost.Windows.Diagnostics;
 using UsbDisplayHost.Core.Configuration;
 using UsbDisplayHost.Windows.Lifecycle;
 using UsbDisplayHost.Core.Sessions;
+using UsbDisplayHost.Windows.Updates;
 
 namespace UsbDisplayHost.Desktop;
 
@@ -30,6 +31,7 @@ public sealed class App : Application
     private System.Windows.Controls.TextBlock? startupErrorText;
     private bool activationPending;
     private readonly bool uiOnly;
+    private readonly string? updatedTo;
 
     public void RequestActivation()
     {
@@ -49,10 +51,11 @@ public sealed class App : Application
         MainWindow.Activate();
     }
 
-    public App(DiagnosticLog errorReporter, bool uiOnly = false)
+    public App(DiagnosticLog errorReporter, bool uiOnly = false, string? updatedTo = null)
     {
         this.errorReporter = errorReporter;
         this.uiOnly = uiOnly;
+        this.updatedTo = updatedTo;
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
@@ -73,6 +76,9 @@ public sealed class App : Application
             var settingsService = new ApplicationSettingsService(profiles, new WindowsStartupRegistration(errorReporter), errorReporter,
                 () => deviceCoordinator.Current);
             var settings = new ApplicationSettingsPageViewModel(settingsService, errorReporter);
+            var updateService = new GitHubAppUpdateService(dataPaths, errorReporter);
+            var updates = new AppUpdateViewModel(updateService, settings, Dispatcher, errorReporter);
+            settings.Updates = updates;
             var assets = new FileAssetStore(dataPaths, new WpfImageValidator(errorReporter), storageCoordinator);
             var renderer = new WpfFrameRenderer(assets, TimeProvider.System, errorReporter);
             var metrics = new MetricSamplingService(new WindowsHostMetricProvider(TimeProvider.System, errorReporter),
@@ -126,7 +132,9 @@ public sealed class App : Application
             MainWindow.StateChanged += OnWindowStateChanged;
             MainWindow.Show();
             if (uiOnly) { _ = settings.InitializeAsync(); }
-            else { _ = devices.InitializeProtocolAsync(settings); }
+            else { _ = devices.InitializeProtocolAsync(settings, updatedTo is not null); }
+            updates.Start(() => exitService.RequestUpdateAsync(MainWindow, updateService), updatedTo,
+                () => MainWindow.IsLoaded && tray is { IsAvailable: true });
             if (activationPending) { activationPending = false; ShowMainWindow(); }
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)

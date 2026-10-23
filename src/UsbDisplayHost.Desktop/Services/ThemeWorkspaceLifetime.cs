@@ -19,6 +19,8 @@ public sealed class ThemeWorkspaceLifetime(
     private Task<OperationResult<Unit>>? stopping;
     private WindowPowerLifetime? power;
     private WorkspaceNoticeLifetime? notices;
+    private bool updateDevicesClosed;
+    private bool updateOwnsDeviceGate;
     public void AttachNotices(WorkspaceNoticeLifetime value)
     {
         lock (syncRoot)
@@ -60,6 +62,37 @@ public sealed class ThemeWorkspaceLifetime(
     public PendingThemeSave? PendingDeviceSave => sessions.PendingSave;
     public Task<OperationResult<PendingThemeSave>> RetryDeviceSaveAsync(Guid retryId) => sessions.RetrySaveAsync(retryId);
     public Task<OperationResult<Unit>> PrepareExitAsync(Guid? discardSaveId = null) => sessions.CloseAsync(discardSaveId);
+
+    public async Task<OperationResult<Unit>> PrepareUpdateAsync(Guid? discardSaveId)
+    {
+        var before = deviceCoordinator.Current;
+        if (IsDeviceSessionBusy || before.Connection is ConnectionState.Opening or ConnectionState.Recovering
+            || before.PendingOperationId is not null || sessions.Current.Stage == SessionLifecycleStage.Unknown)
+        {
+            return new OperationResult<Unit>.Failure(AppError.Create("UpdateDeviceStateUnconfirmed",
+                "设备操作或会话结果尚未确认，未交接安装", "请先在设备页核实状态"));
+        }
+        updateDevicesClosed = false;
+        updateOwnsDeviceGate = true;
+        devices.IsProtocolBusy = true;
+        var closed = await sessions.CloseAsync(discardSaveId);
+        if (closed is not OperationResult<Unit>.Success) { devices.IsProtocolBusy = false; return closed; }
+        var pending = await protocol.ClosePendingAsync();
+        if (pending is not OperationResult<Unit>.Success) { devices.IsProtocolBusy = false; return pending; }
+        var discoveryClosed = await deviceDiscovery.SuspendForUpdateAsync();
+        if (discoveryClosed is not OperationResult<Unit>.Success) { devices.IsProtocolBusy = false; return discoveryClosed; }
+        if (before.DeviceKey is { } key) { deviceCoordinator.NotifyDisconnected(key, before.SessionGeneration); }
+        updateDevicesClosed = true;
+        return closed;
+    }
+
+    public void ResumeAfterUpdateLaunchFailure()
+    {
+        if (!updateOwnsDeviceGate) { return; }
+        updateOwnsDeviceGate = false;
+        if (updateDevicesClosed) { sessions.ResumeAfterUpdateLaunchFailure(); updateDevicesClosed = false; }
+        devices.IsProtocolBusy = false;
+    }
 
     public Task<OperationResult<Unit>> StopAsync()
     {

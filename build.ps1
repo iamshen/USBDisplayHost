@@ -6,6 +6,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+[xml]$buildProperties = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Directory.Build.props') -Raw
+$version = [string]$buildProperties.Project.PropertyGroup.Version
+if ($version -notmatch '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') {
+    throw 'Version 必须为三段稳定版本号，如 0.1.1'
+}
 $projectPath = Join-Path $PSScriptRoot 'src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj'
 $packageArguments = @()
 if ($PackageCache) {
@@ -44,15 +49,24 @@ try {
 
             if ($Action -eq 'Package') {
                 Invoke-DotNet @('tool', 'restore', '--tool-manifest', (Join-Path $PSScriptRoot '.config/dotnet-tools.json'))
-                [xml]$buildProperties = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Directory.Build.props') -Raw
-                $version = [string]$buildProperties.Project.PropertyGroup.Version
-                $installerPath = Join-Path $artifactRoot "installers/win-x64/$version"
+                $installerPath = [IO.Path]::GetFullPath((Join-Path $artifactRoot "installers/win-x64/$version"))
+                if (-not $installerPath.StartsWith($artifactRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+                    throw '安装包目录必须位于仓库 .artifacts 内'
+                }
+                if (Test-Path -LiteralPath $installerPath) {
+                    Remove-Item -LiteralPath $installerPath -Recurse -Force
+                }
                 # 打包不启动应用；入口运行核验留待授权后进行。
                 Invoke-DotNet @('tool', 'run', 'vpk', '--', 'pack', '--packId', 'USBDisplayHost',
                     '--packTitle', 'USB Display', '--packVersion', $version, '--packDir', $outputPath,
                     '--mainExe', 'UsbDisplayHost.Desktop.exe', '--runtime', 'win-x64',
                     '--icon', (Join-Path $outputPath 'Assets/Branding/app.ico'), '--outputDir', $installerPath,
                     '--channel', 'win-x64', '--delta', 'None', '--noPortable', '--skipVeloAppCheck', '--yes')
+                $checksums = Get-ChildItem -LiteralPath $installerPath -File | Sort-Object Name | ForEach-Object {
+                    $hash = Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256
+                    "$($hash.Hash.ToLowerInvariant())  $($_.Name)"
+                }
+                Set-Content -LiteralPath (Join-Path $installerPath 'SHA256SUMS.txt') -Value $checksums -Encoding utf8
                 Write-Host "离线安装包目录：$installerPath（未签名，未执行安装或运行验证）"
             }
         }

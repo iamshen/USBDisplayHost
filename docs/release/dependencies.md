@@ -7,7 +7,7 @@
 | WPF-UI | 4.3.0 | Desktop，原生 FluentWindow／TitleBar 及后续导航控件 | MIT；包含单独第三方声明 | Wpf.Ui.dll |
 | WPF-UI.Abstractions | 4.3.0（传递） | Desktop，WPF UI 服务契约 | MIT | Wpf.Ui.Abstractions.dll |
 | CommunityToolkit.Mvvm | 8.4.2 | Desktop，状态通知及后续命令／校验 | MIT | CommunityToolkit.Mvvm.dll；生成器仅在构建时使用 |
-| Velopack | 1.2.161 | Desktop，安装生命周期入口；在线更新服务未接入 | MIT | Velopack.dll |
+| Velopack | 1.2.161 | Desktop 安装生命周期；Windows GitHub 更新适配器 | MIT | Velopack.dll |
 | vpk | 1.2.161 | 本地工具，生成当前用户离线安装包 | MIT；保留工具原始第三方声明 | 工具不整体分发；生成 Setup 和包内安装辅助程序 |
 | Microsoft.NETCore.App.Runtime.win-x64 | 10.0.12 | SDK 10.0.401 解析的自包含运行时 | MIT 及第三方声明 | coreclr.dll、hostfxr.dll、系统程序集等 |
 | Microsoft.WindowsDesktop.App.Runtime.win-x64 | 10.0.12 | SDK 10.0.401 解析的 WPF 桌面运行时 | MIT | PresentationFramework.dll 等 |

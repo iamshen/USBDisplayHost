@@ -398,6 +398,17 @@ public sealed class DeviceSessionLifetime(DeviceCoordinator coordinator, IErrorR
         }
     }
 
+    public void ResumeAfterUpdateLaunchFailure()
+    {
+        lock (syncRoot)
+        {
+            // 只有已确认关闭且没有保留所有者时，才允许用户建立新会话。
+            if (owner is null && controlOwner is null && !buildingPipeline
+                && closeTask is { IsCompletedSuccessfully: true, Result: OperationResult<Unit>.Success })
+            { stopping = false; closeTask = null; }
+        }
+    }
+
     private async Task<OperationResult<Unit>> CloseCoreAsync(Guid? discardSaveId)
     {
         Task handoff;

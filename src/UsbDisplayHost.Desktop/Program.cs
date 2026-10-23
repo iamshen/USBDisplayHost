@@ -37,7 +37,8 @@ internal static class Program
                 return 0;
             }
             diagnostics.Write(DiagnosticSeverity.Information, "Application", "Starting");
-            var application = new App(diagnostics, args.Contains("--ui-only", StringComparer.Ordinal));
+            var application = new App(diagnostics, args.Contains("--ui-only", StringComparer.Ordinal),
+                args.FirstOrDefault(arg => arg.StartsWith("--updated-to=", StringComparison.Ordinal))?["--updated-to=".Length..]);
             instance.SetActivationHandler(application.RequestActivation);
             return application.Run();
         }

@@ -9,6 +9,13 @@ public sealed partial class DeviceProtocolService
 {
     public async Task<OperationResult<Unit>> SwitchModeAsync(DeviceMode target, CancellationToken token)
     {
+        var key = coordinator.Current.DeviceKey;
+        var result = await SwitchModeCoreAsync(target, token);
+        return key is null ? result : RecordProtocolResult(result, key, "SwitchMode");
+    }
+
+    private async Task<OperationResult<Unit>> SwitchModeCoreAsync(DeviceMode target, CancellationToken token)
+    {
         var before = coordinator.Current;
         if (active is not { } source || before.DeviceKey is not { } key || before.Mode == target
             || target is not (DeviceMode.Theme or DeviceMode.SecondaryDisplay) || pendingSave is not null)
@@ -27,17 +34,19 @@ public sealed partial class DeviceProtocolService
                 await transport.DisposeAsync();
             }
             acknowledgement = await source.Controller.SwitchAsync(context, target, source.PowerIntent, cancellation);
+            if (acknowledgement is OperationResult<Ad102V2ModeAcknowledgement>.Failure
+                or OperationResult<Ad102V2ModeAcknowledgement>.Cancelled)
+            { return Ad102V2DeviceSession.Convert<DeviceObservation, Ad102V2ModeAcknowledgement>(acknowledgement); }
             // 原 PID 的受理不是目标连接完成；旧会话结束后重新枚举同一序列号。
             return new OperationResult<DeviceObservation>.Unknown(AppError.Create("ModeTargetPending",
                 "模式请求已处理，等待目标设备重新枚举", "核实同一设备的目标接口，不重复发送切换命令"));
         }
-        if (before.Mode == DeviceMode.Theme)
-        { await sessions.ExecuteProtocolAsync(DeviceAction.SwitchMode, SendAsync, false, false, token); }
-        else
-        {
-            await coordinator.ExecuteAsync(key, before.SessionGeneration, DeviceAction.SwitchMode, 0,
+        var sent = before.Mode == DeviceMode.Theme
+            ? await sessions.ExecuteProtocolAsync(DeviceAction.SwitchMode, SendAsync, false, false, token)
+            : await coordinator.ExecuteAsync(key, before.SessionGeneration, DeviceAction.SwitchMode, 0,
                 new ProtocolControlWork(SendAsync, source.DrainAsync), token);
-        }
+        // 未进入模式发送时保留实际失败，例如在途传输未收敛，不覆盖成“模式请求未发送”。
+        if (acknowledgement is null) { return Convert(sent); }
         coordinator.NotifyDisconnected(key, before.SessionGeneration);
         var closed = await sessions.CloseDisconnectedAsync(key, before.SessionGeneration);
         if (closed is not OperationResult<Unit>.Success) { return closed; }
@@ -45,13 +54,20 @@ public sealed partial class DeviceProtocolService
         if (acknowledgement is OperationResult<Ad102V2ModeAcknowledgement>.Success rejected
             && rejected.Value.Result != Ad102V2HidResult.Accepted)
         { return Failure("ModeRejected", "固件拒绝切换请求，原会话已释放，请重新检测"); }
-        if (acknowledgement is null || acknowledgement is OperationResult<Ad102V2ModeAcknowledgement>.Failure)
-        { return acknowledgement is null ? Failure("ModeNotSent", "模式请求未发送") : Convert(acknowledgement); }
+        if (acknowledgement is OperationResult<Ad102V2ModeAcknowledgement>.Failure
+            or OperationResult<Ad102V2ModeAcknowledgement>.Cancelled)
+        { return Convert(acknowledgement); }
 
         return await WaitForConnectionAsync(key, target, started, token);
     }
 
     public async Task<OperationResult<Unit>> ReconnectAsync(DeviceKey key, long oldGeneration, CancellationToken token)
+    {
+        var result = await ReconnectCoreAsync(key, oldGeneration, token);
+        return RecordProtocolResult(result, key, "Reconnect");
+    }
+
+    private async Task<OperationResult<Unit>> ReconnectCoreAsync(DeviceKey key, long oldGeneration, CancellationToken token)
     {
         var closed = await sessions.CloseDisconnectedAsync(key, oldGeneration);
         if (closed is not OperationResult<Unit>.Success) { return closed; }
@@ -63,6 +79,7 @@ public sealed partial class DeviceProtocolService
     private async Task<OperationResult<Unit>> WaitForConnectionAsync(DeviceKey key, DeviceMode? target, long started, CancellationToken token)
     {
         bool originalPresent = false;
+        AppError? interfaceError = null;
         TimeSpan budget = TimeSpan.FromSeconds(target is null ? 30 : 8);
         while (TimeProvider.System.GetElapsedTime(started) < budget)
         {
@@ -74,6 +91,7 @@ public sealed partial class DeviceProtocolService
             { await Task.Delay(100, token); }
             var inventory = catalog.Current;
             originalPresent = false;
+            interfaceError = null;
             if (inventory.CanSelect && catalog.Select(inventory.Version, key) is OperationResult<DeviceSelectionAdmission>.Success selected)
             {
                 ushort expectedPid = target is null ? selected.Value.Selection.Interfaces[0].ProductId
@@ -81,8 +99,8 @@ public sealed partial class DeviceProtocolService
                 var identities = selected.Value.Selection.Interfaces;
                 bool isTarget = identities.All(identity => identity.ProductId == expectedPid);
                 originalPresent = !isTarget;
-                bool displayAvailable = expectedPid != 0xADA0 || identities.Length >= 2;
-                if (isTarget && displayAvailable)
+                interfaceError = GetConnectionInterfaceError(selected.Value.Selection);
+                if (isTarget && interfaceError is null)
                 {
                     var admitted = await coordinator.SelectAsync(selected.Value, token);
                     if (admitted is not OperationResult<DeviceSnapshot>.Success) { return Convert(admitted); }
@@ -94,6 +112,7 @@ public sealed partial class DeviceProtocolService
             await Task.Delay(250, token);
         }
         if (target is { } expected) { return await RequeryModeOutcomeAsync(key, expected, token); }
+        if (interfaceError is not null) { return new OperationResult<Unit>.Unknown(interfaceError); }
         return new OperationResult<Unit>.Unknown(AppError.Create("ModeTargetTimeout",
             originalPresent ? "仍发现原模式，未确认目标模式完成" : "目标接口或驱动尚未就绪，切换结果待确认",
             "重新检测同一设备，不盲目重发或反向切换"));
@@ -118,6 +137,9 @@ public sealed partial class DeviceProtocolService
         var pids = selected.Value.Selection.Interfaces.Select(identity => identity.ProductId).Distinct().ToArray();
         if (pids.Length != 1 || pids[0] is not (0xADA0 or 0xAD11))
         { return ModeUnknown("设备模式接口尚未稳定"); }
+        // 目标 PID 出现不等于主题数据面可用；不要先选中残缺接口再打开 HID。
+        if (GetConnectionInterfaceError(selected.Value.Selection) is { } bindingError)
+        { return new OperationResult<Unit>.Unknown(bindingError); }
         var admitted = await coordinator.SelectAsync(selected.Value, token);
         if (admitted is not OperationResult<DeviceSnapshot>.Success) { return Convert(admitted); }
         var connected = await ConnectAsync(selected.Value, token);

@@ -1,0 +1,74 @@
+name: Windows 安装包与 Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 安装锁定的 .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - name: 核对版本与发布标签
+        id: version
+        run: |
+          [xml]$properties = Get-Content Directory.Build.props -Raw
+          $version = [string]$properties.Project.PropertyGroup.Version
+          if ($version -notmatch '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') { throw '版本格式无效' }
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -cne "v$version") {
+            throw "标签必须为 v$version，与 Directory.Build.props 一致"
+          }
+          "value=$version" >> $env:GITHUB_OUTPUT
+
+      - name: 构建自包含安装包
+        run: ./build.ps1 -Action Package
+
+      - name: 保存安装包及更新索引
+        uses: actions/upload-artifact@v7
+        with:
+          name: USBDisplayHost-${{ steps.version.outputs.value }}-win-x64
+          path: .artifacts/installers/win-x64/${{ steps.version.outputs.value }}/*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: 发布 GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $directory = Join-Path $PWD ".artifacts/installers/win-x64/$env:RELEASE_VERSION"
+          $files = @(Get-ChildItem -LiteralPath $directory -File | ForEach-Object { $_.FullName })
+          # 草稿完整上传后才发布，客户端下载不到一半上传的索引。
+          gh release create $env:GITHUB_REF_NAME --repo $env:GITHUB_REPOSITORY --verify-tag --draft --title "USB Display $env:RELEASE_VERSION" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw '创建 Release 草稿失败；已发布版本不可覆盖' }
+          gh release upload $env:GITHUB_REF_NAME @files --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { throw '上传失败，Release 保留为草稿' }
+          gh release edit $env:GITHUB_REF_NAME --repo $env:GITHUB_REPOSITORY --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { throw '发布 Release 失败' }
