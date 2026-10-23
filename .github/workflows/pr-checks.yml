@@ -1,0 +1,63 @@
+name: PR 检查
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  metadata:
+    name: PR 规范
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: context.issue.number });
+            const errors = [];
+            if (!/^(fix|feat|docs|refactor|perf|test|build|ci|chore|revert)(\([^()\r\n]+\))?!?:\s+\S.+$/u.test(pr.title)) {
+              errors.push('标题应为 类型(可选范围): 简短说明，例如 fix(device): 修复接口发现遗漏。');
+            }
+            const body = (pr.body || '').replace(/<!--[\s\S]*?-->/g, '');
+            const sections = new Map([...body.matchAll(/^## ([^\r\n]+)\r?\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm)].map(m => [m[1].trim(), m[2].trim()]));
+            for (const heading of ['变更说明', '关联事项', '验证结果', '风险与限制']) {
+              const value = sections.get(heading);
+              if (!value || /^(_No response_|待填写|TODO|TBD)$/i.test(value)) errors.push(`请填写“${heading}”，不适用时说明原因。`);
+            }
+            if (errors.length) core.setFailed(errors.join('\n'));
+            else core.info('PR 标题与说明完整。内容正确性由审核确认。');
+
+  build:
+    name: Windows 构建
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        id: scope
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number: context.issue.number, per_page: 100 });
+            const doc = path => /\.md$/i.test(path) || /^docs\//.test(path) || /^\.github\/(ISSUE_TEMPLATE\/|pull_request_template\.md$)/.test(path);
+            const docsOnly = files.length > 0 && files.length < 3000 && files.every(f => doc(f.filename) && (!f.previous_filename || doc(f.previous_filename)));
+            core.setOutput('build', String(!docsOnly));
+            core.info(docsOnly ? '纯文档变更，无需编译。' : '执行 Windows Release 构建。');
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: steps.scope.outputs.build == 'true'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        if: steps.scope.outputs.build == 'true'
+        with:
+          global-json-file: global.json
+      - name: 锁定还原并构建
+        if: steps.scope.outputs.build == 'true'
+        shell: pwsh
+        run: ./build.ps1 -Action Build

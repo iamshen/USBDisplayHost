@@ -72,6 +72,8 @@ dotnet run --project src/UsbDisplayHost.Desktop -- --ui-only
 
 遇到问题时，请[提交 Issue](https://github.com/iamshen/USBDisplayHost/issues/new)，提供应用版本、设备型号、复现步骤、预期与实际结果，以及已去除敏感信息的日志。
 
+提交问题或代码前，请阅读[贡献指南](CONTRIBUTING.md)。
+
 ## 文档
 
 - [产品需求](docs/02_PRD.md) · [软件架构](docs/03_软件技术架构.md)
