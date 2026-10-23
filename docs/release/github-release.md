@@ -1,6 +1,6 @@
 # GitHub 打包与应用更新
 
-更新源：[iamshen/USBDisplayHost Releases](https://github.com/iamshen/USBDisplayHost/releases)。仓库已公开，客户端无需账号或令牌。当前版本为 0.1.1，使用 Velopack 1.2.161、Windows x64、`win-x64` 通道。
+更新源：[iamshen/USBDisplayHost Releases](https://github.com/iamshen/USBDisplayHost/releases)。仓库已公开，客户端无需账号或令牌。当前版本为 0.1.2，使用 Velopack 1.2.161、Windows x64、`win-x64` 通道。
 
 ## 用户操作
 
@@ -10,7 +10,7 @@
 
 更新过程跳过退出切副屏和启动切主题策略，不主动改变设备模式、电源或固件。交接前关闭设备及发现探测句柄，交接失败保留窗口和诊断，可重新检测设备。只有重新启动版本符合目标、配置可读且窗口与托盘初始化成功，才显示“已更新”。
 
-0.1.0 尚无在线更新入口，第一次需要退出旧程序后安装新的 Setup。源码构建／便携目录不支持应用内更新，页面提供 GitHub 下载入口。
+0.1.0 尚无在线更新入口，第一次需要退出旧程序后安装新的 Setup。0.1.1 存在更新进度条绑定引起的启动故障，无法从该版本正常打开更新入口；请退出故障实例后手动安装 0.1.2 或更高版本的 Setup。0.1.2 已修正该绑定。源码构建／便携目录不支持应用内更新，页面提供 GitHub 下载入口。
 
 ## 提交与发布
 
@@ -29,8 +29,8 @@ dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force-
 dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force --locked-mode
 # 将版本、锁文件及相关改动提交后发布
 git push origin main
-git tag v0.1.1
-git push origin v0.1.1
+git tag v0.1.2
+git push origin v0.1.2
 ```
 
 工作流使用仓库提供的 `GITHUB_TOKEN` 和 `contents: write`，无需添加个人令牌；不执行测试、应用、安装器或设备操作。`global.json`、NuGet 锁文件与工具清单固定构建版本。

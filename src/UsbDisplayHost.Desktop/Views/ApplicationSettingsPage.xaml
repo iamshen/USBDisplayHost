@@ -90,7 +90,7 @@
                                 </DockPanel>
                                 <StackPanel DataContext="{Binding Updates}">
                                     <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" Style="{DynamicResource AuxiliaryTextStyle}" />
-                                    <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" Height="6" Margin="0,12,0,0" AutomationProperties.Name="更新下载进度">
+                                    <ProgressBar Value="{Binding Progress, Mode=OneWay}" IsIndeterminate="{Binding IsIndeterminate}" Height="6" Margin="0,12,0,0" AutomationProperties.Name="更新下载进度">
                                         <ProgressBar.Style><Style TargetType="ProgressBar"><Setter Property="Visibility" Value="Collapsed" /><Style.Triggers><DataTrigger Binding="{Binding IsProgressVisible}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers></Style></ProgressBar.Style>
                                     </ProgressBar>
                                     <controls:InlineMessage Message="{Binding ErrorText}" Margin="0,8,0,0" />

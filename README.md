@@ -48,7 +48,7 @@ SDK 已由 `global.json` 精确锁定；集中包版本及四份锁文件启用�
 ./build.ps1 -Action Package
 ```
 
-Restore 执行锁定还原；Build 执行目标 Release 构建；Publish 清理生成目录后输出 win-x64 自包含文件到 `.artifacts/publish/win-x64`，不启用裁剪或 AOT。Package 执行相同发布步骤，再恢复仓库固定版本的 vpk，生成 `.artifacts/installers/win-x64/<Version>/USBDisplayHost-win-x64-Setup.exe`。版本来自 `Directory.Build.props`，当前为 `0.1.0`。SDK 依赖与工具首次还原需要网络，目标机器安装无需在线下载 .NET。
+Restore 执行锁定还原；Build 执行目标 Release 构建；Publish 清理生成目录后输出 win-x64 自包含文件到 `.artifacts/publish/win-x64`，不启用裁剪或 AOT。Package 执行相同发布步骤，再恢复仓库固定版本的 vpk，生成 `.artifacts/installers/win-x64/<Version>/USBDisplayHost-win-x64-Setup.exe`。版本来自 `Directory.Build.props`，当前为 `0.1.2`。SDK 依赖与工具首次还原需要网络，目标机器安装无需在线下载 .NET。
 
 所有入口均不运行应用、测试、设备操作或驱动安装；Package 使用 `--skipVeloAppCheck` 跳过会执行应用的入口探测。安装包未签名，不能把打包成功当作安装验收。使用方式、数据保留和驱动边界见 [离线安装说明](docs/release/offline-installation.md)。推送 `main` 自动生成 Actions 产物，推送与项目版本一致的 `vX.Y.Z` 标签自动发布 GitHub Release，详见 [发布及更新说明](docs/release/github-release.md)。测试工程及入口尚未创建，2.2／2.3／12.x 的完整验收仍待完成。
 

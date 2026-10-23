@@ -7,6 +7,7 @@
 - 安装复用退出保存决策；先关闭设备及探测句柄，再启动等待退出的更新器。交接失败只有确认所有者已释放才恢复新建会话；更新重启参数禁止自动切换模式。不能将启动更新器当作更新成功。
 - `main` 推送保存 Actions 产物；与项目版本一致的 `vX.Y.Z` 标签才发布 Release。草稿完整上传后转公开，同版本不覆盖。编译／打包与实际升级分开记录，当前仍无签名及端到端升级证据。见 `docs/release/github-release.md`。
 - 递增 `Directory.Build.props/Version` 后也要重新评估锁文件：Desktop 锁文件包含项目引用的最低版本，本地增量还原可能继续使用旧值。用 `dotnet restore ... --force-evaluate -p:RestoreLockedMode=false` 更新，再以 `--force --locked-mode` 确认版本一致，避免云端全新还原与本机结果不同。
+- 更新进度是只读派生属性，`ProgressBar.Value` 必须显式 `Mode=OneWay`。v0.1.1 安装后在 `MainWindow.Show` 触发 `PropertyPathWorker.CheckReadOnly`，导致主窗口打不开；仅编译打包无法发现。修复后需实际启动安装版，并从低版本测试基线下载正式包，确认旧进程退出、新版本窗口打开及“已更新”状态。原正式 v0.1.1 无法打开更新入口，恢复须手动安装新 Setup。
 
 ## 主题重枚举与 WinUSB 接口发现
 
