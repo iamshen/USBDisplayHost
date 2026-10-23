@@ -68,6 +68,10 @@ dotnet run --project src/UsbDisplayHost.Desktop -- --ui-only
 
 推送 `main` 自动打包；推送与项目版本一致的 `vX.Y.Z` 标签自动发布 GitHub Release。详见 [发布与更新说明](docs/release/github-release.md)。
 
+## 问题反馈
+
+遇到问题时，请[提交 Issue](https://github.com/iamshen/USBDisplayHost/issues/new)，提供应用版本、设备型号、复现步骤、预期与实际结果，以及已去除敏感信息的日志。
+
 ## 文档
 
 - [产品需求](docs/02_PRD.md) · [软件架构](docs/03_软件技术架构.md)
