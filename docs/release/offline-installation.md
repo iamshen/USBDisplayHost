@@ -1,6 +1,6 @@
 # USB Display 离线安装说明
 
-当前版本：0.1.2；目标架构：Windows x64。当前安装包未签名，安装、卸载及真实设备兼容性尚未验证，不作为正式发布验收通过。
+当前版本：0.1.2；目标架构：Windows x64。已完成本机无设备下的 Setup 覆盖安装和应用内升级后启动，见 [实际验证](../verification/upgrade-v0.1.2-2026-10-23.md)。当前安装包未签名；干净机、卸载及真实设备兼容性仍待验证。
 
 ## 安装与使用
 
@@ -57,6 +57,6 @@ dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force-
 
 打包使用 `--noPortable`、`--delta None`，不生成便携包或增量包；使用 `--skipVeloAppCheck` 禁止打包器启动主程序探测入口。因此打包成功只证明产物生成，不证明安装生命周期已运行验证。包内含 `INSTALLATION.zh-CN.md` 与 `licenses/`。
 
-当前没有签名参数或证书。GitHub 发布和应用内更新已接入源码；正式发布验收仍须完成应用和安装辅助程序的签名验签，以及获授权的安装、卸载、跨版本和设备验收。
+当前没有签名参数或证书。GitHub 发布、无设备在线升级及 Setup 覆盖安装已完成实际验证；正式 V1 发布验收仍须完成签名验签、干净机、卸载、故障场景和设备验收。
 
 参考：[Velopack 安装器](https://docs.velopack.io/packaging/installer)、[Windows 安装目录](https://docs.velopack.io/packaging/operating-systems/windows)、[C# 生命周期](https://docs.velopack.io/getting-started/csharp)。实际行为以锁定的 1.2.161 源码和后续运行证据为准。

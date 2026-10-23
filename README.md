@@ -18,7 +18,7 @@
 - JSON 本地配置、Serilog 本地滚动日志、仓库内任务与验收记录。
 - Velopack 安装与软件更新，通过 HTTPS 发布源检查版本；用户发起下载和重启安装，断网仍可使用核心功能。
 
-以上为设计基线；窗口已接入 WPF UI、MVVM Toolkit 和结构化日志，Velopack 1.2.161 已接入安装生命周期、GitHub 检查下载与确认重启安装。签名和真实升级验收仍待任务 2.5／12.x。编码器兼容性、固件能力和驱动绑定仍须样机验证。
+以上为设计基线；窗口已接入 WPF UI、MVVM Toolkit 和结构化日志，Velopack 1.2.161 已接入安装生命周期、GitHub 检查下载与确认重启安装。v0.1.2 已通过本机无设备在线升级、重启打开及 Setup 覆盖安装，见 [验证记录](docs/verification/upgrade-v0.1.2-2026-10-23.md)；签名、更新故障场景和实物会话仍待任务 2.5／12.x。编码器兼容性、固件能力和驱动绑定仍须样机验证。
 
 实际输入与未完成依赖记录：[样机／驱动](docs/contracts/device-baseline.md)、[主题数据面](docs/contracts/data-plane.md)、[HID 控制](docs/contracts/hid-control.md)、[安装更新通道](docs/release/update-channel.md)。这些记录区分已确定输入和待交付条件，不构成已验收的设备兼容契约。
 

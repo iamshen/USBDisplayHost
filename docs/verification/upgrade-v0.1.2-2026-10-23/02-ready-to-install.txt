@@ -1,0 +1,62 @@
+Window: "USB Display", App: UsbDisplayHost.Desktop.exe.
+	0 窗口 USB Display Secondary Actions: Raise
+		1 图像
+		2 文本 USB Display
+		3 按钮 ID: TitleBarMinimizeButton
+		4 按钮 ID: TitleBarMaximizeButton
+		5 按钮 ID: TitleBarCloseButton
+		6 文本 
+		7 文本 未连接设备
+		8 列表视图 主导航 ID: PageNavigation
+			9 列表项 (selectable) 设备 Description: 连接设备，查看画面与运行状态
+				10 文本 
+			11 列表项 (selectable) 主题 Description: 编辑、预览并应用屏幕内容
+				12 文本 
+			13 列表项 (selectable) 设备设置 Description: 调整屏幕方向、画质与亮度
+				14 文本 
+			15 列表项 (selectable) 诊断 Description: 查看运行信息与事件日志
+				16 文本 
+			17 列表项 (selectable) 应用设置 Description: 管理窗口、启动与设备模式偏好
+				18 文本 
+		19 列表视图 ID: NavigationItems
+		20 列表视图 ID: NavigationFooterItems
+		21 窗格 ID: PART_NavigationViewContentPresenter
+			36 窗格 ID: SettingsScroll
+				37 文本 应用设置
+				38 文本 窗口与启动
+				39 文本 导航布局
+				40 单选按钮 (selectable) 顶部导航
+					41 文本 顶部导航
+				42 单选按钮 (selectable) 侧边导航
+					43 文本 侧边导航
+				44 组合框 关闭窗口行为
+				45 文本 关闭主窗口时
+				46 按钮 开机自动启动
+					47 文本
+				48 文本 开机自动启动
+				49 文本 自启注册：未启用
+				50 文本 设备模式
+				51 按钮 (disabled) 启动时切换到主题模式
+					52 文本 (disabled)
+				53 文本 启动时切换到主题模式
+				54 按钮 (disabled) 退出时切回副屏模式
+					55 文本 (disabled)
+				56 文本 退出时切回副屏模式
+				57 文本 连接支持模式切换的设备后可启用
+				58 文本 版本 0.1.1
+				59 文本 软件更新
+				60 按钮 自动检查更新
+					61 文本
+				62 文本 自动检查更新
+				63 文本 0.1.2 已准备好，可现在安装或稍后操作
+				64 按钮 重启并安装
+					65 文本 重启并安装
+				66 按钮 GitHub 下载页
+					67 文本 GitHub 下载页
+			68 文本 已保存 ID: ActionStatus
+			69 按钮 撤销更改
+				70 文本 撤销更改
+			71 按钮 保存设置
+				72 文本 保存设置
+
+The focused UI element is 36 窗格 ID: SettingsScroll.

@@ -5,7 +5,7 @@
 - 更新源是公开的 `iamshen/USBDisplayHost`，通道 `win-x64`。vpk 1.2.161 的完整包名包含通道：`USBDisplayHost-<Version>-win-x64-full.nupkg`；不要凭示例省略中间字段。
 - SDK 的 `DownloadUpdatesAsync` 遇到已有文件会直接返回，必须自行复核缓存的大小、SHA-256 和包内身份；待安装记录保存在独立数据目录，恢复及安装前仍需复核。启动保持 `SetAutoApplyOnStartup(false)`。
 - 安装复用退出保存决策；先关闭设备及探测句柄，再启动等待退出的更新器。交接失败只有确认所有者已释放才恢复新建会话；更新重启参数禁止自动切换模式。不能将启动更新器当作更新成功。
-- `main` 推送保存 Actions 产物；与项目版本一致的 `vX.Y.Z` 标签才发布 Release。草稿完整上传后转公开，同版本不覆盖。编译／打包与实际升级分开记录，当前仍无签名及端到端升级证据。见 `docs/release/github-release.md`。
+- `main` 推送保存 Actions 产物；与项目版本一致的 `vX.Y.Z` 标签才发布 Release。草稿完整上传后转公开，同版本不覆盖。v0.1.2 已完成无设备下的 GitHub 下载、确认退出、安装重启及 Setup 覆盖安装；签名和实物会话验证仍待完成。见 `docs/verification/upgrade-v0.1.2-2026-10-23.md`。
 - 递增 `Directory.Build.props/Version` 后也要重新评估锁文件：Desktop 锁文件包含项目引用的最低版本，本地增量还原可能继续使用旧值。用 `dotnet restore ... --force-evaluate -p:RestoreLockedMode=false` 更新，再以 `--force --locked-mode` 确认版本一致，避免云端全新还原与本机结果不同。
 - 更新进度是只读派生属性，`ProgressBar.Value` 必须显式 `Mode=OneWay`。v0.1.1 安装后在 `MainWindow.Show` 触发 `PropertyPathWorker.CheckReadOnly`，导致主窗口打不开；仅编译打包无法发现。修复后需实际启动安装版，并从低版本测试基线下载正式包，确认旧进程退出、新版本窗口打开及“已更新”状态。原正式 v0.1.1 无法打开更新入口，恢复须手动安装新 Setup。
 

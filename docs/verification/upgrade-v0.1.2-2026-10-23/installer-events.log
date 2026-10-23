@@ -1,0 +1,19 @@
+[update:69164] [15:25:38] [INFO] Waiting for process pid-30560 to exit.
+[update:69164] [15:25:38] [WARN] Failed to wait for process (30560) to exit (拒绝访问。 (os error -2147024891)). Continuing...
+[update:69164] [15:25:38] [INFO] About to launch: 'WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe")' in dir 'Some(WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current"))' with arguments: WideString("\"%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe\" --veloapp-obsolete 0.1.1\0")
+[update:69164] [15:25:38] [INFO] Inspected 422 running processes in 88ms, 1 matched directory
+[update:69164] [15:25:38] [WARN] Skipping killing self: %USERPROFILE%\AppData\Local\USBDisplayHost\Update.exe (69164)
+[update:69164] [15:25:38] [INFO] Inspected 419 running processes in 68ms, 1 matched directory
+[update:69164] [15:25:38] [WARN] Skipping killing self: %USERPROFILE%\AppData\Local\USBDisplayHost\Update.exe (69164)
+[update:69164] [15:25:38] [INFO] About to launch: 'WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe")' in dir 'Some(WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current"))' with arguments: WideString("\"%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe\" --veloapp-updated 0.1.2\0")
+[update:69164] [15:25:39] [INFO] Inspected 421 running processes in 86ms, 1 matched directory
+[update:69164] [15:25:39] [WARN] Skipping killing self: %USERPROFILE%\AppData\Local\USBDisplayHost\Update.exe (69164)
+[update:69164] [15:25:39] [INFO] Package applied successfully.
+[update:69164] [15:25:39] [INFO] Package version 0.1.2 applied successfully.
+[update:69164] [15:25:39] [INFO] About to launch: 'WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe")' in dir 'Some(WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current"))' with arguments: WideString("\"%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe\" --updated-to=0.1.2\0")
+[setup:11276] [15:27:58] [INFO]     Package Version: 0.1.2
+[setup:11276] [15:28:10] [INFO] Inspected 416 running processes in 86ms, 0 matched directory
+[setup:11276] [15:28:11] [INFO] About to launch: 'WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe")' in dir 'Some(WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current"))' with arguments: WideString("\"%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe\" --veloapp-install 0.1.2\0")
+[setup:11276] [15:28:11] [INFO] Inspected 417 running processes in 62ms, 0 matched directory
+[setup:11276] [15:28:11] [INFO] About to launch: 'WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe")' in dir 'Some(WideString("%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current"))' with arguments: WideString("\"%USERPROFILE%\\AppData\\Local\\USBDisplayHost\\current\\UsbDisplayHost.Desktop.exe\"\0")
+[setup:11276] [15:28:11] [INFO] Installation completed successfully!

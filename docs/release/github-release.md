@@ -43,6 +43,8 @@ git push origin v0.1.2
 
 配置、素材和日志位于 `%LocalAppData%\UsbDisplayHost.Data`，更新替换程序目录时保留。检查时间和已下载包描述位于其 `updates` 子目录；实际包由 Velopack 管理。失败原因和错误编号记录在 `diagnostics\logs` 的 `AppUpdate.*` 阶段。
 
-当前发布链路没有代码签名证书，产物为未签名构建，SHA-256 仅确认完整性，不证明发布者身份。正式 V1 仍需签名、Windows 兼容性及真实跨版本升级验收；没有声明自动回滚。修复时先备份独立数据目录、明确退出应用，再使用同仓库可信的完整 Setup；旧版读取新配置的兼容性未验证。
+v0.1.2 已完成 Actions 发布、从本地修复的 0.1.1 安装基线在线升级到正式包、重启打开及正式 Setup 覆盖安装，配置保持一致；详细边界、截图和日志见 [实际验证](../verification/upgrade-v0.1.2-2026-10-23.md)。实物设备会话关闭留待同事电脑验证。
+
+当前发布链路没有代码签名证书，产物为未签名构建，SHA-256 仅确认完整性，不证明发布者身份。正式 V1 仍需签名、Windows 兼容性及更新故障场景验收；没有声明自动回滚。修复时先备份独立数据目录、明确退出应用，再使用同仓库可信的完整 Setup；旧版读取新配置的兼容性未验证。
 
 实现依据：[Velopack GitHub 源](https://docs.velopack.io/integrating/update-sources)、[更新生命周期](https://docs.velopack.io/integrating/overview)。SDK 行为已按仓库锁定版本源码核对。
