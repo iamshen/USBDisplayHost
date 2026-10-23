@@ -1,0 +1,41 @@
+name: PR 构建
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Windows 构建
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        id: scope
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number: context.issue.number, per_page: 100 });
+            const doc = path => /\.md$/i.test(path) || /^docs\//.test(path) || /^\.github\/(ISSUE_TEMPLATE\/|pull_request_template\.md$)/.test(path);
+            const docsOnly = files.length > 0 && files.length < 3000 && files.every(f => doc(f.filename) && (!f.previous_filename || doc(f.previous_filename)));
+            core.setOutput('build', String(!docsOnly));
+            core.info(docsOnly ? '纯文档变更，无需编译。' : '执行 Windows Release 构建。');
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: steps.scope.outputs.build == 'true'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        if: steps.scope.outputs.build == 'true'
+        with:
+          global-json-file: global.json
+      - name: 锁定还原并构建
+        if: steps.scope.outputs.build == 'true'
+        shell: pwsh
+        run: ./build.ps1 -Action Build
