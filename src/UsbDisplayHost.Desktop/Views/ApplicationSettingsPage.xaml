@@ -19,10 +19,10 @@
                         <StackPanel>
                             <TextBlock Text="窗口与启动" Style="{DynamicResource GroupTitleStyle}" Margin="0,0,0,16" />
                             <TextBlock Text="导航布局" Margin="0,0,0,12" />
-                            <Grid Margin="0,0,0,20">
+                            <Grid Margin="0,0,0,20" PreviewKeyDown="OnNavigationLayoutKeyDown">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                <RadioButton Content="顶部导航" IsChecked="{Binding IsTopNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" Margin="0,0,8,0" AutomationProperties.Name="顶部导航" />
-                                <RadioButton Grid.Column="1" Content="侧边导航" IsChecked="{Binding IsSideNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" AutomationProperties.Name="侧边导航" />
+                                <RadioButton x:Name="TopNavigationOption" Content="顶部导航" IsChecked="{Binding IsTopNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" Margin="0,0,8,0" AutomationProperties.Name="顶部导航" />
+                                <RadioButton x:Name="SideNavigationOption" Grid.Column="1" Content="侧边导航" IsChecked="{Binding IsSideNavigation, Mode=TwoWay}" GroupName="NavigationLayout" Style="{StaticResource SettingsLayoutOptionStyle}" AutomationProperties.Name="侧边导航" />
                             </Grid>
                             <DockPanel Margin="0,0,0,20">
                                 <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding CloseBehaviors}" DisplayMemberPath="Label" SelectedValuePath="CloseToTray"
