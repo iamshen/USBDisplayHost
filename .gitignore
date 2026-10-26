@@ -4,3 +4,7 @@
 *.user
 *.suo
 .artifacts/
+
+# 本机工作区与调试缓存（正式文档和精选资源仍需逐项审核）
+/.codex-worktrees/
+/.codex/
