@@ -1,5 +1,6 @@
 using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Input;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Desktop.ViewModels;
 
@@ -17,6 +18,18 @@ public partial class ApplicationSettingsPage : Page
         this.errorReporter = errorReporter;
         DataContext = viewModel;
         Loaded += OnLoaded;
+    }
+
+    private void OnNavigationLayoutKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.OriginalSource is not RadioButton current
+            || e.Key is not (Key.Left or Key.Right or Key.Up or Key.Down)) { return; }
+
+        // 在滚动容器处理方向键之前切换组内选项，并保留双向绑定与键盘焦点。
+        e.Handled = true;
+        RadioButton target = current == TopNavigationOption ? SideNavigationOption : TopNavigationOption;
+        target.SetCurrentValue(RadioButton.IsCheckedProperty, true);
+        target.Focus();
     }
 
     private void OnSettingsLayoutSizeChanged(object sender, SizeChangedEventArgs e)
