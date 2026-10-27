@@ -45,10 +45,10 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         drawing.DrawRectangle(Brush(content.Background), null, new Rect(0, 0, width, height));
         var foreground = Brush(content.Foreground);
         var secondary = MixBrush(content.Background, content.Foreground, .7);
-        double fontSize = Math.Min(width * .21, height * .36);
+        double fontSize = Math.Min(width * .21, height * .32);
         var hours = CreateText(request.LocalTime.ToString(content.Use24HourClock ? "HH:mm" : "hh:mm", CultureInfo.CurrentCulture),
-            foreground, fontSize, FontWeights.Light);
-        var seconds = CreateText(request.LocalTime.ToString(":ss", CultureInfo.CurrentCulture), secondary, fontSize * .34, FontWeights.Light);
+            foreground, fontSize, FontWeights.Bold);
+        var seconds = CreateText(request.LocalTime.ToString(":ss", CultureInfo.CurrentCulture), secondary, fontSize * .26, FontWeights.SemiBold);
         FormattedText? period = content.Use24HourClock ? null
             : CreateText(request.LocalTime.ToString("tt", CultureInfo.CurrentCulture), secondary, fontSize * .18);
         double gap = fontSize * .08;
@@ -58,16 +58,18 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         if (scale < 1)
         {
             hours.SetFontSize(fontSize * scale);
-            seconds.SetFontSize(fontSize * .34 * scale);
+            seconds.SetFontSize(fontSize * .26 * scale);
             period?.SetFontSize(fontSize * .18 * scale);
             gap *= scale;
             trailingWidth = Math.Max(seconds.WidthIncludingTrailingWhitespace, period?.WidthIncludingTrailingWhitespace ?? 0);
             timeWidth = hours.WidthIncludingTrailingWhitespace + gap + trailingWidth;
         }
 
+        string dateFormat = CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+        if (!dateFormat.Contains("ddd", StringComparison.Ordinal)) { dateFormat += " dddd"; }
         FormattedText? date = content.ShowDate
-            ? FittedText(request.LocalTime.ToString("D", CultureInfo.CurrentCulture), secondary,
-                Math.Min(width * .034, height * .055), width * .84)
+            ? FittedText(request.LocalTime.ToString(dateFormat, CultureInfo.CurrentCulture), secondary,
+                Math.Min(width * .044, height * .072), width * .84, FontWeights.SemiBold)
             : null;
         double dateGap = fontSize * scale * .1;
         double groupHeight = hours.Height + (date is null ? 0 : dateGap + date.Height);
@@ -126,27 +128,28 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         if (metrics.Count == 0) { return; }
 
         double unit = Math.Min(width, height);
-        double margin = unit * .065;
-        double gap = unit * .024;
-        double headingHeight = unit * .09;
-        var foreground = Brush(content.Foreground);
-        var secondary = MixBrush(content.Background, content.Foreground, .66);
-        var heading = CreateText("系统监测", foreground, unit * .038, FontWeights.SemiBold);
-        drawing.DrawText(heading, new Point(margin, margin));
-        var count = CreateText($"{metrics.Count} 项指标", secondary, unit * .026);
-        drawing.DrawText(count, new Point(width - margin - count.WidthIncludingTrailingWhitespace,
-            margin + heading.Baseline - count.Baseline));
-
+        double margin = unit * .09;
         bool portrait = height > width;
         int columns = metrics.Count == 4 ? 2 : portrait ? 1 : metrics.Count;
         int rows = (metrics.Count + columns - 1) / columns;
-        double cardWidth = (width - margin * 2 - gap * (columns - 1)) / columns;
-        double cardHeight = (height - margin * 2 - headingHeight - gap * (rows - 1)) / rows;
+        double cellWidth = (width - margin * 2) / columns;
+        double cellHeight = (height - margin * 2) / rows;
+        var separator = new Pen(MixBrush(content.Background, content.Foreground, .18), unit * .0018);
+        for (int column = 1; column < columns; column++)
+        {
+            double x = margin + column * cellWidth;
+            drawing.DrawLine(separator, new Point(x, margin), new Point(x, height - margin));
+        }
+        for (int row = 1; row < rows; row++)
+        {
+            double y = margin + row * cellHeight;
+            drawing.DrawLine(separator, new Point(margin, y), new Point(width - margin, y));
+        }
         for (int index = 0; index < metrics.Count; index++)
         {
-            var card = new Rect(margin + index % columns * (cardWidth + gap),
-                margin + headingHeight + index / columns * (cardHeight + gap), cardWidth, cardHeight);
-            DrawMetricCard(drawing, metrics[index], content, card, unit);
+            var cell = new Rect(margin + index % columns * cellWidth,
+                margin + index / columns * cellHeight, cellWidth, cellHeight);
+            DrawMetric(drawing, metrics[index], content, cell, unit);
         }
     }
 
@@ -165,60 +168,43 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
             metric.Unit, false, metric.Availability == MetricAvailability.Stale);
     }
 
-    private static void DrawMetricCard(DrawingContext drawing, DashboardMetric metric, ThemeContent.Dashboard content,
-        Rect card, double unit)
+    private static void DrawMetric(DrawingContext drawing, DashboardMetric metric, ThemeContent.Dashboard content,
+        Rect cell, double unit)
     {
         var foreground = Brush(content.Foreground);
-        var secondary = MixBrush(content.Background, content.Foreground, .66);
-        var panel = MixBrush(content.Background, content.Foreground, .065);
-        var outline = new Pen(MixBrush(content.Background, content.Foreground, .16), unit * .0012);
-        double radius = unit * .022;
-        drawing.DrawRoundedRectangle(panel, outline, card, radius, radius);
-
-        double padding = Math.Min(card.Width * .075, unit * .044);
-        double innerWidth = card.Width - padding * 2;
-        double labelSize = Math.Min(unit * .034, card.Height * .11);
-        var source = CreateText(metric.Source, secondary, labelSize * .75);
-        double badgePadding = labelSize * .35;
-        var sourceBadge = new Rect(card.Right - padding - source.WidthIncludingTrailingWhitespace - badgePadding * 2,
-            card.Top + padding, source.WidthIncludingTrailingWhitespace + badgePadding * 2, source.Height + badgePadding);
-        drawing.DrawRoundedRectangle(MixBrush(content.Background, content.Foreground, .1), null,
-            sourceBadge, radius * .35, radius * .35);
-        drawing.DrawText(source, new Point(sourceBadge.Left + badgePadding, sourceBadge.Top + badgePadding / 2));
-        var label = FittedText(metric.Label, foreground, labelSize,
-            innerWidth - sourceBadge.Width - labelSize * .5, FontWeights.SemiBold);
-        drawing.DrawText(label, new Point(card.Left + padding,
-            sourceBadge.Top + (sourceBadge.Height - label.Height) / 2));
-
-        double valueSize = Math.Min(card.Width * .28, card.Height * .34);
+        var secondary = MixBrush(content.Background, content.Foreground, .7);
+        double innerWidth = cell.Width * .84;
+        double labelSize = Math.Min(unit * .055, cell.Height * .15);
+        var label = FittedText(metric.Label, secondary, labelSize, innerWidth, FontWeights.SemiBold);
+        double valueSize = Math.Min(cell.Width * .34, cell.Height * .46);
         if (metric.Unavailable) { valueSize *= .58; }
-        var value = CreateText(metric.Value, metric.Unavailable ? secondary : foreground, valueSize, FontWeights.Light);
-        var suffix = CreateText(metric.Unit, secondary, valueSize * .32);
-        double valueGap = string.IsNullOrEmpty(metric.Unit) ? 0 : valueSize * .08;
+        var value = CreateText(metric.Value, metric.Unavailable ? secondary : foreground, valueSize, FontWeights.Bold);
+        var suffix = CreateText(metric.Unit, foreground, valueSize * .42, FontWeights.SemiBold);
+        double valueGap = string.IsNullOrEmpty(metric.Unit) ? 0 : valueSize * .04;
         double combinedWidth = value.WidthIncludingTrailingWhitespace + valueGap + suffix.WidthIncludingTrailingWhitespace;
         double valueScale = Math.Min(1, innerWidth / combinedWidth);
         if (valueScale < 1)
         {
             value.SetFontSize(valueSize * valueScale);
-            suffix.SetFontSize(valueSize * .32 * valueScale);
+            suffix.SetFontSize(valueSize * .42 * valueScale);
             valueGap *= valueScale;
             combinedWidth = value.WidthIncludingTrailingWhitespace + valueGap + suffix.WidthIncludingTrailingWhitespace;
         }
-        double valueLeft = card.Left + (card.Width - combinedWidth) / 2;
-        double valueTop = card.Top + (card.Height - value.Height) / 2;
+        string status = metric.Unavailable ? $"{metric.Source} · 暂无有效读数"
+            : metric.Stale ? $"{metric.Source} · 数据已过期 · 保留最近读数" : $"来源：{metric.Source}";
+        var statusText = FittedText(status, secondary, labelSize * .6, innerWidth);
+        double gap = labelSize * .35;
+        double groupHeight = label.Height + gap + value.Height + gap + statusText.Height;
+        double top = cell.Top + (cell.Height - groupHeight) / 2;
+        drawing.DrawText(label, new Point(cell.Left + (cell.Width - label.WidthIncludingTrailingWhitespace) / 2, top));
+        double valueLeft = cell.Left + (cell.Width - combinedWidth) / 2;
+        double valueTop = top + label.Height + gap;
         drawing.DrawText(value, new Point(valueLeft, valueTop));
         drawing.DrawText(suffix, new Point(valueLeft + value.WidthIncludingTrailingWhitespace + valueGap,
             valueTop + value.Baseline - suffix.Baseline));
 
-        string status = metric.Unavailable ? "暂无有效读数" : metric.Stale ? "数据已过期 · 保留最近读数" : "当前读数";
-        var statusText = FittedText(status, secondary, labelSize * .75, innerWidth);
-        double statusTop = card.Bottom - padding - statusText.Height;
-        if (metric.Stale)
-        {
-            drawing.DrawLine(new Pen(secondary, unit * .0015), new Point(card.Left + padding, statusTop - labelSize * .4),
-                new Point(card.Left + padding + labelSize, statusTop - labelSize * .4));
-        }
-        drawing.DrawText(statusText, new Point(card.Left + padding, statusTop));
+        drawing.DrawText(statusText, new Point(cell.Left + (cell.Width - statusText.WidthIncludingTrailingWhitespace) / 2,
+            valueTop + value.Height + gap));
     }
 
     private static FormattedText CreateText(string value, Brush brush, double fontSize, FontWeight? weight = null) =>

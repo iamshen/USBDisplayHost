@@ -52,6 +52,7 @@ public sealed partial class ThemePageViewModel
             OnPropertyChanged(nameof(IsDirty));
         }
         finally { restoring = false; }
+        InvalidateTemplatePreviews();
         return true;
     }
 }

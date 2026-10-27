@@ -6,6 +6,9 @@ namespace UsbDisplayHost.Desktop.ViewModels;
 
 public sealed partial class ThemePageViewModel
 {
+    public string SessionDeviceText => coordinator.Current.DeviceKey is { } key
+        ? $"当前设备：{key.Value}" : "未连接设备 · 可本地编辑";
+
     public string EditorStatus => IsApplying ? "正在发送主题…"
         : coordinator.Current.Connection != ConnectionState.Ready ? "连接设备后可应用主题"
         : coordinator.Current.Mode != DeviceMode.Theme ? "切换到主题模式后可应用"
