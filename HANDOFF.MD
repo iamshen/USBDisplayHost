@@ -15,6 +15,8 @@
 
 ## 主题重枚举与 WinUSB 接口发现
 
+- 主题首帧完整发送并提交活动配置后，成功核验为 Theme／On 时，应将主机推流状态从 Stopped 转为 Running；否则每秒状态查询会保持帧通道暂停，下一次应用报 `CandidateChannelUnavailable`，尚未进入保存阶段。保留 Paused／Faulted／Off 和观察失败，不将 Running 当作设备呈现反馈。回归应串联“首帧应用→状态查询→再次应用”，不能只验证首帧发送。
+- 显式模式切换在旧会话结束前捕获 PowerIntent，正常目标连接与超时后核验都传递同一值；普通连接／重连不覆盖原有恢复规则。重枚举后的 DisplayEnabled 不能替代切换前的电源意图，HID／EP0 背光一致性检查仍须保留。
 - Windows 支持 `DeviceInterfaceGUID`（字符串）与 `DeviceInterfaceGUIDs`（多字符串）两种 WinUSB 注册方式。只读后者会漏掉已安装的数据接口；两者合并去重后仍须按实际描述符区分 Display 与 Maintenance。
 - 模式切换的 HID 受理和目标连接分属两个阶段。日志中的毫秒级 `ModeTargetPending` 不是八秒等待已结束；PID 从 AD11 变成 ADA0 也不能证明 Display 通道可用。目标接口缺失／歧义应在打开 HID 前拦截，超时核验不选中残缺接口。
 - 发生在协调器前的连接错误也必须记录，协议最终结果沿用页面错误编号，避免录屏中的错误无法在 JSONL 找到。核对方式：检查两种 GUID 注册、同设备接口数量、最终 `DeviceProtocol.*` 事件及错误编号。2026-10-23 的源码修复、编译与尚待同事机器确认的项目见 [调试记录分析](docs/verification/theme-interface-debug-2026-10-23.md)。

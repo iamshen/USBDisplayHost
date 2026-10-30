@@ -42,13 +42,18 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
         return result is OperationResult<DeviceSnapshot>.Success ? new OperationResult<Unit>.Success(new()) : Convert(result);
     }
 
-    public async Task<OperationResult<Unit>> ConnectAsync(DeviceSelectionAdmission admission, CancellationToken token)
+    public Task<OperationResult<Unit>> ConnectAsync(DeviceSelectionAdmission admission, CancellationToken token) =>
+        ConnectWithPowerIntentAsync(admission, null, token);
+
+    private async Task<OperationResult<Unit>> ConnectWithPowerIntentAsync(DeviceSelectionAdmission admission,
+        PowerState? modePowerIntent, CancellationToken token)
     {
-        var result = await ConnectCoreAsync(admission, token);
+        var result = await ConnectCoreAsync(admission, modePowerIntent, token);
         return RecordProtocolResult(result, admission.Selection.Key, "Connect");
     }
 
-    private async Task<OperationResult<Unit>> ConnectCoreAsync(DeviceSelectionAdmission admission, CancellationToken token)
+    private async Task<OperationResult<Unit>> ConnectCoreAsync(DeviceSelectionAdmission admission,
+        PowerState? modePowerIntent, CancellationToken token)
     {
         if (HasPendingResources || sessions.HasRetainedSession)
         { return Failure("ConnectionStillOwned", "原连接资源尚未释放"); }
@@ -82,8 +87,9 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
             if (loaded is not OperationResult<ProfileReadResult>.Success saved) { return Convert<ProfileReadResult>(loaded); }
             using var restore = saved.Value;
             if (restore.Error is { } error) { return new OperationResult<Unit>.Failure(error); }
-            var intent = restore.Profile?.PowerIntent == PowerState.Off ? PowerState.Off
-                : status.Value.DisplayEnabled ? PowerState.On : PowerState.Off;
+            // 显式切换沿用原会话电源意图，不能用重枚举后的瞬时反馈覆盖它。
+            var intent = modePowerIntent ?? (restore.Profile?.PowerIntent == PowerState.Off ? PowerState.Off
+                : status.Value.DisplayEnabled ? PowerState.On : PowerState.Off);
             if (theme)
             {
                 var data = admission.Selection.Interfaces.Where(identity => identity.ProductId == 0xADA0
