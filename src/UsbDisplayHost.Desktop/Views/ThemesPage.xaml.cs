@@ -1,5 +1,6 @@
 using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Input;
 using UsbDisplayHost.Desktop.ViewModels;
 using UsbDisplayHost.Core.Diagnostics;
 
@@ -42,25 +43,50 @@ public partial class ThemesPage : Page
     private void OnContentSizeChanged(object sender, SizeChangedEventArgs e) => UpdateResponsiveLayout();
     private void OnEditorViewportSizeChanged(object sender, SizeChangedEventArgs e) => UpdateResponsiveLayout();
 
+    private void OnTemplatePreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        int index = e.Key switch
+        {
+            Key.Left or Key.Up => Math.Max(0, TemplateSelector.SelectedIndex - 1),
+            Key.Right or Key.Down => Math.Min(TemplateSelector.Items.Count - 1, TemplateSelector.SelectedIndex + 1),
+            Key.Home => 0,
+            Key.End => TemplateSelector.Items.Count - 1,
+            _ => -1
+        };
+        if (index < 0) { return; }
+        TemplateSelector.SetCurrentValue(ListBox.SelectedIndexProperty, index);
+        if (TemplateSelector.ItemContainerGenerator.ContainerFromIndex(index) is ListBoxItem item) { item.Focus(); }
+        e.Handled = true;
+    }
+
     private void UpdateResponsiveLayout()
     {
         bool stacked = ContentGrid.ActualWidth < 780;
         bool compactHeight = EditorViewport.ActualHeight < 280;
-        ContentGrid.ColumnDefinitions[1].Width = new GridLength(stacked ? 0 : 320);
+        ContentGrid.ColumnDefinitions[1].Width = new GridLength(stacked ? 0 : 280);
         Grid.SetColumn(FieldsPanel, stacked ? 0 : 1);
         Grid.SetRow(FieldsPanel, stacked ? 1 : 0);
+        FieldsPanel.BorderThickness = stacked ? new Thickness(0, 1, 0, 0) : new Thickness(1, 0, 0, 0);
+        FieldsPanel.Padding = stacked ? new Thickness(0, 24, 0, 0) : new Thickness(24, 8, 0, 0);
         PreviewPanel.Margin = stacked ? new Thickness(0, 0, 0, 24) : new Thickness(0, 0, 24, 0);
+        double previewWidth = Math.Max(0, ContentGrid.ActualWidth - (stacked ? 0 : 304));
+        double previewHeight;
         if (compactHeight)
         {
-            // 短窗口保留预览和来源说明的滚动空间。
-            PreviewViewport.MaxHeight = Math.Clamp(EditorViewport.ActualHeight - 64, 112, 140);
+            // 短窗口让预览、来源说明和缩略图随主体滚动，底栏独立保留。
+            previewHeight = Math.Clamp(EditorViewport.ActualHeight - 64, 112, 140);
         }
         else
         {
-            double availablePreviewHeight = EditorViewport.ActualHeight - PageHeader.ActualHeight - PageHeader.Margin.Bottom
-                - TemplateSelector.ActualHeight - TemplateSelector.Margin.Bottom - 64;
-            PreviewViewport.MaxHeight = Math.Clamp(availablePreviewHeight, 180, stacked ? 240 : 360);
+            // 主预览与三张等比缩略图共用列宽；按两者的比例一次计算，避免测量值相互反馈。
+            double availableHeight = EditorViewport.ActualHeight - 84;
+            previewHeight = Math.Clamp(availableHeight * 0.75, 180, stacked ? 240 : 360);
         }
+        double frameWidth = Math.Min(previewWidth, previewHeight * 16 / 9);
+        PreviewFrame.Width = frameWidth;
+        PreviewFrame.Height = frameWidth * 9 / 16;
+        TemplateSelector.MaxWidth = frameWidth + 12;
+        TemplateSelector.Width = frameWidth + 12;
     }
 
     private void OnActionBarSizeChanged(object sender, SizeChangedEventArgs e)

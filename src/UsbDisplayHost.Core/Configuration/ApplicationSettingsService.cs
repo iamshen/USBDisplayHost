@@ -7,7 +7,7 @@ namespace UsbDisplayHost.Core.Configuration;
 
 public sealed record ApplicationSettingsEdit(bool StartWithWindows, bool SwitchToThemeOnStartup,
     bool SwitchToSecondaryOnExit, bool AutomaticallyCheckUpdates, bool CloseToTray,
-    NavigationLayout NavigationLayout = NavigationLayout.Top);
+    NavigationLayout NavigationLayout = NavigationLayout.Side);
 
 public sealed record PendingApplicationSettingsSave(Guid ConfirmationId, ApplicationSettings Candidate, AppError Error);
 
@@ -56,7 +56,7 @@ public sealed class ApplicationSettingsService(IApplicationSettingsStore store, 
             }
             var candidate = new ApplicationSettings(edit.StartWithWindows, edit.SwitchToThemeOnStartup,
                 edit.SwitchToSecondaryOnExit, edit.AutomaticallyCheckUpdates, before.HasSeenTrayNotice, edit.CloseToTray,
-                before.SuppressModeSwitchNotice, Enum.IsDefined(edit.NavigationLayout) ? edit.NavigationLayout : NavigationLayout.Top);
+                before.SuppressModeSwitchNotice, Enum.IsDefined(edit.NavigationLayout) ? edit.NavigationLayout : ApplicationSettings.Default.NavigationLayout);
             OperationResult<IStartupRegistrationCheckpoint> change;
             try { change = await startup.ChangeAsync(candidate.StartWithWindows, cancellationToken).ConfigureAwait(false); }
             catch (Exception exception) when (exception is not OutOfMemoryException)

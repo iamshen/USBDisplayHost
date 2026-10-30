@@ -34,7 +34,7 @@
       "usbdisplayhost.rendering": {
         "type": "Project",
         "dependencies": {
-          "UsbDisplayHost.Core": "[0.1.3, )"
+          "UsbDisplayHost.Core": "[0.1.4, )"
         }
       },
       "usbdisplayhost.windows": {
@@ -43,7 +43,7 @@
           "Serilog": "[4.4.0, )",
           "Serilog.Sinks.Async": "[2.1.0, )",
           "Serilog.Sinks.File": "[7.0.0, )",
-          "UsbDisplayHost.Core": "[0.1.3, )",
+          "UsbDisplayHost.Core": "[0.1.4, )",
           "Velopack": "[1.2.161, )"
         }
       },

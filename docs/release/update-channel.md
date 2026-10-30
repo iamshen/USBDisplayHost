@@ -5,7 +5,7 @@
 | 输入 | 当前状态 | 影响 |
 |---|---|---|
 | Velopack SDK 与打包工具的实际锁定版本及许可 | SDK／vpk 均为 1.2.161，MIT，已保存许可及工具第三方声明 | 已实现 GitHub 更新适配器及安装生命周期 |
-| packId、产品版本规则、通道标识 | `USBDisplayHost`；`Directory.Build.props` 中的三段版本，当前 `0.1.3`；通道 `win-x64` | 固定身份，稳定版只允许向更高版本升级 |
+| packId、产品版本规则、通道标识 | `USBDisplayHost`；`Directory.Build.props` 中的三段版本，当前 `0.1.4`；通道 `win-x64` | 固定身份，稳定版只允许向更高版本升级 |
 | HTTPS 源和独立隔离验证源 | 用户指定公开的 `https://github.com/iamshen/USBDisplayHost` Releases；隔离验收源未提供 | 客户端无需令牌；当前发布不代表签名及正式 V1 验收 |
 | 签名主体、证书链、时间戳策略与安全签名链路 | 未提供 | 应用、Setup、Update 和实际包验签 |
 | 架构、目标 Windows 范围、当前用户安装位置 | win-x64；默认 `%LocalAppData%\USBDisplayHost`；实际支持的 Windows build 未验收 | 仅生成 Windows x64 安装包，不宣称兼容性验收完成 |

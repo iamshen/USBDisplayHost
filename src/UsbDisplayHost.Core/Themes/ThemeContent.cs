@@ -12,8 +12,8 @@ public abstract record ThemeContent
     public sealed record Dashboard(bool ShowCpuUsage, bool ShowMemoryUsage, bool ShowHostTemperature,
         bool ShowDeviceTemperature, RgbColor Background, RgbColor Foreground) : ThemeContent;
 
-    public static ThemeContent Default { get; } = new Image(null, ImageFit.Contain, new RgbColor(0, 0, 0));
-    public static ThemeContent DefaultClock { get; } = new Clock(true, true, new RgbColor(0, 0, 0), new RgbColor(255, 255, 255));
+    public static ThemeContent Default { get; } = new Image(null, ImageFit.Contain, new RgbColor(20, 23, 27));
+    public static ThemeContent DefaultClock { get; } = new Clock(true, true, new RgbColor(20, 23, 27), new RgbColor(243, 245, 247));
     public static ThemeContent DefaultDashboard { get; } = new Dashboard(true, true, false, false,
-        new RgbColor(0, 0, 0), new RgbColor(255, 255, 255));
+        new RgbColor(20, 23, 27), new RgbColor(243, 245, 247));
 }

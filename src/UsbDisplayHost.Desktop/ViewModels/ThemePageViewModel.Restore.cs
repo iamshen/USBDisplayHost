@@ -16,7 +16,7 @@ public sealed partial class ThemePageViewModel
             revision = value.Revision;
             Fit = ImageFit.Contain;
             ImageDescription = nextAsset is null ? "内置背景" : "已保存图片";
-            ForegroundColor = "#FFFFFF";
+            ForegroundColor = ThemeFields.ColorText(((ThemeContent.Clock)ThemeContent.DefaultClock).Foreground);
             Use24HourClock = true;
             ShowDate = true;
             ShowCpuUsage = true;
@@ -52,6 +52,7 @@ public sealed partial class ThemePageViewModel
             OnPropertyChanged(nameof(IsDirty));
         }
         finally { restoring = false; }
+        InvalidateTemplatePreviews();
         return true;
     }
 }

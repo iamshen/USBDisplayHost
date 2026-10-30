@@ -49,7 +49,12 @@ public partial class MainWindow : FluentWindow
         RootNavigationView.SelectionChanged += OnNavigationSelectionChanged;
         PageNavigation.ItemsSource = pages;
         settings.PropertyChanged += OnSettingsChanged;
-        Closed += (_, _) => settings.PropertyChanged -= OnSettingsChanged;
+        viewModel.PropertyChanged += OnWorkspaceChanged;
+        Closed += (_, _) =>
+        {
+            settings.PropertyChanged -= OnSettingsChanged;
+            viewModel.PropertyChanged -= OnWorkspaceChanged;
+        };
     }
 
     public void ShowNotice(string text, bool failed)
@@ -159,6 +164,14 @@ public partial class MainWindow : FluentWindow
         if (e.PropertyName == nameof(ApplicationSettingsPageViewModel.NavigationLayout)) { UpdateNavigationLayout(); }
     }
 
+    private void OnWorkspaceChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(WorkspaceViewModel.ErrorText))
+        {
+            UpdateNavigationLayout();
+        }
+    }
+
     private void OnCompactMenuClick(object sender, RoutedEventArgs e)
     {
         compactMenuOpen = !compactMenuOpen;
@@ -200,6 +213,9 @@ public partial class MainWindow : FluentWindow
         if (PageNavigation is null) { return; }
         bool compact = ActualWidth < 800;
         bool side = !compact && settings.NavigationLayout == NavigationLayout.Side;
+        var currentPage = (RootNavigationView.SelectedItem as NavigationViewItem)?.TargetPageType;
+        bool themeHeader = side && currentPage == typeof(ThemesPage)
+            && DataContext is WorkspaceViewModel workspace && string.IsNullOrWhiteSpace(workspace.ErrorText);
         bool partial = !compact && !side && ActualWidth < 1000;
         if (partial != showingPartialNavigation)
         {
@@ -215,7 +231,10 @@ public partial class MainWindow : FluentWindow
         }
         double pageMargin = compact ? 16 : 32;
         System.Windows.Application.Current.Resources["PageContentMargin"] = new Thickness(pageMargin, compact ? 16 : 24, pageMargin, compact ? 16 : 24);
-        Header.Margin = new Thickness(0, 0, pageMargin, 0);
+        Header.Margin = new Thickness(0, themeHeader ? 16 : 0, pageMargin, 0);
+        Grid.SetRow(Header, themeHeader ? 1 : 0);
+        Header.VerticalAlignment = themeHeader ? VerticalAlignment.Top : VerticalAlignment.Stretch;
+        Panel.SetZIndex(Header, themeHeader ? 1 : 0);
         WorkspaceError.Margin = new Thickness(pageMargin, 8, pageMargin, 0);
         NavigationColumn.Width = new GridLength(side ? 184 : 0);
         Grid.SetColumn(PageNavigation, side ? 0 : 1);
@@ -234,7 +253,6 @@ public partial class MainWindow : FluentWindow
         PageNavigation.Visibility = compact && !compactMenuOpen ? Visibility.Collapsed : Visibility.Visible;
         CompactMenuButton.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
         MoreNavigationButton.Visibility = partial ? Visibility.Visible : Visibility.Collapsed;
-        var currentPage = (RootNavigationView.SelectedItem as NavigationViewItem)?.TargetPageType;
         string currentLabel = pages.FirstOrDefault(page => page.PageType == currentPage)?.Label ?? "设备";
         CompactPageLabel.Text = currentLabel;
         CompactChevron.Symbol = compactMenuOpen ? SymbolRegular.ChevronUp16 : SymbolRegular.ChevronDown16;
@@ -245,6 +263,6 @@ public partial class MainWindow : FluentWindow
         System.Windows.Automation.AutomationProperties.SetName(MoreNavigationButton, $"更多页面，当前：{currentLabel}");
         DiagnosticsMenuItem.IsChecked = currentPage == typeof(DiagnosticsPage);
         SettingsMenuItem.IsChecked = currentPage == typeof(ApplicationSettingsPage);
-        Header.MinHeight = 56;
+        Header.MinHeight = themeHeader ? 40 : 56;
     }
 }

@@ -55,8 +55,8 @@ public sealed partial class ThemePageViewModel : ObservableObject
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsImage), nameof(IsClock), nameof(IsDashboard))]
     private ThemeKind selectedTemplate;
     [ObservableProperty] private ImageFit fit = ImageFit.Contain;
-    [ObservableProperty] private string backgroundColor = "#000000";
-    [ObservableProperty] private string foregroundColor = "#FFFFFF";
+    [ObservableProperty] private string backgroundColor = ThemeFields.ColorText(((ThemeContent.Image)ThemeContent.Default).Background);
+    [ObservableProperty] private string foregroundColor = ThemeFields.ColorText(((ThemeContent.Clock)ThemeContent.DefaultClock).Foreground);
     [ObservableProperty] private bool use24HourClock = true;
     [ObservableProperty] private bool showDate = true;
     [ObservableProperty] private bool showCpuUsage = true;
@@ -65,6 +65,9 @@ public sealed partial class ThemePageViewModel : ObservableObject
     [ObservableProperty] private bool showDeviceTemperature;
     [ObservableProperty] private string imageDescription = "内置背景";
     [ObservableProperty] private ImageSource? previewImage;
+    [ObservableProperty] private ImageSource? selectedTemplatePreview;
+    [ObservableProperty] private ImageSource? imageTemplatePreview;
+    private ThemeContent.Image? imageTemplatePreviewContent;
     [ObservableProperty] private string errorText = string.Empty;
     [ObservableProperty] private string previewErrorText = string.Empty;
     [ObservableProperty, NotifyCanExecuteChangedFor(nameof(ApplyCommand))] private string validationText = string.Empty;
@@ -132,6 +135,7 @@ public sealed partial class ThemePageViewModel : ObservableObject
     public void RefreshDeviceActions()
     {
         SynchronizeActiveContent();
+        OnPropertyChanged(nameof(SessionDeviceText));
         OnPropertyChanged(nameof(EditorStatus));
         OnPropertyChanged(nameof(UseDeviceApplication));
         ApplyCommand.NotifyCanExecuteChanged();
@@ -251,6 +255,7 @@ public sealed partial class ThemePageViewModel : ObservableObject
     private void UpdateDraft()
     {
         if (restoring || stopping) { return; }
+        InvalidateTemplatePreviews();
         if (revision == long.MaxValue)
         {
             unsupportedVersion = true;
@@ -331,16 +336,50 @@ public sealed partial class ThemePageViewModel : ObservableObject
         if (string.IsNullOrEmpty(ValidationText)) { preview.Request(draft, force: true); }
     }
 
-    public void SetPageVisible(bool value) { pageVisible = value; preview.SetVisible(pageVisible && windowVisible); }
-    public void SetWindowVisible(bool value) { windowVisible = value; preview.SetVisible(pageVisible && windowVisible); }
+    public void SetPageVisible(bool value)
+    {
+        pageVisible = value;
+        if (!value) { SelectedTemplatePreview = null; }
+        preview.SetVisible(pageVisible && windowVisible);
+    }
+    public void SetWindowVisible(bool value)
+    {
+        windowVisible = value;
+        if (!value) { SelectedTemplatePreview = null; }
+        preview.SetVisible(pageVisible && windowVisible);
+    }
     private void OnPreviewUpdated(PreviewUpdate update)
     {
         if (update.DeviceKey != draft.DeviceKey || update.Revision != revision || stopping) { return; }
         if (update.Error is not null)
         {
+            SelectedTemplatePreview = null;
             PreviewErrorText = $"{update.Error.Reason}。{update.Error.Action}（错误编号：{update.Error.ErrorId}）";
         }
-        else { PreviewImage = update.Image; PreviewErrorText = string.Empty; }
+        else
+        {
+            PreviewImage = update.Image;
+            SelectedTemplatePreview = update.Image;
+            if (draft.Content is ThemeContent.Image image)
+            {
+                imageTemplatePreviewContent = image;
+                ImageTemplatePreview = update.Image;
+            }
+            PreviewErrorText = string.Empty;
+        }
+    }
+
+    private void InvalidateTemplatePreviews()
+    {
+        // 只复用通过现有修订检查的位图，不读取素材文件或持有额外素材租约。
+        // 时钟／遥测仅显示当前预览；图片只有在素材、适配和背景仍一致时才能复用。
+        SelectedTemplatePreview = null;
+        if (!ThemeFields.TryColor(BackgroundColor, out var background)
+            || imageTemplatePreviewContent != new ThemeContent.Image(assetId, Fit, background))
+        {
+            imageTemplatePreviewContent = null;
+            ImageTemplatePreview = null;
+        }
     }
     private void ShowError(AppError error) => ErrorText = $"{error.Reason}。{error.Action}（错误编号：{error.ErrorId}）";
     private void Report(Exception exception, string stage)

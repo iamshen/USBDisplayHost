@@ -2,9 +2,56 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:local="clr-namespace:UsbDisplayHost.Desktop.Views"
       xmlns:controls="clr-namespace:UsbDisplayHost.Desktop.Controls"
       Title="主题" ScrollViewer.CanContentScroll="False">
     <Page.Resources>
+        <local:ThemeColorBrushConverter x:Key="ThemeColorBrush" />
+        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style x:Key="ColorExpanderStyle" TargetType="Expander">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Expander">
+                        <StackPanel>
+                            <ToggleButton x:Name="HeaderSite" MinHeight="40" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Content="{TemplateBinding Header}"
+                                          AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), RelativeSource={RelativeSource TemplatedParent}}"
+                                          FocusVisualStyle="{DynamicResource ProjectFocusVisualStyle}"
+                                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="Entry" Background="{DynamicResource SurfaceRaisedBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="1" CornerRadius="6" Padding="10,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                <ContentPresenter VerticalAlignment="Center" />
+                                                <Path x:Name="Chevron" Grid.Column="1" Data="M 0,0 L 4,4 0,8" Margin="12,0,0,0"
+                                                      Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.5" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Entry" Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}" /></Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="Chevron" Property="RenderTransform"><Setter.Value><RotateTransform Angle="90" /></Setter.Value></Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="Details" Visibility="Collapsed" Margin="0,12,0,0" />
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True"><Setter TargetName="Details" Property="Visibility" Value="Visible" /></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55" /></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="ColorValueStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="Width" Value="116" />
             <Setter Property="FontFamily" Value="Consolas" />
@@ -15,75 +62,110 @@
             <Setter Property="ToolTip" Value="输入十六进制颜色，例如 #FFFFFF" />
         </Style>
     </Page.Resources>
-    <Grid Margin="{DynamicResource PageContentMargin}" MaxWidth="1120">
-        <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-        <ScrollViewer x:Name="EditorViewport" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="OnEditorViewportSizeChanged">
+    <Grid x:Name="Workspace" Margin="{DynamicResource PageContentMargin}" MaxWidth="1120" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <StackPanel x:Name="PageHeader" Margin="0,0,0,20" MaxWidth="{Binding ActualWidth, ElementName=PreviewPanel}" HorizontalAlignment="Left">
+            <TextBlock Text="主题" Style="{DynamicResource PageTitleStyle}" />
+            <TextBlock Text="{Binding SessionDeviceText}" Style="{DynamicResource PageDescriptionStyle}" FontSize="14" TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding SessionDeviceText}" />
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" x:Name="EditorViewport" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="OnEditorViewportSizeChanged">
             <StackPanel Margin="0,0,12,0">
-                <StackPanel x:Name="PageHeader" Margin="0,0,0,20">
-                    <TextBlock Text="主题" Style="{DynamicResource PageTitleStyle}" />
-                </StackPanel>
-                <ListBox x:Name="TemplateSelector" ItemsSource="{Binding Templates}" SelectedValuePath="Value" SelectedValue="{Binding SelectedTemplate, Mode=TwoWay}" SelectionMode="Single"
-                         IsEnabled="{Binding CanEdit}" Background="Transparent" BorderThickness="0" Padding="0" IsTabStop="False"
-                         AutomationProperties.Name="显示内容" Margin="-4,0,-4,24" HorizontalAlignment="Left">
-                    <ListBox.Template><ControlTemplate TargetType="ListBox"><ItemsPresenter /></ControlTemplate></ListBox.Template>
-                    <ListBox.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate></ListBox.ItemsPanel>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
-                            <Setter Property="FocusVisualStyle" Value="{DynamicResource ProjectFocusVisualStyle}" />
-                            <Setter Property="MinWidth" Value="96" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListBoxItem">
-                                        <Border x:Name="Tile" Background="Transparent" CornerRadius="6" Padding="16,10" Margin="4,0">
-                                            <Grid>
-                                                <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                <Border x:Name="Mark" Width="18" Height="2" Background="{DynamicResource AccentBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-10" Visibility="Hidden" />
-                                            </Grid>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" /></Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SurfaceRaisedBrush}" />
-                                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55" /></Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox>
                 <Grid x:Name="ContentGrid" SizeChanged="OnContentSizeChanged">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="320" /></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="280" /></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <StackPanel x:Name="PreviewPanel" Margin="0,0,24,0">
-                        <Border Background="{DynamicResource NavigationBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6">
-                            <Viewbox x:Name="PreviewViewport" Stretch="Uniform" MaxHeight="360">
+                        <Border x:Name="PreviewFrame" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" HorizontalAlignment="Left">
+                            <Viewbox x:Name="PreviewViewport" Stretch="Uniform">
                                 <Border Width="640" Height="360" Background="{DynamicResource CanvasBrush}" ClipToBounds="True">
                                     <Image Source="{Binding PreviewImage}" Stretch="Uniform" AutomationProperties.Name="主题画面预览" />
                                 </Border>
                             </Viewbox>
                         </Border>
-                        <TextBlock Text="本地预览 · 应用后发送到设备" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,12,0,0" />
+                        <TextBlock Text="本地预览 · 应用后发送到设备" FontSize="13" TextAlignment="Center" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,12,0,0"
+                                   Width="{Binding ActualWidth, ElementName=PreviewFrame}" HorizontalAlignment="Left" />
                         <controls:InlineMessage Message="{Binding PreviewErrorText}" Margin="0,12,0,0" />
                         <Button Content="重试预览" Command="{Binding RetryPreviewCommand}" HorizontalAlignment="Left" Margin="0,8,0,0">
                             <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Style.Triggers><DataTrigger Binding="{Binding PreviewErrorText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Button.Style>
                         </Button>
+                        <ListBox x:Name="TemplateSelector" ItemsSource="{Binding Templates}" SelectedValuePath="Value"
+                                 SelectedValue="{Binding SelectedTemplate, Mode=TwoWay}" SelectionMode="Single"
+                                 IsEnabled="{Binding CanEdit}" Background="Transparent" BorderThickness="0" Padding="0" IsTabStop="False"
+                                 AutomationProperties.Name="显示内容模板" Margin="-6,12,-6,0" HorizontalAlignment="Left" PreviewKeyDown="OnTemplatePreviewKeyDown" SizeChanged="OnContentSizeChanged">
+                            <ListBox.Template><ControlTemplate TargetType="ListBox"><ItemsPresenter /></ControlTemplate></ListBox.Template>
+                            <ListBox.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate></ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+                                    <Setter Property="ToolTip" Value="选中后显示当前真实预览；其余为图片预览或模板布局示意" />
+                                    <Setter Property="FocusVisualStyle" Value="{DynamicResource ProjectFocusVisualStyle}" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <StackPanel Margin="6,0" Background="Transparent">
+                                                    <Border x:Name="Tile" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                                            Background="{DynamicResource CanvasBrush}" CornerRadius="5" Padding="1">
+                                                        <Grid>
+                                                            <Viewbox Stretch="Uniform">
+                                                                <controls:ThemeTemplatePreview Value="{Binding Value}" Width="160" Height="90">
+                                                                    <controls:ThemeTemplatePreview.Style>
+                                                                        <Style TargetType="controls:ThemeTemplatePreview">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Value}" Value="Image">
+                                                                                    <Setter Property="Source" Value="{Binding DataContext.ImageTemplatePreview, RelativeSource={RelativeSource AncestorType=Page}}" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                                    <Setter Property="Source" Value="{Binding DataContext.SelectedTemplatePreview, RelativeSource={RelativeSource AncestorType=Page}}" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </controls:ThemeTemplatePreview.Style>
+                                                                </controls:ThemeTemplatePreview>
+                                                            </Viewbox>
+                                                            <Border x:Name="Mark" Width="20" Height="20" CornerRadius="3" Background="{DynamicResource AccentBrush}"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="3" Visibility="Hidden">
+                                                                <TextBlock Text="✓" Foreground="{DynamicResource OnAccentBrush}" TextAlignment="Center" VerticalAlignment="Center" />
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                    <TextBlock x:Name="Name" Text="{Binding Name}" Foreground="{TemplateBinding Foreground}" TextAlignment="Center" Margin="0,8,0,0" />
+                                                </StackPanel>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}" /></Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                        <Setter TargetName="Tile" Property="BorderThickness" Value="2" />
+                                                        <Setter TargetName="Tile" Property="Padding" Value="0" />
+                                                        <Setter TargetName="Name" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                                        <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55" /></Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
                     </StackPanel>
-                    <Border x:Name="FieldsPanel" Grid.Column="1" Style="{StaticResource SectionStyle}" VerticalAlignment="Top">
-                        <StackPanel IsEnabled="{Binding CanEdit}">
+                    <Border x:Name="FieldsPanel" Grid.Column="1" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0" Padding="24,8,0,0">
+                        <StackPanel IsEnabled="{Binding CanEdit}" VerticalAlignment="Top">
+                            <TextBlock Text="{Binding SelectedItem.Name, ElementName=TemplateSelector}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,24" />
                             <StackPanel Visibility="{Binding IsImage, Converter={StaticResource BooleanVisibility}}">
-                                <Button Content="选择图片…" Command="{Binding SelectImageCommand}" HorizontalAlignment="Stretch" AutomationProperties.Name="选择图片" ToolTip="支持 PNG、JPEG 图片" />
+                                <Button Content="选择图片…" Command="{Binding SelectImageCommand}" MinHeight="40" HorizontalAlignment="Stretch" AutomationProperties.Name="选择图片" ToolTip="支持 PNG、JPEG 图片" />
                                 <TextBlock Text="{Binding ImageDescription}" Style="{DynamicResource AuxiliaryTextStyle}" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding ImageDescription}" />
-                                <TextBlock Text="图片适配" Margin="0,16,0,8" />
-                                <ComboBox ItemsSource="{Binding Fits}" DisplayMemberPath="Name" SelectedValuePath="Value"
-                                          SelectedValue="{Binding Fit, Mode=TwoWay}" AutomationProperties.Name="图片适配方式" />
+                                <Grid Margin="0,24,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="72" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="图片适配" VerticalAlignment="Center" />
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding Fits}" DisplayMemberPath="Name" SelectedValuePath="Value"
+                                              SelectedValue="{Binding Fit, Mode=TwoWay}" MinHeight="40" HorizontalAlignment="Stretch" AutomationProperties.Name="图片适配方式" />
+                                </Grid>
                             </StackPanel>
                             <StackPanel Visibility="{Binding IsClock, Converter={StaticResource BooleanVisibility}}">
                                 <CheckBox Content="24 小时制" IsChecked="{Binding Use24HourClock}" />
-                                <CheckBox Content="显示日期" IsChecked="{Binding ShowDate}" Margin="0,4,0,0" />
+                                <CheckBox Content="显示日期" IsChecked="{Binding ShowDate}" Margin="0,8,0,0" />
                             </StackPanel>
                             <StackPanel Visibility="{Binding IsDashboard, Converter={StaticResource BooleanVisibility}}">
                                 <Grid>
@@ -91,22 +173,49 @@
                                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                                     <CheckBox Content="CPU 使用率" IsChecked="{Binding ShowCpuUsage}" Margin="0,0,8,0" />
                                     <CheckBox Grid.Column="1" Content="内存占用" IsChecked="{Binding ShowMemoryUsage}" />
-                                    <CheckBox Grid.Row="1" Content="主机温度" IsChecked="{Binding ShowHostTemperature}" Margin="0,4,8,0" />
-                                    <CheckBox Grid.Row="1" Grid.Column="1" Content="设备温度" IsChecked="{Binding ShowDeviceTemperature}" Margin="0,4,0,0" />
+                                    <CheckBox Grid.Row="1" Content="主机温度" IsChecked="{Binding ShowHostTemperature}" Margin="0,8,8,0" />
+                                    <CheckBox Grid.Row="1" Grid.Column="1" Content="设备温度" IsChecked="{Binding ShowDeviceTemperature}" Margin="0,8,0,0" />
                                 </Grid>
                             </StackPanel>
-                            <DockPanel Margin="0,24,0,0">
-                                <TextBox DockPanel.Dock="Right" Style="{StaticResource ColorValueStyle}" Text="{Binding BackgroundColor, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="背景色，十六进制 RGB" />
-                                <TextBlock Text="背景色" VerticalAlignment="Center" />
-                            </DockPanel>
-                            <controls:ColorPalette SelectedColor="{Binding BackgroundColor}" Label="背景色色板" Margin="0,8,0,0" />
-                            <StackPanel Margin="0,16,0,0">
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,24,0,8" />
+                            <Grid Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="72" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <TextBlock Text="背景色" Margin="0,10,8,0" VerticalAlignment="Top" />
+                                <Expander x:Name="BackgroundColorEntry" Grid.Column="1" Style="{StaticResource ColorExpanderStyle}" AutomationProperties.Name="背景色设置">
+                                    <Expander.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="24" Height="24" CornerRadius="3" BorderBrush="{DynamicResource TextSecondaryBrush}" BorderThickness="1"
+                                                    Background="{Binding BackgroundColor, Converter={StaticResource ThemeColorBrush}}" />
+                                            <TextBlock Text="{Binding BackgroundColor}" FontFamily="Consolas" Margin="10,0,0,0" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Expander.Header>
+                                    <TextBox Style="{StaticResource ColorValueStyle}" HorizontalAlignment="Left"
+                                             Text="{Binding BackgroundColor, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="背景色，十六进制 RGB" />
+                                </Expander>
+                                <controls:ColorPalette Grid.Row="1" Grid.ColumnSpan="2" SelectedColor="{Binding BackgroundColor}" Label="背景色色板" Margin="0,12,0,0"
+                                                       Visibility="{Binding IsExpanded, ElementName=BackgroundColorEntry, Converter={StaticResource BooleanVisibility}}" />
+                            </Grid>
+                            <StackPanel>
                                 <StackPanel.Style><Style TargetType="StackPanel"><Style.Triggers><DataTrigger Binding="{Binding IsImage}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></StackPanel.Style>
-                                <DockPanel>
-                                    <TextBox DockPanel.Dock="Right" Style="{StaticResource ColorValueStyle}" Text="{Binding ForegroundColor, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="文字色，十六进制 RGB" />
-                                    <TextBlock Text="文字色" VerticalAlignment="Center" />
-                                </DockPanel>
-                                <controls:ColorPalette SelectedColor="{Binding ForegroundColor}" Label="文字色色板" Margin="0,8,0,0" />
+                                <Grid Margin="0,16,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="72" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                    <TextBlock Text="文字色" Margin="0,10,8,0" VerticalAlignment="Top" />
+                                    <Expander x:Name="ForegroundColorEntry" Grid.Column="1" Style="{StaticResource ColorExpanderStyle}" AutomationProperties.Name="文字色设置">
+                                        <Expander.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Width="24" Height="24" CornerRadius="3" BorderBrush="{DynamicResource TextSecondaryBrush}" BorderThickness="1"
+                                                        Background="{Binding ForegroundColor, Converter={StaticResource ThemeColorBrush}}" />
+                                                <TextBlock Text="{Binding ForegroundColor}" FontFamily="Consolas" Margin="10,0,0,0" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Expander.Header>
+                                    <TextBox Style="{StaticResource ColorValueStyle}" HorizontalAlignment="Left"
+                                             Text="{Binding ForegroundColor, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="文字色，十六进制 RGB" />
+                                </Expander>
+                                <controls:ColorPalette Grid.Row="1" Grid.ColumnSpan="2" SelectedColor="{Binding ForegroundColor}" Label="文字色色板" Margin="0,12,0,0"
+                                                       Visibility="{Binding IsExpanded, ElementName=ForegroundColorEntry, Converter={StaticResource BooleanVisibility}}" />
+                            </Grid>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -118,15 +227,15 @@
                         Visibility="{Binding SelectImageCommand.IsRunning, Converter={StaticResource BooleanVisibility}}" />
             </StackPanel>
         </ScrollViewer>
-        <Border Grid.Row="1" Style="{StaticResource ActionBarStyle}">
+        <Border Grid.Row="2" Style="{StaticResource ActionBarStyle}">
             <Grid x:Name="ActionBar" SizeChanged="OnActionBarSizeChanged">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                <TextBlock x:Name="ActionStatus" Text="{Binding EditorStatus}" Style="{DynamicResource AuxiliaryTextStyle}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <TextBlock x:Name="ActionStatus" Text="{Binding EditorStatus}" Style="{DynamicResource AuxiliaryTextStyle}" FontSize="14" VerticalAlignment="Center" Margin="0,0,16,0" />
                 <WrapPanel x:Name="PrimaryActions" Grid.Column="1" HorizontalAlignment="Right">
-                    <Button Content="恢复默认" Command="{Binding RestoreDefaultsCommand}" Margin="0,0,8,0" />
-                    <Button Content="撤销" Command="{Binding UndoCommand}" Margin="0,0,8,0" />
-                    <ui:Button Appearance="Primary" Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}" MinWidth="128" />
+                    <Button Content="恢复默认" Command="{Binding RestoreDefaultsCommand}" MinHeight="40" MinWidth="104" Margin="0,0,8,0" />
+                    <Button Content="撤销" Command="{Binding UndoCommand}" MinHeight="40" MinWidth="96" Margin="0,0,8,0" />
+                    <ui:Button Appearance="Primary" Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}" MinHeight="40" MinWidth="128" />
                 </WrapPanel>
                 <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right">
                     <Button Content="重试保存配置" Command="{Binding RetryApplicationSaveCommand}" Margin="8,8,0,0"

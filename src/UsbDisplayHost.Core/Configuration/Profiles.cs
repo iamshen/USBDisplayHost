@@ -14,7 +14,7 @@ public sealed record ApplicationSettings(
     bool AutomaticallyCheckUpdates, bool HasSeenTrayNotice, bool CloseToTray = true,
     bool SuppressModeSwitchNotice = false,
     [property: System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<NavigationLayout>))]
-    NavigationLayout NavigationLayout = NavigationLayout.Top)
+    NavigationLayout NavigationLayout = NavigationLayout.Side)
 {
     public static ApplicationSettings Default { get; } = new(false, false, false, true, false);
 }
