@@ -67,12 +67,17 @@ internal static class ConfigurationCodec
         // 导航偏好独立降级，不能因未知布局丢弃其他有效设置；高版本保护由存储层处理。
         var fields = payload.Deserialize<Dictionary<string, JsonElement>>(AtomicJsonStorage.Options);
         if (fields is null) { return Invalid<ApplicationSettings>(); }
-        NavigationLayout layout = NavigationLayout.Top;
+        NavigationLayout layout = ApplicationSettings.Default.NavigationLayout;
         if (fields.Remove("navigationLayout", out var value))
         {
             if (value.ValueKind == JsonValueKind.String)
             {
-                layout = value.GetString() == "Side" ? NavigationLayout.Side : NavigationLayout.Top;
+                layout = value.GetString() switch
+                {
+                    "Side" => NavigationLayout.Side,
+                    "Top" => NavigationLayout.Top,
+                    _ => ApplicationSettings.Default.NavigationLayout
+                };
             }
         }
         var data = JsonSerializer.SerializeToElement(fields, AtomicJsonStorage.Options)

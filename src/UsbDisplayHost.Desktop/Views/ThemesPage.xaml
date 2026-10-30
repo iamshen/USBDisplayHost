@@ -63,14 +63,14 @@
         </Style>
     </Page.Resources>
     <Grid x:Name="Workspace" Margin="{DynamicResource PageContentMargin}" MaxWidth="1120" HorizontalAlignment="Stretch">
-        <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-        <ScrollViewer x:Name="EditorViewport" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="OnEditorViewportSizeChanged">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <StackPanel x:Name="PageHeader" Margin="0,0,0,20" MaxWidth="{Binding ActualWidth, ElementName=PreviewPanel}" HorizontalAlignment="Left">
+            <TextBlock Text="主题" Style="{DynamicResource PageTitleStyle}" />
+            <TextBlock Text="{Binding SessionDeviceText}" Style="{DynamicResource PageDescriptionStyle}" FontSize="14" TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding SessionDeviceText}" />
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" x:Name="EditorViewport" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="OnEditorViewportSizeChanged">
             <StackPanel Margin="0,0,12,0">
-                <StackPanel x:Name="PageHeader" Margin="0,0,0,20" MaxWidth="{Binding ActualWidth, ElementName=PreviewPanel}" HorizontalAlignment="Left">
-                    <TextBlock Text="主题" Style="{DynamicResource PageTitleStyle}" />
-                    <TextBlock Text="{Binding SessionDeviceText}" Style="{DynamicResource PageDescriptionStyle}" FontSize="14" TextWrapping="NoWrap"
-                               TextTrimming="CharacterEllipsis" ToolTip="{Binding SessionDeviceText}" />
-                </StackPanel>
                 <Grid x:Name="ContentGrid" SizeChanged="OnContentSizeChanged">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="280" /></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
@@ -227,7 +227,7 @@
                         Visibility="{Binding SelectImageCommand.IsRunning, Converter={StaticResource BooleanVisibility}}" />
             </StackPanel>
         </ScrollViewer>
-        <Border Grid.Row="1" Style="{StaticResource ActionBarStyle}">
+        <Border Grid.Row="2" Style="{StaticResource ActionBarStyle}">
             <Grid x:Name="ActionBar" SizeChanged="OnActionBarSizeChanged">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>

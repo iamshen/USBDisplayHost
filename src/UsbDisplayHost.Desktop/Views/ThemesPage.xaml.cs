@@ -79,7 +79,7 @@ public partial class ThemesPage : Page
         else
         {
             // 主预览与三张等比缩略图共用列宽；按两者的比例一次计算，避免测量值相互反馈。
-            double availableHeight = EditorViewport.ActualHeight - PageHeader.ActualHeight - PageHeader.Margin.Bottom - 84;
+            double availableHeight = EditorViewport.ActualHeight - 84;
             previewHeight = Math.Clamp(availableHeight * 0.75, 180, stacked ? 240 : 360);
         }
         double frameWidth = Math.Min(previewWidth, previewHeight * 16 / 9);
