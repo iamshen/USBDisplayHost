@@ -100,6 +100,11 @@ public sealed class ThemeApplicationSessionWork : IDeviceSessionWork
             var observed = await session.ObserveAsync(context, CancellationToken.None).ConfigureAwait(false);
             return observed switch
             {
+                // Streaming 是主机推流状态；首帧已发送且活动配置已提交，不能沿用连接时的 Stopped。
+                // 模式、电源仍以实际读回为准，Running 不表示设备已呈现画面。
+                OperationResult<DeviceObservation>.Success
+                    { Value: { Mode: DeviceMode.Theme, Power: PowerState.On, Streaming: StreamingState.Stopped } } confirmed =>
+                    new OperationResult<DeviceObservation>.Success(confirmed.Value with { Streaming = StreamingState.Running }),
                 OperationResult<DeviceObservation>.Success or OperationResult<DeviceObservation>.Failure
                     or OperationResult<DeviceObservation>.Unknown => observed,
                 _ => new OperationResult<DeviceObservation>.Unknown(AppError.Create("ApplicationObservationUnconfirmed",
