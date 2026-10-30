@@ -1,6 +1,6 @@
 # GitHub 打包与应用更新
 
-更新源：[iamshen/USBDisplayHost Releases](https://github.com/iamshen/USBDisplayHost/releases)。仓库已公开，客户端无需账号或令牌。当前版本为 0.1.3，使用 Velopack 1.2.161、Windows x64、`win-x64` 通道。
+更新源：[iamshen/USBDisplayHost Releases](https://github.com/iamshen/USBDisplayHost/releases)。仓库已公开，客户端无需账号或令牌。当前版本为 0.1.4，使用 Velopack 1.2.161、Windows x64、`win-x64` 通道。
 
 ## 用户操作
 
@@ -29,8 +29,8 @@ dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force-
 dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force --locked-mode
 # 将版本、锁文件及相关改动提交后发布
 git push origin main
-git tag v0.1.3
-git push origin v0.1.3
+git tag v0.1.4
+git push origin v0.1.4
 ```
 
 工作流使用仓库提供的 `GITHUB_TOKEN` 和 `contents: write`，无需添加个人令牌；不执行测试、应用、安装器或设备操作。`global.json`、NuGet 锁文件与工具清单固定构建版本。
