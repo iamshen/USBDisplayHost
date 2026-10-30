@@ -21,7 +21,8 @@ public sealed partial class DeviceProtocolService
             || target is not (DeviceMode.Theme or DeviceMode.SecondaryDisplay) || pendingSave is not null)
         { return Failure("ModeUnavailable", "当前设备不能开始该模式切换"); }
         // 当前 usb_mode_switch.c 无条件调用 set_power(1)，主机无法在重枚举期间保证 Off。
-        if (source.PowerIntent == PowerState.Off)
+        var powerIntent = source.PowerIntent;
+        if (powerIntent == PowerState.Off)
         { return Failure("FirmwareOffModeUnsupported", "当前固件切换会亮屏，请先明确唤醒再切换模式"); }
         OperationResult<Ad102V2ModeAcknowledgement>? acknowledgement = null;
         long started = TimeProvider.System.GetTimestamp();
@@ -33,7 +34,7 @@ public sealed partial class DeviceProtocolService
                 if (drained is not OperationResult<Unit>.Success) { return Ad102V2DeviceSession.Convert<DeviceObservation, Unit>(drained); }
                 await transport.DisposeAsync();
             }
-            acknowledgement = await source.Controller.SwitchAsync(context, target, source.PowerIntent, cancellation);
+            acknowledgement = await source.Controller.SwitchAsync(context, target, powerIntent, cancellation);
             if (acknowledgement is OperationResult<Ad102V2ModeAcknowledgement>.Failure
                 or OperationResult<Ad102V2ModeAcknowledgement>.Cancelled)
             { return Ad102V2DeviceSession.Convert<DeviceObservation, Ad102V2ModeAcknowledgement>(acknowledgement); }
@@ -58,7 +59,7 @@ public sealed partial class DeviceProtocolService
             or OperationResult<Ad102V2ModeAcknowledgement>.Cancelled)
         { return Convert(acknowledgement); }
 
-        return await WaitForConnectionAsync(key, target, started, token);
+        return await WaitForConnectionAsync(key, target, started, token, powerIntent);
     }
 
     public async Task<OperationResult<Unit>> ReconnectAsync(DeviceKey key, long oldGeneration, CancellationToken token)
@@ -76,7 +77,8 @@ public sealed partial class DeviceProtocolService
         return await WaitForConnectionAsync(key, null, TimeProvider.System.GetTimestamp(), token);
     }
 
-    private async Task<OperationResult<Unit>> WaitForConnectionAsync(DeviceKey key, DeviceMode? target, long started, CancellationToken token)
+    private async Task<OperationResult<Unit>> WaitForConnectionAsync(DeviceKey key, DeviceMode? target, long started,
+        CancellationToken token, PowerState? modePowerIntent = null)
     {
         bool originalPresent = false;
         AppError? interfaceError = null;
@@ -104,21 +106,22 @@ public sealed partial class DeviceProtocolService
                 {
                     var admitted = await coordinator.SelectAsync(selected.Value, token);
                     if (admitted is not OperationResult<DeviceSnapshot>.Success) { return Convert(admitted); }
-                    var connected = await ConnectAsync(selected.Value, token);
+                    var connected = await ConnectWithPowerIntentAsync(selected.Value, modePowerIntent, token);
                     if (connected is not OperationResult<Unit>.Success) { return connected; }
                     return target is null || coordinator.Current.Mode == target ? connected : Failure("ModeTargetMismatch", "目标连接后实际模式不一致");
                 }
             }
             await Task.Delay(250, token);
         }
-        if (target is { } expected) { return await RequeryModeOutcomeAsync(key, expected, token); }
+        if (target is { } expected) { return await RequeryModeOutcomeAsync(key, expected, modePowerIntent, token); }
         if (interfaceError is not null) { return new OperationResult<Unit>.Unknown(interfaceError); }
         return new OperationResult<Unit>.Unknown(AppError.Create("ModeTargetTimeout",
             originalPresent ? "仍发现原模式，未确认目标模式完成" : "目标接口或驱动尚未就绪，切换结果待确认",
             "重新检测同一设备，不盲目重发或反向切换"));
     }
 
-    private async Task<OperationResult<Unit>> RequeryModeOutcomeAsync(DeviceKey key, DeviceMode expected, CancellationToken token)
+    private async Task<OperationResult<Unit>> RequeryModeOutcomeAsync(DeviceKey key, DeviceMode expected,
+        PowerState? modePowerIntent, CancellationToken token)
     {
         // 等待期结束后仅重新枚举和核实，不重发模式命令，也不切回原模式。
         var restarted = await discovery.StartAsync(token);
@@ -142,7 +145,7 @@ public sealed partial class DeviceProtocolService
         { return new OperationResult<Unit>.Unknown(bindingError); }
         var admitted = await coordinator.SelectAsync(selected.Value, token);
         if (admitted is not OperationResult<DeviceSnapshot>.Success) { return Convert(admitted); }
-        var connected = await ConnectAsync(selected.Value, token);
+        var connected = await ConnectWithPowerIntentAsync(selected.Value, modePowerIntent, token);
         if (connected is not OperationResult<Unit>.Success)
         {
             AppError? cause = connected switch
