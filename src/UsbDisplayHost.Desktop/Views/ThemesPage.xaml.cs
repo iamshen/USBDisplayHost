@@ -63,13 +63,13 @@ public partial class ThemesPage : Page
     {
         bool stacked = ContentGrid.ActualWidth < 780;
         bool compactHeight = EditorViewport.ActualHeight < 280;
-        ContentGrid.ColumnDefinitions[1].Width = new GridLength(stacked ? 0 : 320);
+        ContentGrid.ColumnDefinitions[1].Width = new GridLength(stacked ? 0 : 280);
         Grid.SetColumn(FieldsPanel, stacked ? 0 : 1);
         Grid.SetRow(FieldsPanel, stacked ? 1 : 0);
         FieldsPanel.BorderThickness = stacked ? new Thickness(0, 1, 0, 0) : new Thickness(1, 0, 0, 0);
         FieldsPanel.Padding = stacked ? new Thickness(0, 24, 0, 0) : new Thickness(24, 8, 0, 0);
         PreviewPanel.Margin = stacked ? new Thickness(0, 0, 0, 24) : new Thickness(0, 0, 24, 0);
-        double previewWidth = Math.Max(0, ContentGrid.ActualWidth - (stacked ? 0 : 344));
+        double previewWidth = Math.Max(0, ContentGrid.ActualWidth - (stacked ? 0 : 304));
         double previewHeight;
         if (compactHeight)
         {
@@ -82,12 +82,11 @@ public partial class ThemesPage : Page
             double availableHeight = EditorViewport.ActualHeight - PageHeader.ActualHeight - PageHeader.Margin.Bottom - 84;
             previewHeight = Math.Clamp(availableHeight * 0.75, 180, stacked ? 240 : 360);
         }
-        // 高度限制预览时收拢整个工作区，页头、画面、参数与底栏保持同一组对齐线。
-        Workspace.MaxWidth = stacked || compactHeight ? 1120 : Math.Clamp(previewHeight * 16 / 9 + 356, 848, 1120);
         double frameWidth = Math.Min(previewWidth, previewHeight * 16 / 9);
         PreviewFrame.Width = frameWidth;
         PreviewFrame.Height = frameWidth * 9 / 16;
-        TemplateSelector.MaxWidth = compactHeight || stacked ? previewWidth + 12 : frameWidth + 12;
+        TemplateSelector.MaxWidth = frameWidth + 12;
+        TemplateSelector.Width = frameWidth + 12;
     }
 
     private void OnActionBarSizeChanged(object sender, SizeChangedEventArgs e)

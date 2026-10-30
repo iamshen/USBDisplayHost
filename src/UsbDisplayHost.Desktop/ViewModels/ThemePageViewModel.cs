@@ -55,8 +55,8 @@ public sealed partial class ThemePageViewModel : ObservableObject
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsImage), nameof(IsClock), nameof(IsDashboard))]
     private ThemeKind selectedTemplate;
     [ObservableProperty] private ImageFit fit = ImageFit.Contain;
-    [ObservableProperty] private string backgroundColor = "#000000";
-    [ObservableProperty] private string foregroundColor = "#FFFFFF";
+    [ObservableProperty] private string backgroundColor = ThemeFields.ColorText(((ThemeContent.Image)ThemeContent.Default).Background);
+    [ObservableProperty] private string foregroundColor = ThemeFields.ColorText(((ThemeContent.Clock)ThemeContent.DefaultClock).Foreground);
     [ObservableProperty] private bool use24HourClock = true;
     [ObservableProperty] private bool showDate = true;
     [ObservableProperty] private bool showCpuUsage = true;

@@ -10,6 +10,7 @@ namespace UsbDisplayHost.Rendering.Scenes;
 
 internal sealed class ScenePainter(TimeProvider timeProvider)
 {
+    private static readonly Lazy<BitmapSource> BuiltInBackground = new(LoadBuiltInBackground);
     private readonly MetricFreshness freshness = new(timeProvider);
 
     public void Paint(DrawingContext drawing, RenderRequest request, double width, double height, BitmapSource? image)
@@ -18,8 +19,7 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         {
             case ThemeContent.Image content:
                 drawing.DrawRectangle(Brush(content.Background), null, new Rect(0, 0, width, height));
-                if (image is null) { DrawBuiltInBackground(drawing, width, height, content.Background); }
-                else { DrawImage(drawing, image, content.Fit, width, height); }
+                DrawImage(drawing, image ?? BuiltInBackground.Value, content.Fit, width, height);
                 break;
             case ThemeContent.Clock content:
                 DrawClock(drawing, request, content, width, height);
@@ -104,16 +104,13 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         drawing.Pop();
     }
 
-    private static void DrawBuiltInBackground(DrawingContext drawing, double width, double height, RgbColor background)
+    private static BitmapSource LoadBuiltInBackground()
     {
-        bool light = background.Red * .2126 + background.Green * .7152 + background.Blue * .0722 > 160;
-        Brush foreground = light ? new SolidColorBrush(Color.FromRgb(30, 40, 54)) : new SolidColorBrush(Color.FromRgb(229, 237, 247));
-        var outline = new Pen(foreground, width * .003);
-        var screen = new Rect(width * .42, height * .26, width * .16, height * .18);
-        drawing.DrawRoundedRectangle(null, outline, screen, width * .009, width * .009);
-        drawing.DrawLine(outline, new Point(width * .5, height * .44), new Point(width * .5, height * .48));
-        drawing.DrawLine(outline, new Point(width * .46, height * .48), new Point(width * .54, height * .48));
-        DrawText(drawing, "USB Display", foreground, width * .052, width, height * .56);
+        using var stream = typeof(ScenePainter).Assembly.GetManifestResourceStream("UsbDisplayHost.Rendering.DefaultLandscape.png")
+            ?? throw new InvalidDataException("Built-in theme image is missing.");
+        var image = BitmapDecoder.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad).Frames[0];
+        image.Freeze();
+        return image;
     }
 
     private void DrawDashboard(DrawingContext drawing, RenderRequest request, ThemeContent.Dashboard content,
@@ -223,15 +220,4 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         return text;
     }
 
-    private static double DrawText(DrawingContext drawing, string value, Brush brush, double fontSize, double width, double top)
-    {
-        var text = new FormattedText(value, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new Typeface("Microsoft YaHei UI"), fontSize, brush, 1);
-        double availableWidth = width * .92;
-        text.MaxTextWidth = availableWidth;
-        text.TextAlignment = TextAlignment.Center;
-        text.Trimming = TextTrimming.CharacterEllipsis;
-        drawing.DrawText(text, new Point(width * .04, top));
-        return text.Height;
-    }
 }
