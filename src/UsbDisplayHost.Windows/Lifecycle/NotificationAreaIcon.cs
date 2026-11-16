@@ -6,18 +6,20 @@ namespace UsbDisplayHost.Windows.Lifecycle;
 public sealed class NotificationAreaIcon : IDisposable
 {
     public const int CallbackMessage = 0x8001;
+    private readonly string displayName;
     private NotifyIconData data;
     private bool disposed;
 
-    public NotificationAreaIcon(nint window, string iconPath)
+    public NotificationAreaIcon(nint window, string iconPath, string displayName = "USB Display")
     {
+        this.displayName = displayName;
         data = new NotifyIconData
         {
             Size = (uint)Marshal.SizeOf<NotifyIconData>(), Window = window, Id = 1,
             Flags = 1 | 2 | 4 | 128, Callback = CallbackMessage,
             Icon = NativeMethods.LoadImageW(0, iconPath, 1,
                 NativeMethods.GetSystemMetrics(49), NativeMethods.GetSystemMetrics(50), 0x10),
-            Tip = "USB Display",
+            Tip = displayName,
             Info = "", InfoTitle = "", Version = 4
         };
         if (data.Icon == 0) { throw new Win32Exception(Marshal.GetLastPInvokeError()); }
@@ -57,7 +59,7 @@ public sealed class NotificationAreaIcon : IDisposable
     {
         if (disposed || !IsAvailable) { return false; }
         data.Flags = 16;
-        data.InfoTitle = "USB Display 仍在运行";
+        data.InfoTitle = $"{displayName} 仍在运行";
         data.Info = "关闭窗口会收至托盘。可从托盘打开窗口或选择退出。";
         data.InfoFlags = 1;
         bool result = NativeMethods.Shell_NotifyIconW(1, ref data);
@@ -68,6 +70,28 @@ public sealed class NotificationAreaIcon : IDisposable
 
     public void ActivateMenuOwner() => NativeMethods.SetForegroundWindow(data.Window);
 
+    public bool TryGetMenuAnchor(out int x, out int y)
+    {
+        x = y = 0;
+        if (disposed || !IsAvailable) { return false; }
+        var identifier = new NotifyIconIdentifier
+        {
+            Size = (uint)Marshal.SizeOf<NotifyIconIdentifier>(), Window = data.Window, Id = data.Id
+        };
+        if (NativeMethods.Shell_NotifyIconGetRect(ref identifier, out var rect) < 0) { return false; }
+        x = rect.Left + (rect.Right - rect.Left) / 2;
+        y = rect.Top;
+        return true;
+    }
+
+    public void FinishMenu()
+    {
+        if (disposed || !IsAvailable) { return; }
+        // 托盘菜单关闭后让 Shell 收回焦点，窗口接收 WM_NULL 以结束 Win32 菜单状态。
+        NativeMethods.PostMessageW(data.Window, 0, 0, 0);
+        NativeMethods.Shell_NotifyIconW(3, ref data);
+    }
+
     public void Dispose()
     {
         if (disposed) { return; }
@@ -77,6 +101,24 @@ public sealed class NotificationAreaIcon : IDisposable
         // 文件加载的图标由本实例持有，在移除通知区域图标后释放。
         NativeMethods.DestroyIcon(data.Icon);
         data.Icon = 0;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NotifyIconIdentifier
+    {
+        public uint Size;
+        public nint Window;
+        public uint Id;
+        public Guid Guid;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -104,6 +146,11 @@ public sealed class NotificationAreaIcon : IDisposable
         [DllImport("shell32.dll", ExactSpelling = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool Shell_NotifyIconW(uint message, ref NotifyIconData data);
+        [DllImport("shell32.dll", ExactSpelling = true)]
+        public static extern int Shell_NotifyIconGetRect(ref NotifyIconIdentifier identifier, out NativeRect rect);
+        [DllImport("user32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool PostMessageW(nint window, uint message, nint wParam, nint lParam);
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern nint LoadImageW(nint instance, string name, uint type, int width, int height, uint flags);
         [DllImport("user32.dll", ExactSpelling = true)]

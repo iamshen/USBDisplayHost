@@ -20,15 +20,16 @@ public sealed class SingleInstanceGate : IDisposable
     private bool pendingActivation;
     private bool disposed;
 
-    public SingleInstanceGate(IErrorReporter errorReporter)
+    public SingleInstanceGate(IErrorReporter errorReporter, string applicationId = "UsbDisplayHost")
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(applicationId);
         this.errorReporter = errorReporter;
         using var identity = WindowsIdentity.GetCurrent();
         string user = identity.User?.Value ?? throw new InvalidOperationException("无法确定当前用户身份");
         using var process = Process.GetCurrentProcess();
         string key = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{user}:{process.SessionId}")));
-        pipeName = $"UsbDisplayHost.Activate.{key}";
-        mutex = new Mutex(false, $"Local\\UsbDisplayHost.Instance.{key}");
+        pipeName = $"{applicationId}.Activate.{key}";
+        mutex = new Mutex(false, $"Local\\{applicationId}.Instance.{key}");
         try { IsOwner = mutex.WaitOne(0); }
         catch (AbandonedMutexException) { IsOwner = true; }
         catch { mutex.Dispose(); lifetime.Dispose(); throw; }

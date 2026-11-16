@@ -1,30 +1,29 @@
-using System.Windows.Threading;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Desktop.ViewModels;
 using UsbDisplayHost.Windows.Usb;
 
 namespace UsbDisplayHost.Desktop.Services;
 
-// 只消费一个最新快照槽；隐藏时停止 Dispatcher 更新，不阻塞发现任务。
+// 只消费一个最新快照槽；隐藏时停止 界面更新，不阻塞发现任务。
 public sealed class DeviceDiscoveryPresenter : IAsyncDisposable
 {
     private readonly object sync = new();
     private readonly WindowsDeviceDiscoverySession session;
-    private readonly Dispatcher dispatcher;
+    private readonly IUiDispatcher dispatcher;
     private readonly DevicesPageViewModel devices;
     private readonly IErrorReporter reporter;
     private readonly CancellationTokenSource lifetime = new();
     private readonly Task reading;
     private DeviceDiscoverySnapshot latest;
-    private DispatcherOperation? pending;
+    private bool pending;
     private string? error;
     private bool visible, stopped;
     private Task? closing;
 
-    public DeviceDiscoveryPresenter(WindowsDeviceDiscoverySession session, Dispatcher dispatcher,
+    public DeviceDiscoveryPresenter(WindowsDeviceDiscoverySession session, IUiDispatcher dispatcher,
         DevicesPageViewModel devices, IErrorReporter reporter)
     {
-        dispatcher.VerifyAccess();
+        if (!dispatcher.HasThreadAccess) { throw new InvalidOperationException("发现列表需在界面线程附加"); }
         this.session = session; this.dispatcher = dispatcher; this.devices = devices; this.reporter = reporter;
         latest = session.Current; devices.AttachDiscovery(session);
         reading = Task.Run(ReadAsync);
@@ -60,8 +59,8 @@ public sealed class DeviceDiscoveryPresenter : IAsyncDisposable
     }
     private void ScheduleLocked()
     {
-        if (stopped || !visible || pending is not null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) { return; }
-        try { pending = dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(Present)); }
+        if (stopped || !visible || pending) { return; }
+        try { pending = dispatcher.TryEnqueue(Present, background: true); }
         catch (Exception exception) when (exception is not OutOfMemoryException) { reporter.Report(exception, "DeviceDiscoveryDispatch"); }
     }
     private void Present()
@@ -70,7 +69,7 @@ public sealed class DeviceDiscoveryPresenter : IAsyncDisposable
         string? message;
         lock (sync)
         {
-            pending = null;
+            pending = false;
             if (stopped || !visible) { return; }
             value = latest; message = error;
         }
@@ -85,7 +84,7 @@ public sealed class DeviceDiscoveryPresenter : IAsyncDisposable
     {
         lock (sync)
         {
-            stopped = true; pending?.Abort(); pending = null;
+            stopped = true; pending = false;
             return new(closing ??= StopCoreAsync());
         }
     }

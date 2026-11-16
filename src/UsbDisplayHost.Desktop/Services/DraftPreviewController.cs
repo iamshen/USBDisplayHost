@@ -1,7 +1,4 @@
-using System.IO;
 using System.Threading.Channels;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using UsbDisplayHost.Core.Configuration;
 using UsbDisplayHost.Core.Devices;
 using UsbDisplayHost.Core.Diagnostics;
@@ -11,7 +8,7 @@ using UsbDisplayHost.Core.Telemetry;
 
 namespace UsbDisplayHost.Desktop.Services;
 
-public sealed record PreviewUpdate(DeviceKey? DeviceKey, long Revision, BitmapSource? Image, AppError? Error);
+public sealed record PreviewUpdate(DeviceKey? DeviceKey, long Revision, object? Image, AppError? Error);
 
 public sealed class DraftPreviewController : IAsyncDisposable
 {
@@ -22,7 +19,8 @@ public sealed class DraftPreviewController : IAsyncDisposable
     });
     private readonly CancellationTokenSource lifetime = new();
     private readonly IFrameRenderer renderer;
-    private readonly Dispatcher dispatcher;
+    private readonly IUiDispatcher dispatcher;
+    private readonly IFramePreviewDecoder decoder;
     private readonly TimeProvider timeProvider;
     private readonly IErrorReporter errorReporter;
     private readonly MetricSamplingService metrics;
@@ -40,11 +38,12 @@ public sealed class DraftPreviewController : IAsyncDisposable
     private long frameNumber;
     private int resourcesDisposed;
 
-    public DraftPreviewController(IFrameRenderer renderer, Dispatcher dispatcher,
+    public DraftPreviewController(IFrameRenderer renderer, IUiDispatcher dispatcher, IFramePreviewDecoder decoder,
         TimeProvider timeProvider, IErrorReporter errorReporter, MetricSamplingService metrics, IAssetStore assets)
     {
         this.renderer = renderer;
         this.dispatcher = dispatcher;
+        this.decoder = decoder;
         this.timeProvider = timeProvider;
         this.errorReporter = errorReporter;
         this.metrics = metrics;
@@ -140,7 +139,7 @@ public sealed class DraftPreviewController : IAsyncDisposable
                         if (result is OperationResult<EncodedFrame>.Success success)
                         {
                             cancellation.Token.ThrowIfCancellationRequested();
-                            var image = Decode(success.Value);
+                            var image = await decoder.DecodeAsync(success.Value, cancellation.Token).ConfigureAwait(false);
                             cancellation.Token.ThrowIfCancellationRequested();
                             Publish(draft, new PreviewUpdate(draft.DeviceKey, draft.Revision, image, null));
                         }
@@ -174,19 +173,6 @@ public sealed class DraftPreviewController : IAsyncDisposable
         }
     }
 
-    private static BitmapSource Decode(EncodedFrame frame)
-    {
-        using var source = new MemoryStream(frame.Jpeg.ToArray(), writable: false);
-        var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-        bitmap.DecodePixelWidth = Math.Min(frame.Width, 576);
-        bitmap.StreamSource = source;
-        bitmap.EndInit();
-        bitmap.Freeze();
-        return bitmap;
-    }
-
     private AppError? AcquireReference(ThemeDraft draft, out AssetReferenceLease? lease)
     {
         lease = null;
@@ -217,24 +203,30 @@ public sealed class DraftPreviewController : IAsyncDisposable
         }
         try
         {
-            dispatcher.BeginInvoke(() =>
-            {
-                PreviewUpdate? updateToPublish;
-                lock (syncRoot)
-                {
-                    updateToPublish = visible && !disposed && latest?.Revision == desired?.Revision
-                        && latest?.DeviceKey == desired?.DeviceKey ? latest : null;
-                    latest = null;
-                    notificationQueued = false;
-                }
-                if (updateToPublish is not null) { Updated?.Invoke(updateToPublish); }
-            }, DispatcherPriority.Background);
-        }
-        catch (InvalidOperationException exception)
+            if (!dispatcher.TryEnqueue(PublishLatest, background: true)) { ClearPendingNotification(); }
+        }        catch (InvalidOperationException exception)
         {
-            lock (syncRoot) { latest = null; notificationQueued = false; }
+            ClearPendingNotification();
             errorReporter.Report(exception, "PreviewNotificationDuringShutdown");
         }
+    }
+
+    private void PublishLatest()
+    {
+        PreviewUpdate? update;
+        lock (syncRoot)
+        {
+            update = visible && !disposed && latest?.Revision == desired?.Revision
+                && latest?.DeviceKey == desired?.DeviceKey ? latest : null;
+            latest = null;
+            notificationQueued = false;
+        }
+        if (update is not null) { Updated?.Invoke(update); }
+    }
+
+    private void ClearPendingNotification()
+    {
+        lock (syncRoot) { latest = null; notificationQueued = false; }
     }
 
     private async Task UpdateClockAsync()

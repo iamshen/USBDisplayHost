@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using System.Windows.Threading;
+using UsbDisplayHost.Desktop.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using UsbDisplayHost.Core.Diagnostics;
@@ -12,7 +12,7 @@ public sealed partial class AppUpdateViewModel : ObservableObject
 {
     private readonly IAppUpdateService service;
     private readonly ApplicationSettingsPageViewModel settings;
-    private readonly Dispatcher dispatcher;
+    private readonly IUiDispatcher dispatcher;
     private readonly IErrorReporter reporter;
     private readonly CancellationTokenSource lifetime = new();
     private Task? background;
@@ -23,7 +23,7 @@ public sealed partial class AppUpdateViewModel : ObservableObject
     private AppUpdateSnapshot snapshot;
 
     public AppUpdateViewModel(IAppUpdateService service, ApplicationSettingsPageViewModel settings,
-        Dispatcher dispatcher, IErrorReporter reporter)
+        IUiDispatcher dispatcher, IErrorReporter reporter)
     {
         this.service = service; this.settings = settings; this.dispatcher = dispatcher; this.reporter = reporter;
         snapshot = service.Snapshot;
@@ -119,8 +119,8 @@ public sealed partial class AppUpdateViewModel : ObservableObject
 
     private void OnChanged(AppUpdateSnapshot value)
     {
-        if (dispatcher.HasShutdownStarted || stopping) { return; }
-        dispatcher.BeginInvoke(() => { if (!stopping) { snapshot = value; Refresh(); } });
+        if (stopping) { return; }
+        dispatcher.TryEnqueue(() => { if (!stopping) { snapshot = value; Refresh(); } });
     }
 
     private void Refresh()

@@ -37,8 +37,10 @@ public sealed partial class DevicesPageViewModel
     private bool CanThemeControl() => CanControlProtocol() && coordinator.Current.Mode == DeviceMode.Theme;
     private bool CanApplyBrightness() => CanThemeControl() && int.TryParse(BrightnessValue, out int value) && value is >= 0 and <= 100;
     private bool CanRetryProtocolSave() => !stopping && !IsProtocolBusy && protocol?.HasPendingSave == true;
-    private bool CanSwitchTheme() => CanControlProtocol() && coordinator.Current.Mode == DeviceMode.SecondaryDisplay;
-    private bool CanSwitchScreen() => CanControlProtocol() && coordinator.Current.Mode == DeviceMode.Theme;
+    private bool CanSwitchTheme() => CanControlProtocol()
+        && coordinator.Current is { Mode: DeviceMode.SecondaryDisplay, Power: not PowerState.Off };
+    private bool CanSwitchScreen() => CanControlProtocol()
+        && coordinator.Current is { Mode: DeviceMode.Theme, Power: not PowerState.Off };
 
     [RelayCommand(CanExecute = nameof(CanConnectProtocol))]
     private Task ConnectProtocolAsync() => RunProtocolAsync(() => protocol!.ConnectAsync(SelectedAdmission!, ProtocolToken), "设备协议已连接");

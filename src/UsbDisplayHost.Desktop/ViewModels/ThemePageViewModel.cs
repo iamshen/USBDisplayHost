@@ -1,4 +1,3 @@
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using UsbDisplayHost.Core.Configuration;
@@ -9,7 +8,6 @@ using UsbDisplayHost.Core.Sessions;
 using UsbDisplayHost.Core.Telemetry;
 using UsbDisplayHost.Core.Transport;
 using UsbDisplayHost.Desktop.Services;
-using Wpf.Ui.Controls;
 
 namespace UsbDisplayHost.Desktop.ViewModels;
 
@@ -48,8 +46,8 @@ public sealed partial class ThemePageViewModel : ObservableObject
     }
 
     public IReadOnlyList<ThemeOption> Templates { get; } = [
-        new("图片", ThemeKind.Image, SymbolRegular.Image24), new("时钟", ThemeKind.Clock, SymbolRegular.Clock24),
-        new("仪表盘", ThemeKind.Dashboard, SymbolRegular.DataHistogram24)];
+        new("图片", ThemeKind.Image), new("时钟", ThemeKind.Clock),
+        new("仪表盘", ThemeKind.Dashboard)];
     public IReadOnlyList<FitOption> Fits { get; } = [new("完整显示", ImageFit.Contain), new("填充裁剪", ImageFit.Cover)];
 
     [ObservableProperty, NotifyPropertyChangedFor(nameof(IsImage), nameof(IsClock), nameof(IsDashboard))]
@@ -64,9 +62,9 @@ public sealed partial class ThemePageViewModel : ObservableObject
     [ObservableProperty] private bool showHostTemperature;
     [ObservableProperty] private bool showDeviceTemperature;
     [ObservableProperty] private string imageDescription = "内置背景";
-    [ObservableProperty] private ImageSource? previewImage;
-    [ObservableProperty] private ImageSource? selectedTemplatePreview;
-    [ObservableProperty] private ImageSource? imageTemplatePreview;
+    [ObservableProperty] private object? previewImage;
+    [ObservableProperty] private object? selectedTemplatePreview;
+    [ObservableProperty] private object? imageTemplatePreview;
     private ThemeContent.Image? imageTemplatePreviewContent;
     [ObservableProperty] private string errorText = string.Empty;
     [ObservableProperty] private string previewErrorText = string.Empty;
@@ -311,7 +309,7 @@ public sealed partial class ThemePageViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            string? path = imagePicker.PickImage();
+            string? path = await imagePicker.PickImageAsync(cancellationToken);
             if (path is null) { return; }
             var result = await assets.ImportAsync(path, cancellationToken);
             if (result is OperationResult<ImportedAsset>.Success imported)

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Desktop.ViewModels;
@@ -11,19 +10,20 @@ public sealed class WorkspaceNoticeLifetime : IDisposable
 {
     private sealed record Notice(string Text, bool Failed);
     private readonly object sync = new();
-    private readonly MainWindow window;
+    private readonly IUiDispatcher dispatcher;
+    private readonly Action<string, bool> showNotice;
     private readonly IErrorReporter reporter;
     private readonly Dictionary<IAsyncRelayCommand, Func<Notice>> commands;
     private readonly HashSet<IAsyncRelayCommand> accepted = [];
     private readonly Func<IAsyncRelayCommand, bool> isExecuting;
-    private DispatcherOperation? pending;
+    private bool pending;
     private Notice? latest;
     private bool disposed;
 
-    public WorkspaceNoticeLifetime(MainWindow window, DevicesPageViewModel devices, ThemePageViewModel themes,
+    public WorkspaceNoticeLifetime(IUiDispatcher dispatcher, Action<string, bool> showNotice, DevicesPageViewModel devices, ThemePageViewModel themes,
         DeviceSettingsPageViewModel settings, IErrorReporter reporter)
     {
-        this.window = window; this.reporter = reporter;
+        this.dispatcher = dispatcher; this.showNotice = showNotice; this.reporter = reporter;
         isExecuting = command => ReferenceEquals(command, themes.ApplyCommand) ? themes.IsApplying
             : ReferenceEquals(command, settings.ApplyCommand) ? settings.IsApplying
             : ReferenceEquals(command, devices.DisconnectCommand) ? devices.IsDisconnecting
@@ -55,9 +55,8 @@ public sealed class WorkspaceNoticeLifetime : IDisposable
                 }
                 if (!accepted.Remove(command) || command.ExecutionTask is not { IsCompletedSuccessfully: true }) { return; }
                 latest = read();
-                if (string.IsNullOrWhiteSpace(latest.Text) || pending is not null
-                    || window.Dispatcher.HasShutdownStarted || window.Dispatcher.HasShutdownFinished) { return; }
-                pending = window.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(Present));
+                if (string.IsNullOrWhiteSpace(latest.Text) || pending) { return; }
+                pending = dispatcher.TryEnqueue(Present, background: true);
             }
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)
@@ -68,12 +67,12 @@ public sealed class WorkspaceNoticeLifetime : IDisposable
         Notice? notice;
         lock (sync)
         {
-            pending = null;
+            pending = false;
             if (disposed) { return; }
             notice = latest; latest = null;
         }
         if (notice is null) { return; }
-        try { window.ShowNotice(notice.Text, notice.Failed); }
+        try { showNotice(notice.Text, notice.Failed); }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         { reporter.Report(exception, "WorkspaceNoticePresentation"); }
     }
@@ -85,7 +84,7 @@ public sealed class WorkspaceNoticeLifetime : IDisposable
             disposed = true;
             foreach (var command in commands.Keys) { command.PropertyChanged -= OnCommandChanged; }
             commands.Clear(); accepted.Clear(); latest = null;
-            pending?.Abort(); pending = null;
+            pending = false;
         }
     }
 }

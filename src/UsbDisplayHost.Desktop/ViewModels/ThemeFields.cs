@@ -1,11 +1,10 @@
 using System.Globalization;
 using UsbDisplayHost.Core.Themes;
-using Wpf.Ui.Controls;
 
 namespace UsbDisplayHost.Desktop.ViewModels;
 
 public enum ThemeKind { Image, Clock, Dashboard }
-public sealed record ThemeOption(string Name, ThemeKind Value, SymbolRegular Icon);
+public sealed record ThemeOption(string Name, ThemeKind Value);
 public sealed record FitOption(string Name, ImageFit Value);
 
 internal static class ThemeFields

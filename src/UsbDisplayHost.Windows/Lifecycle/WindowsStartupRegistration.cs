@@ -5,41 +5,48 @@ using UsbDisplayHost.Core.Operations;
 
 namespace UsbDisplayHost.Windows.Lifecycle;
 
-public sealed class WindowsStartupRegistration(IErrorReporter errorReporter) : IStartupRegistration
+public sealed class WindowsStartupRegistration(IErrorReporter errorReporter, string valueName, string executableName)
+    : IStartupRegistration
 {
     private const string RunPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "USBDisplayHost";
+    private const string DefaultValueName = "USBDisplayHost";
+    private const string DefaultExecutableName = "UsbDisplayHost.Desktop.exe";
     private readonly object syncRoot = new();
     private readonly Guid owner = Guid.NewGuid();
 
-    // 卸载时只移除指向当前应用的自启项。
-    public static void RemoveCurrentApplicationEntry()
+    public WindowsStartupRegistration(IErrorReporter errorReporter) : this(errorReporter, DefaultValueName, DefaultExecutableName)
     {
-        string command = Command();
+    }
+
+    // 卸载时只移除指向当前应用的自启项。
+    public static void RemoveCurrentApplicationEntry() => RemoveCurrentApplicationEntry(DefaultValueName, DefaultExecutableName);
+    public static void RemoveCurrentApplicationEntry(string valueName, string executableName)
+    {
+        string command = Command(executableName);
         using var key = Registry.CurrentUser.OpenSubKey(RunPath, writable: true);
-        object? value = key?.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-        if (value is string text && text == command && key!.GetValueKind(ValueName) == RegistryValueKind.String)
+        object? value = key?.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+        if (value is string text && text == command && key!.GetValueKind(valueName) == RegistryValueKind.String)
         {
-            key.DeleteValue(ValueName, throwOnMissingValue: false);
+            key.DeleteValue(valueName, throwOnMissingValue: false);
         }
     }
 
     public Task<OperationResult<StartupRegistrationState>> QueryAsync(CancellationToken cancellationToken) => RunAsync(() =>
     {
-        string command = Command();
+        string command = Command(executableName);
         using var key = Registry.CurrentUser.OpenSubKey(RunPath, writable: false);
-        object? value = key?.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-        bool owned = value is null || value is string text && text == command && key!.GetValueKind(ValueName) == RegistryValueKind.String;
+        object? value = key?.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+        bool owned = value is null || value is string text && text == command && key!.GetValueKind(valueName) == RegistryValueKind.String;
         return new OperationResult<StartupRegistrationState>.Success(new StartupRegistrationState(value is not null && owned, owned));
     }, "StartupQuery", cancellationToken);
 
     public Task<OperationResult<IStartupRegistrationCheckpoint>> ChangeAsync(bool enabled, CancellationToken cancellationToken) =>
         RunAsync<IStartupRegistrationCheckpoint>(() =>
         {
-            string command = Command();
+            string command = Command(executableName);
             using var key = Registry.CurrentUser.CreateSubKey(RunPath, writable: true);
-            object? before = key.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-            if (before is not null && (before is not string text || text != command || key.GetValueKind(ValueName) != RegistryValueKind.String))
+            object? before = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+            if (before is not null && (before is not string text || text != command || key.GetValueKind(valueName) != RegistryValueKind.String))
             {
                 return new OperationResult<IStartupRegistrationCheckpoint>.Failure(AppError.Create("StartupEntryConflict",
                     "同名启动项与当前应用不匹配，未修改", "请检查已安装版本的自启配置后重试"));
@@ -57,7 +64,7 @@ public sealed class WindowsStartupRegistration(IErrorReporter errorReporter) : I
                 var report = errorReporter.Report(exception, "StartupChange");
                 try
                 {
-                    object? actual = key.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+                    object? actual = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
                     if (Equals(actual, checkpoint.Before))
                     {
                         return Failure<IStartupRegistrationCheckpoint>(report.ErrorId);
@@ -84,7 +91,7 @@ public sealed class WindowsStartupRegistration(IErrorReporter errorReporter) : I
                     "自启恢复上下文无效", "请重新读取设置和自启状态"));
             }
             using var key = Registry.CurrentUser.CreateSubKey(RunPath, writable: true);
-            object? actual = key.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+            object? actual = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
             if (Equals(actual, saved.Before)) { return new OperationResult<Unit>.Success(new Unit()); }
             if (!Equals(actual, saved.After))
             {
@@ -120,11 +127,11 @@ public sealed class WindowsStartupRegistration(IErrorReporter errorReporter) : I
             }
         }, CancellationToken.None);
 
-    private static string Command()
+    private static string Command(string executableName)
     {
         string? executable = Environment.ProcessPath;
         if (string.IsNullOrWhiteSpace(executable)
-            || !string.Equals(Path.GetFileName(executable), "UsbDisplayHost.Desktop.exe", StringComparison.OrdinalIgnoreCase))
+            || !string.Equals(Path.GetFileName(executable), executableName, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException("当前启动方式不支持应用自启");
         }
@@ -133,15 +140,15 @@ public sealed class WindowsStartupRegistration(IErrorReporter errorReporter) : I
         return command;
     }
 
-    private static void Apply(RegistryKey key, string? command)
+    private void Apply(RegistryKey key, string? command)
     {
-        if (command is null) { key.DeleteValue(ValueName, throwOnMissingValue: false); }
-        else { key.SetValue(ValueName, command, RegistryValueKind.String); }
+        if (command is null) { key.DeleteValue(valueName, throwOnMissingValue: false); }
+        else { key.SetValue(valueName, command, RegistryValueKind.String); }
     }
-    private static void Verify(RegistryKey key, string? expected)
+    private void Verify(RegistryKey key, string? expected)
     {
-        object? actual = key.GetValue(ValueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-        if (!Equals(actual, expected) || actual is not null && key.GetValueKind(ValueName) != RegistryValueKind.String)
+        object? actual = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+        if (!Equals(actual, expected) || actual is not null && key.GetValueKind(valueName) != RegistryValueKind.String)
         {
             throw new IOException("自启注册结果无法确认");
         }

@@ -7,6 +7,10 @@
         <PlatformTarget>x64</PlatformTarget>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <UseWinUI>true</UseWinUI>
+        <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+        <DesktopSource>../UsbDisplayHost.Desktop</DesktopSource>
+        <!-- 当前共用的 WPF ViewModel 使用字段生成属性，WinUI 采用非 AOT 部署。 -->
+        <NoWarn Condition="'$(PublishAot)' != 'true'">$(NoWarn);MVVMTK0045</NoWarn>
         <WindowsPackageType>None</WindowsPackageType>
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
         <SelfContained>true</SelfContained>
@@ -15,5 +19,38 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.WindowsAppSDK" />
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+        <PackageReference Include="Velopack" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../UsbDisplayHost.Core/UsbDisplayHost.Core.csproj" />
+        <ProjectReference Include="../UsbDisplayHost.Windows/UsbDisplayHost.Windows.csproj" />
+        <ProjectReference Include="../UsbDisplayHost.Rendering/UsbDisplayHost.Rendering.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="$(DesktopSource)/ViewModels/*.cs" LinkBase="Shared/ViewModels" />
+        <Compile Include="$(DesktopSource)/Services/DeviceDiscoveryLifetime.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/DeviceDiscoveryPresenter.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/DeviceProtocolService*.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/DeviceSessionLifetime.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/DeviceSnapshotPresenter.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/DraftPreviewController.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/IExportDestinationPicker.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/IFramePreviewDecoder.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/IImagePicker.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/IUiDispatcher.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/IWindowExitHost.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/ModeSwitchNoticeService.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/PowerSessionLifetime.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/ThemeApplicationResultFormatter.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/ThemeWorkspaceLifetime.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/WindowExitWorkflow.cs" LinkBase="Shared/Services" />
+        <Compile Include="$(DesktopSource)/Services/WorkspaceNoticeLifetime.cs" LinkBase="Shared/Services" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="$(DesktopSource)/Assets/Branding/app.ico"
+                 Link="Assets/Branding/app.ico"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 </Project>

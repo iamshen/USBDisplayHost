@@ -1,4 +1,3 @@
-using System.Windows.Threading;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Core.Operations;
 using UsbDisplayHost.Core.Sessions;
@@ -6,13 +5,13 @@ using UsbDisplayHost.Desktop.ViewModels;
 
 namespace UsbDisplayHost.Desktop.Services;
 
-// 消费协调器最新槽，不等待界面呈现；隐藏时仅保留一个快照，Dispatcher 最多一个待处理通知。
+// 消费协调器最新槽，不等待界面呈现；隐藏时仅保留一个快照，界面队列最多一个待处理通知。
 public sealed class DeviceSnapshotPresenter : IAsyncDisposable
 {
     private readonly object syncRoot = new();
     private readonly DeviceCoordinator coordinator;
     private readonly DeviceSessionLifetime sessions;
-    private readonly Dispatcher dispatcher;
+    private readonly IUiDispatcher dispatcher;
     private readonly DevicesPageViewModel devices;
     private readonly WorkspaceViewModel workspace;
     private readonly IErrorReporter reporter;
@@ -27,10 +26,10 @@ public sealed class DeviceSnapshotPresenter : IAsyncDisposable
     private SessionLifecycleSnapshot latestLifecycle;
     private string? pendingError;
     private bool visible, stopped;
-    private DispatcherOperation? pending;
+    private bool pending;
     private Task? stopping;
 
-    public DeviceSnapshotPresenter(DeviceCoordinator coordinator, DeviceSessionLifetime sessions, Dispatcher dispatcher, DevicesPageViewModel devices,
+    public DeviceSnapshotPresenter(DeviceCoordinator coordinator, DeviceSessionLifetime sessions, IUiDispatcher dispatcher, DevicesPageViewModel devices,
         WorkspaceViewModel workspace, IErrorReporter reporter, ThemePageViewModel themes, DeviceSettingsPageViewModel deviceSettings,
         ApplicationSettingsPageViewModel applicationSettings)
     {
@@ -124,8 +123,8 @@ public sealed class DeviceSnapshotPresenter : IAsyncDisposable
 
     private void Schedule()
     {
-        if (!visible || stopped || pending is not null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) { return; }
-        try { pending = dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(Present)); }
+        if (!visible || stopped || pending) { return; }
+        try { pending = dispatcher.TryEnqueue(Present, background: true); }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {
             reporter.Report(exception, "DeviceSnapshotDispatch");
@@ -139,7 +138,7 @@ public sealed class DeviceSnapshotPresenter : IAsyncDisposable
         string? error;
         lock (syncRoot)
         {
-            pending = null;
+            pending = false;
             if (!visible || stopped) { return; }
             snapshot = latest; error = pendingError;
             lifecycle = latestLifecycle;
@@ -173,7 +172,7 @@ public sealed class DeviceSnapshotPresenter : IAsyncDisposable
     }
     private async Task StopCoreAsync()
     {
-        stopped = true; pending?.Abort(); pending = null;
+        stopped = true; pending = false;
         await lifetime.CancelAsync().ConfigureAwait(false);
         if (subscription is not null) { await subscription.DisposeAsync().ConfigureAwait(false); }
         await reading.ConfigureAwait(false);

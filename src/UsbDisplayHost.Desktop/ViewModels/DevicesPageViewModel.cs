@@ -9,14 +9,13 @@ using UsbDisplayHost.Desktop.Services;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Core.Themes;
 using UsbDisplayHost.Core.Transport;
-using System.IO;
-using System.Windows.Media.Imaging;
 
 namespace UsbDisplayHost.Desktop.ViewModels;
 
 public sealed record DiscoveredDeviceItem(DeviceKey Key, string Title, string InterfacesText, bool IsSelectable, string ErrorText);
 
-public sealed partial class DevicesPageViewModel(DeviceCoordinator coordinator, DeviceSessionLifetime sessions, IErrorReporter reporter) : ObservableObject
+public sealed partial class DevicesPageViewModel(
+    DeviceCoordinator coordinator, DeviceSessionLifetime sessions, IErrorReporter reporter, IFramePreviewDecoder previewDecoder) : ObservableObject
 {
     private readonly CancellationTokenSource lifetime = new();
     private bool stopping;
@@ -28,7 +27,7 @@ public sealed partial class DevicesPageViewModel(DeviceCoordinator coordinator, 
     private FrameContext? failedPreviewContext;
     private long failedPreviewNumber = -1;
     private string previewFailure = string.Empty;
-    [ObservableProperty] private BitmapSource? hostPreview;
+    [ObservableProperty] private object? hostPreview;
     [ObservableProperty] private string hostPreviewText = "主机预览：尚无已提交画面";
     [ObservableProperty] private string hostPreviewErrorText = string.Empty;
     public void SetPreviewPageVisible(bool value) { pageVisible = value; visibilityRevision++; }
@@ -60,28 +59,25 @@ public sealed partial class DevicesPageViewModel(DeviceCoordinator coordinator, 
             if (completed.Frame.Context == previewContext && completed.Frame.FrameNumber == previewFrameNumber)
             { HostPreviewText = PreviewCaption(completed); return; }
             attempted = completed;
-            var image = await Task.Run(() =>
-            {
-                using var stream = new MemoryStream(completed.Frame.Jpeg.ToArray(), writable: false);
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit(); bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.DecodePixelWidth = Math.Min(completed.Frame.Width, 576); bitmap.StreamSource = stream;
-                bitmap.EndInit(); bitmap.Freeze();
-                return bitmap;
-            });
+            var image = await previewDecoder.DecodeAsync(completed.Frame, lifetime.Token);
             if (stopping || !pageVisible || !windowVisible || visibility != visibilityRevision
                 || !ReferenceEquals(sessions.CaptureActiveHostFrame(), completed)) { return; }
             previewContext = completed.Frame.Context; previewFrameNumber = completed.Frame.FrameNumber;
             HostPreview = image; HostPreviewErrorText = string.Empty;
             HostPreviewText = PreviewCaption(completed);
         }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+        {
+        }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {
             var report = reporter.Report(exception, "ActiveHostPreviewDecode");
+            if (stopping || !pageVisible || !windowVisible || visibility != visibilityRevision
+                || (attempted is not null && !ReferenceEquals(sessions.CaptureActiveHostFrame(), attempted))) { return; }
+
             previewFailure = $"主机预览未完成，请重试预览或检查诊断。错误编号：{report.ErrorId}";
             if (attempted is not null) { failedPreviewContext = attempted.Frame.Context; failedPreviewNumber = attempted.Frame.FrameNumber; }
-            if (!stopping && visibility == visibilityRevision)
-            { HostPreviewErrorText = previewFailure; }
+            HostPreviewErrorText = previewFailure;
         }
     }
     private static string PreviewCaption(CompletedHostFrame completed) =>

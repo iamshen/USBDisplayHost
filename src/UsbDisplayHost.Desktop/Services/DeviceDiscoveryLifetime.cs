@@ -1,4 +1,3 @@
-using System.Windows.Threading;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Core.Operations;
 using UsbDisplayHost.Core.Devices;
@@ -9,7 +8,7 @@ using UsbDisplayHost.Windows.Usb;
 namespace UsbDisplayHost.Desktop.Services;
 
 // 工作区拥有可选发现生命周期；未附加时不创建监视器或执行原生调用。
-public sealed class DeviceDiscoveryLifetime(Dispatcher dispatcher, DevicesPageViewModel devices,
+public sealed class DeviceDiscoveryLifetime(IUiDispatcher dispatcher, DevicesPageViewModel devices,
     DeviceCoordinator coordinator, DeviceSessionLifetime deviceSessions, IErrorReporter reporter)
 {
     private readonly object sync = new();
@@ -47,7 +46,7 @@ public sealed class DeviceDiscoveryLifetime(Dispatcher dispatcher, DevicesPageVi
 
     public OperationResult<Unit> Attach(WindowsDeviceDiscovery value)
     {
-        if (!dispatcher.CheckAccess())
+        if (!dispatcher.HasThreadAccess)
         { return new OperationResult<Unit>.Failure(AppError.Create("DiscoveryAttachRequiresUiThread",
             "发现列表需在界面线程附加", "请通过工作区界面线程附加，调用方继续持有发现生命周期")); }
         lock (sync)
@@ -95,13 +94,13 @@ public sealed class DeviceDiscoveryLifetime(Dispatcher dispatcher, DevicesPageVi
     }
     public void RequestReconnect(DeviceKey key, long generation)
     {
-        if (closing is not null || dispatcher.HasShutdownStarted) { return; }
-        dispatcher.BeginInvoke(new Action(() =>
+        if (closing is not null) { return; }
+        dispatcher.TryEnqueue(() =>
         {
             if (closing is null && coordinator.Current.DeviceKey == key
                 && coordinator.Current.Connection is ConnectionState.Disconnected or ConnectionState.Faulted)
             { _ = devices.ReconnectProtocolAsync(key, generation); }
-        }));
+        });
     }
     public void SetVisible(bool value)
     { devices.SetPreviewWindowVisible(value); lock (sync) { visible = value; presenter?.SetVisible(value); } }

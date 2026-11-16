@@ -77,15 +77,17 @@ public sealed class App : Application
                 () => deviceCoordinator.Current);
             var settings = new ApplicationSettingsPageViewModel(settingsService, errorReporter);
             var updateService = new GitHubAppUpdateService(dataPaths, errorReporter);
-            var updates = new AppUpdateViewModel(updateService, settings, Dispatcher, errorReporter);
+            var dispatcher = new WpfUiDispatcher(Dispatcher);
+            var updates = new AppUpdateViewModel(updateService, settings, dispatcher, errorReporter);
             settings.Updates = updates;
             var assets = new FileAssetStore(dataPaths, new WpfImageValidator(errorReporter), storageCoordinator);
             var renderer = new WpfFrameRenderer(assets, TimeProvider.System, errorReporter);
             var metrics = new MetricSamplingService(new WindowsHostMetricProvider(TimeProvider.System, errorReporter),
                 TimeProvider.System, errorReporter);
-            var preview = new DraftPreviewController(renderer, Dispatcher, TimeProvider.System, errorReporter, metrics, assets);
+            var previewDecoder = new WpfFramePreviewDecoder();
+            var preview = new DraftPreviewController(renderer, dispatcher, previewDecoder, TimeProvider.System, errorReporter, metrics, assets);
             deviceSessions = new DeviceSessionLifetime(deviceCoordinator, errorReporter);
-            var devices = new DevicesPageViewModel(deviceCoordinator, deviceSessions, errorReporter);
+            var devices = new DevicesPageViewModel(deviceCoordinator, deviceSessions, errorReporter, previewDecoder);
             var deviceSettings = new DeviceSettingsPageViewModel(errorReporter, deviceCoordinator, deviceSessions, metrics, devices);
             var themes = new ThemePageViewModel(assets, new ImagePicker(() => MainWindow), preview, errorReporter,
                 deviceCoordinator, deviceSessions, metrics);
@@ -93,12 +95,13 @@ public sealed class App : Application
                 new DiagnosticExportService(dataPaths, errorReporter, TimeProvider.System),
                 new DiagnosticFolderOpener(dataPaths, errorReporter), new ExportDestinationPicker(() => MainWindow),
                 themes.CaptureDiagnosticSummary, deviceSessions);
-            var deviceSnapshots = new DeviceSnapshotPresenter(deviceCoordinator, deviceSessions, Dispatcher, devices, workspace, errorReporter, themes, deviceSettings, settings);
-            var deviceDiscovery = new DeviceDiscoveryLifetime(Dispatcher, devices, deviceCoordinator, deviceSessions, errorReporter);
+            var deviceSnapshots = new DeviceSnapshotPresenter(deviceCoordinator, deviceSessions, dispatcher, devices, workspace, errorReporter, themes, deviceSettings, settings);
+            var deviceDiscovery = new DeviceDiscoveryLifetime(dispatcher, devices, deviceCoordinator, deviceSessions, errorReporter);
             var protocol = new DeviceProtocolService(deviceCoordinator, deviceSessions, deviceDiscovery,
                 profiles, assets, renderer, metrics, errorReporter);
             if (!uiOnly) { devices.AttachProtocol(protocol, deviceDiscovery.StartAsync); }
-            var modeNotice = new ModeSwitchNoticeService(settingsService, () => MainWindow as MainWindow);
+            var modeNotice = new ModeSwitchNoticeService(settingsService, token => MainWindow is MainWindow window
+                ? window.ConfirmModeSwitchAsync(token) : Task.FromResult((false, false)));
             devices.AttachModeSwitchConfirmation(modeNotice.ConfirmAsync);
             themeWorkspace = new ThemeWorkspaceLifetime(themes, settings, deviceSettings, diagnosticsPage, preview, renderer, metrics,
                 deviceSessions, deviceCoordinator, deviceSnapshots, deviceDiscovery, errorReporter, protocol, devices);
@@ -108,11 +111,11 @@ public sealed class App : Application
             var navigationService = new Wpf.Ui.NavigationService(pageProvider);
             MainWindow = new MainWindow(workspace, navigationService, pageProvider, settings, devices);
             _ = new WindowWorkAreaLifetime(MainWindow, errorReporter, message => workspace.ErrorText = message);
-            themeWorkspace.AttachNotices(new WorkspaceNoticeLifetime((MainWindow)MainWindow, devices, themes, deviceSettings, errorReporter));
+            themeWorkspace.AttachNotices(new WorkspaceNoticeLifetime(dispatcher, ((MainWindow)MainWindow).ShowNotice, devices, themes, deviceSettings, errorReporter));
             if (!uiOnly)
             {
-                themeWorkspace.AttachPowerLifetime(new WindowPowerLifetime(MainWindow, deviceCoordinator,
-                    deviceSessions, deviceDiscovery, errorReporter));
+                var power = new WindowPowerLifetime(MainWindow, deviceCoordinator, deviceSessions, deviceDiscovery, errorReporter);
+                themeWorkspace.AttachPowerLifetime(power.StopAsync);
             }
             exitService = new WindowExitService(this, themeWorkspace, errorReporter,
                 TimeSpan.FromSeconds(2), TimeProvider.System);

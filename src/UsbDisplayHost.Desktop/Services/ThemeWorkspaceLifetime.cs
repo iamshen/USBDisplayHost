@@ -17,11 +17,11 @@ public sealed class ThemeWorkspaceLifetime(
 {
     private readonly object syncRoot = new();
     private Task<OperationResult<Unit>>? stopping;
-    private WindowPowerLifetime? power;
-    private WorkspaceNoticeLifetime? notices;
+    private Func<Task<OperationResult<Unit>>>? stopPower;
+    private IDisposable? notices;
     private bool updateDevicesClosed;
     private bool updateOwnsDeviceGate;
-    public void AttachNotices(WorkspaceNoticeLifetime value)
+    public void AttachNotices(IDisposable value)
     {
         lock (syncRoot)
         {
@@ -29,12 +29,12 @@ public sealed class ThemeWorkspaceLifetime(
             notices = value;
         }
     }
-    public void AttachPowerLifetime(WindowPowerLifetime value)
+    public void AttachPowerLifetime(Func<Task<OperationResult<Unit>>> stop)
     {
         lock (syncRoot)
         {
-            if (power is not null || stopping is not null) { throw new InvalidOperationException("工作区电源通知已附加或正在停止"); }
-            power = value;
+            if (stopPower is not null || stopping is not null) { throw new InvalidOperationException("工作区电源通知已附加或正在停止"); }
+            stopPower = stop;
         }
     }
     public ThemePageViewModel Themes { get; } = themes;
@@ -103,9 +103,9 @@ public sealed class ThemeWorkspaceLifetime(
     {
         var noticeStop = await StopResourceAsync(() => { notices?.Dispose(); return Task.CompletedTask; }, "WorkspaceNoticeStop");
         if (noticeStop is not OperationResult<Unit>.Success) { return noticeStop; }
-        if (power is not null)
+        if (stopPower is not null)
         {
-            var powerStop = await power.StopAsync();
+            var powerStop = await stopPower();
             if (powerStop is not OperationResult<Unit>.Success) { return powerStop; }
         }
         var commandStop = await StopResourceAsync(devices.StopAsync, "DeviceCommandsStop");

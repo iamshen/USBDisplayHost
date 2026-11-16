@@ -52,7 +52,7 @@ public partial class DiagnosticsPageViewModel(IDiagnosticService diagnostics, ID
         long generation = ++exportGeneration;
         try
         {
-            string? path = destinationPicker.Pick();
+            string? path = await destinationPicker.PickAsync(cancellationToken);
             if (path is null) { ActionText = "已取消导出"; return; }
             ExportProgress = 0;
             ActionText = "正在导出诊断";

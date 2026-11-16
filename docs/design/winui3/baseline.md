@@ -32,9 +32,9 @@ Apps 截图把选项、筛选和排序集中到列表上方，行内先显示名
 
 - 样板为 `UsbDisplayHost.WinUI`，沿用 `global.json` 的 .NET SDK 10.0.401，锁定稳定版 Microsoft.WindowsAppSDK 2.6.5。项目目标为 `net10.0-windows10.0.19041.0`。
 - 样板以 Windows 10 build 19041 为目标下限，使用本机 Windows SDK 构建 win-x64。最低版本的安装和运行仍需实际环境验证。
-- 非 MSIX 路径分别设置 .NET 与 Windows App SDK 自包含。后续 Beta 由独立 Velopack 安装身份与 `win-x64-beta` 通道分发。样板不订阅设备、不打开正式数据目录。
+- 非 MSIX 路径分别设置 .NET 与 Windows App SDK 自包含。后续 Beta 由独立 Velopack 安装身份与 `win-x64-beta` 通道分发。WinUI 开发入口的 Beta 配置、素材和诊断使用 `%LocalAppData%\UsbDisplayHost.Beta.Data`。
 - 仓库 `build.ps1 -Action Build` 编译两个入口。`Publish` 和 `Package` 继续使用 WPF 入口。构建与打包均不启动程序。
-- 无设备样板从仓库根目录运行 `dotnet run --project src/UsbDisplayHost.WinUI -c Release --no-build`。设备页入口和顶部导航都能打开诊断。每次运行写入 `%TEMP%\UsbDisplayHost.WinUI\startup-*.log`，诊断显示本次启动记录。构建、运行与产品视觉验收分别记录。
+- 无设备验证从仓库根目录运行 `dotnet run --project src/UsbDisplayHost.WinUI -c Release --no-build -- --ui-only`。该模式跳过设备发现和连接，应用数据写入独立临时目录。设备页入口和顶部导航都能打开诊断，查看本次启动记录。启动记录保留在 `%TEMP%\UsbDisplayHost.WinUI\startup-*.log` 的五个槽中。
 
 [Windows App SDK 稳定版](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) · [Windows 版本与 SDK](https://learn.microsoft.com/windows/apps/get-started/versioning-overview) · [部署说明](https://learn.microsoft.com/windows/apps/package-and-deploy/deploy-overview)
 
