@@ -56,6 +56,8 @@ Windows 原生 USB 屏上位机。编辑主题，预览内容，管理设备。
 
 安装包输出到 `.artifacts/installers/win-x64/<Version>/`。构建与打包不会启动应用。
 
+`Build` 同时编译 WPF 入口和 [WinUI 3 无设备样板](docs/design/winui3/baseline.md)。`Package` 生成 WPF 安装包。
+
 无设备查看界面：
 
 ```powershell

@@ -1,5 +1,10 @@
 # 项目交接要点
 
+## WinUI 3 样板构建
+
+- `global.json` 禁止 SDK 前滚。本机只有 10.0.403 时，可从 Microsoft 下载并校验 10.0.401 Windows x64 便携包，解压到独立目录，把该目录临时加入本次构建的 PATH。先在仓库目录核对 `dotnet --version`，再运行 `./build.ps1 -Action Build`。
+- WinUI 非 MSIX 自包含需分别设置 `SelfContained` 和 `WindowsAppSDKSelfContained`。构建后可用输出目录的 `coreclr.dll` 和 `Microsoft.UI.Xaml.dll` 核对依赖是否随应用输出。安装、更新和净机运行分别验证。
+
 ## Issue 机器人标签
 
 - 表单齐全不代表信息足以复现。机器人仅维护 `form-incomplete`，不能移除维护者用于索要日志或澄清的 `needs-info`；自动修复遇到任一标签都先等待。验证覆盖缺项添加、重复检查不刷屏、补齐移除和人工标签保留。

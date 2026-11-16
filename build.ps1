@@ -12,6 +12,7 @@ if ($version -notmatch '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') {
     throw 'Version 必须为三段稳定版本号，如 0.1.1'
 }
 $projectPath = Join-Path $PSScriptRoot 'src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj'
+$solutionPath = Join-Path $PSScriptRoot 'UsbDisplayHost.slnx'
 $packageArguments = @()
 if ($PackageCache) {
     $packageArguments = @("-p:RestorePackagesPath=$([IO.Path]::GetFullPath($PackageCache))")
@@ -29,10 +30,10 @@ Push-Location $PSScriptRoot
 try {
     switch ($Action) {
         'Restore' {
-            Invoke-DotNet (@('restore', $projectPath, '--locked-mode') + $packageArguments)
+            Invoke-DotNet (@('restore', $solutionPath, '--locked-mode') + $packageArguments)
         }
         'Build' {
-            Invoke-DotNet (@('build', $projectPath, '-c', 'Release', '-p:RestoreLockedMode=true') + $packageArguments)
+            Invoke-DotNet (@('build', $solutionPath, '-c', 'Release', '-p:RestoreLockedMode=true') + $packageArguments)
         }
         { $_ -in 'Publish', 'Package' } {
             $artifactRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '.artifacts'))
