@@ -31,10 +31,15 @@ public sealed partial class MainWindow : Window
         double scale = dpi == 0 ? 1.0 : (double)dpi / DefaultDpi;
         DisplayArea display = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest);
         RectInt32 workArea = display.WorkArea;
+        RectInt32 displayBounds = display.OuterBounds;
+        PointInt32 position = AppWindow.Position;
 
-        AppWindow.Resize(new SizeInt32(
-            Math.Min((int)Math.Round(DefaultWidth * scale), workArea.Width),
-            Math.Min((int)Math.Round(DefaultHeight * scale), workArea.Height)));
+        int width = Math.Min((int)Math.Round(DefaultWidth * scale), workArea.Width);
+        int height = Math.Min((int)Math.Round(DefaultHeight * scale), workArea.Height);
+        int x = Math.Clamp(position.X - displayBounds.X, workArea.X, workArea.X + workArea.Width - width);
+        int y = Math.Clamp(position.Y - displayBounds.Y, workArea.Y, workArea.Y + workArea.Height - height);
+
+        AppWindow.MoveAndResize(new RectInt32(x, y, width, height), display);
     }
 
     private void OnOpenDiagnostics(object sender, RoutedEventArgs args)
@@ -60,6 +65,7 @@ public sealed partial class MainWindow : Window
     {
         WorkspaceNavigation.SelectionChanged -= OnSelectionChanged;
         log.Write("主窗口已关闭");
+        log.Dispose();
     }
 
     [DllImport("user32.dll", ExactSpelling = true)]
