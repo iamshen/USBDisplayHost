@@ -126,7 +126,7 @@ public sealed class DiagnosticExportService(ApplicationDataPaths paths, Diagnost
                         {
                             SchemaVersion = 2,
                             ExportedAt = timeProvider.GetUtcNow(),
-                            ApplicationVersion = typeof(DiagnosticExportService).Assembly.GetName().Version?.ToString(),
+                            ApplicationVersion = diagnostics.ApplicationVersion,
                             WindowsVersion = Environment.OSVersion.Version.ToString(),
                             Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
                             FirmwareVersion = "未提供", DriverVersion = "未提供",

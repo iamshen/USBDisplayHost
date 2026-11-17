@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -5,13 +6,14 @@ using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Windows.Diagnostics;
 using UsbDisplayHost.Windows.Lifecycle;
 using UsbDisplayHost.Windows.Storage;
+using UsbDisplayHost.Windows.Updates;
 using Velopack;
 
 namespace UsbDisplayHost.WinUI;
 
 internal static class Program
 {
-    public const string ProductId = "USBDisplayHost.Beta";
+    public const string ProductId = GitHubAppUpdateService.BetaProductId;
     public const string ProductName = "USB Display Beta";
     public const string ExecutableName = "UsbDisplayHost.WinUI.exe";
     private const string UiOnlyInstanceId = ProductId + ".UiOnly";
@@ -37,7 +39,9 @@ internal static class Program
                 ? Path.Combine(Path.GetTempPath(), "UsbDisplayHost.Beta.UiOnly", Guid.NewGuid().ToString("N"))
                 : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UsbDisplayHost.Beta.Data");
             var paths = new ApplicationDataPaths(dataRoot);
-            diagnostics = new DiagnosticLog(paths, TimeProvider.System);
+            string? version = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion.Split('+')[0];
+            diagnostics = new DiagnosticLog(paths, TimeProvider.System, version);
             using var instance = new SingleInstanceGate(diagnostics, uiOnly ? UiOnlyInstanceId : ProductId);
             if (!instance.IsOwner)
             {
@@ -47,13 +51,14 @@ internal static class Program
             }
 
             diagnostics.Write(DiagnosticSeverity.Information, "Application", uiOnly ? "StartingUiOnly" : "Starting");
-            bool updateRestart = args.Any(arg => arg.StartsWith("--updated-to=", StringComparison.Ordinal));
+            const string updatedArgument = "--updated-to=";
+            string? updatedTo = args.FirstOrDefault(arg => arg.StartsWith(updatedArgument, StringComparison.Ordinal))?[updatedArgument.Length..];
             WinRT.ComWrappersSupport.InitializeComWrappers();
             Application.Start(_ =>
             {
                 var queue = DispatcherQueue.GetForCurrentThread();
                 SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(queue));
-                var application = new App(diagnostics, paths, queue, uiOnly, updateRestart);
+                var application = new App(diagnostics, paths, queue, uiOnly, updatedTo);
                 instance.SetActivationHandler(application.RequestActivation);
             });
             return 0;

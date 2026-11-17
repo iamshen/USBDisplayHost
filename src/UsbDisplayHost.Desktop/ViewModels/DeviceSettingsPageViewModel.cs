@@ -134,7 +134,7 @@ public partial class DeviceSettingsPageViewModel(IErrorReporter reporter,
         try
         {
             var completion = await sessions.ApplySettingsAsync(state.DeviceKey, state.SessionGeneration, request, metrics.GetSnapshot(), token);
-            if (coordinator.Current.DeviceKey != state.DeviceKey || coordinator.Current.SessionGeneration != state.SessionGeneration) { return; }
+            if (!IsCurrentSession(state)) { return; }
             if (completion.Attempt?.Result is OperationResult<ThemeApplicationResult>.Success applied)
             {
                 lastApplication = applied.Value;
@@ -156,6 +156,7 @@ public partial class DeviceSettingsPageViewModel(IErrorReporter reporter,
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {
             var report = reporter.Report(exception, "DeviceSettingsApplyCommand");
+            if (!IsCurrentSession(state)) { return; }
             ApplicationText = "应用结果待确认";
             ErrorText = $"请查看设备状态与诊断，避免重复应用。错误编号：{report.ErrorId}";
         }
@@ -174,10 +175,12 @@ public partial class DeviceSettingsPageViewModel(IErrorReporter reporter,
     private async Task RetryApplicationSaveAsync()
     {
         if (!CanRetryApplicationSave() || applicationSaveId is not { } id) { return; }
+        var state = coordinator.Current;
         IsBusy = true;
         try
         {
             var result = await sessions.RetrySaveAsync(id);
+            if (!IsCurrentSession(state)) { return; }
             if (result is OperationResult<PendingThemeSave>.Success)
             {
                 if (lastApplication is not null)
@@ -194,9 +197,16 @@ public partial class DeviceSettingsPageViewModel(IErrorReporter reporter,
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {
             var report = reporter.Report(exception, "SettingsApplicationSaveRetry");
+            if (!IsCurrentSession(state)) { return; }
             ErrorText = $"设置保存未完成。错误编号：{report.ErrorId}";
         }
         finally { IsBusy = false; RefreshDeviceActions(); }
+    }
+
+    private bool IsCurrentSession(DeviceSnapshot state)
+    {
+        var current = coordinator.Current;
+        return state.DeviceKey == current.DeviceKey && state.SessionGeneration == current.SessionGeneration;
     }
 
     private bool CanRestoreDefaults() => CanEdit;

@@ -14,7 +14,7 @@ namespace UsbDisplayHost.Desktop.Services;
 // 页面和托盘共用本服务，实际工作仍由唯一协调器和帧边界执行者受理。
 public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator, DeviceSessionLifetime sessions,
     DeviceDiscoveryLifetime discovery, IProfileStore profiles, IAssetStore assets, IFrameRenderer renderer,
-    MetricSamplingService metrics, IErrorReporter reporter)
+    MetricSamplingService metrics, IErrorReporter reporter, bool exclusiveAccess = false)
 {
     private Ad102V2DeviceSession? active;
     private HidOpenedSession? pendingHid;
@@ -98,7 +98,7 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
                 if (!Guid.TryParse(path[(path.LastIndexOf('#') + 1)..], out var interfaceClass))
                 { return Failure("DisplayInterfaceClassMissing", "无法读取 Display 接口类"); }
                 var policy = (OperationResult<WinUsbIoPolicy>.Success)WinUsbIoPolicy.Create(2000, 2000, false, Ad102V2SourceProtocol.Evidence);
-                pendingTransport = new(admission, WinUsbBinding.ForAd102V2(interfaceClass), policy.Value, reporter);
+                pendingTransport = new(admission, WinUsbBinding.ForAd102V2(interfaceClass), policy.Value, reporter, exclusiveAccess);
                 var dataOpened = await pendingTransport.OpenAsync(data[0], token);
                 if (dataOpened is not OperationResult<TransportLimits>.Success) { return Convert<TransportLimits>(dataOpened); }
                 active = new(controller.Value, hidIdentity, caps.Value, pendingTransport, coordinator, reporter) { PowerIntent = intent };

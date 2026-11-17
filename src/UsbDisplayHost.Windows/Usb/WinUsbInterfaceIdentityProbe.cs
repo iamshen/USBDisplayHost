@@ -18,6 +18,7 @@ public sealed class WinUsbInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
     private static readonly HashSet<WinUsbInterfaceIdentityProbe> Owners = [];
     private readonly ImmutableArray<WinUsbIdentityCompatibility> compatibility;
     private readonly IErrorReporter reporter;
+    private readonly bool exclusiveAccess;
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly object closeSync = new();
     private Task<OperationResult<Unit>>? closing;
@@ -25,11 +26,16 @@ public sealed class WinUsbInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
     private object? retainedOwner;
     private int stopping;
     private sealed record MetadataOwner(SafeUsbFileHandle? File, SafeWinUsbHandle? Usb, WinUsbPathOwnership? Path);
-    private WinUsbInterfaceIdentityProbe(ImmutableArray<WinUsbIdentityCompatibility> compatibility, IErrorReporter reporter)
-    { this.compatibility = compatibility; this.reporter = reporter; }
+    private WinUsbInterfaceIdentityProbe(ImmutableArray<WinUsbIdentityCompatibility> compatibility, IErrorReporter reporter,
+        bool exclusiveAccess)
+    {
+        this.compatibility = compatibility;
+        this.reporter = reporter;
+        this.exclusiveAccess = exclusiveAccess;
+    }
 
     public static OperationResult<WinUsbInterfaceIdentityProbe> Create(ImmutableArray<WinUsbIdentityCompatibility> compatibility,
-        IErrorReporter reporter)
+        IErrorReporter reporter, bool exclusiveAccess)
     {
         if (compatibility.IsDefaultOrEmpty || compatibility.Length > 8 || compatibility.Any(item => item is null
             || item.InterfaceClass == Guid.Empty || item.VendorId == 0 || string.IsNullOrWhiteSpace(item.EvidenceReference)
@@ -47,7 +53,7 @@ public sealed class WinUsbInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
                 return new OperationResult<WinUsbInterfaceIdentityProbe>.Failure(AppError.Create("WinUsbIdentityOwnerOccupied",
                     "接口类已有身份探测所有者或达到限额", "请先确认原探测器关闭；未知释放不能用新实例替代"));
             }
-            var owner = new WinUsbInterfaceIdentityProbe(compatibility, reporter); Owners.Add(owner);
+            var owner = new WinUsbInterfaceIdentityProbe(compatibility, reporter, exclusiveAccess); Owners.Add(owner);
             return new OperationResult<WinUsbInterfaceIdentityProbe>.Success(owner);
         }
     }
@@ -85,7 +91,8 @@ public sealed class WinUsbInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
             var claimed = WinUsbPathOwnership.Acquire(path.Path);
             if (claimed is OperationResult<WinUsbPathOwnership>.Failure occupied) { return new OperationResult<DeviceIdentity?>.Failure(occupied.Error); }
             pathOwner = ((OperationResult<WinUsbPathOwnership>.Success)claimed).Value;
-            file = WinUsbNative.CreateFile(path.Path, 0xC0000000, 3, nint.Zero, 3, 0x40000000, nint.Zero);
+            file = WinUsbNative.CreateFile(path.Path, 0xC0000000,
+                UsbInterfaceFileAccess.GetShareMode(exclusiveAccess), nint.Zero, 3, 0x40000000, nint.Zero);
             if (file.IsInvalid) { throw new Win32Exception(Marshal.GetLastPInvokeError()); }
             opened = true; token.ThrowIfCancellationRequested();
             if (!WinUsbNative.WinUsb_Initialize(file, out nint raw)) { throw new Win32Exception(Marshal.GetLastPInvokeError()); }
@@ -93,7 +100,8 @@ public sealed class WinUsbInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
             result = ReadIdentity(usb, path, token);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { result = new OperationResult<DeviceIdentity?>.Cancelled(); }
-        catch (Exception exception) when (exception is not OutOfMemoryException) { result = ReportFailure(exception); }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        { result = ReportFailure(exception, exclusiveAccess && file is { IsInvalid: true }); }
         finally
         {
             usb?.Dispose();
@@ -224,11 +232,13 @@ public sealed class WinUsbInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
         { throw new InvalidOperationException("WinUSB identity owner retained after unconfirmed release."); }
         GC.KeepAlive(retainedOwner);
     }
-    private OperationResult<DeviceIdentity?> ReportFailure(Exception exception)
+    private OperationResult<DeviceIdentity?> ReportFailure(Exception exception, bool exclusiveFileOpen = false)
     {
         var report = reporter.Report(exception, "WinUsbIdentityProbe");
-        return new OperationResult<DeviceIdentity?>.Failure(new(report.ErrorId, "WinUsbIdentityProbeFailed",
-            "WinUSB 身份读取未完成，未将失败接口跳过", "请检查设备、驱动、权限与身份兼容记录"));
+        var error = UsbInterfaceFileAccess.DescribeSharingViolation(exception, report.ErrorId, exclusiveFileOpen)
+            ?? new AppError(report.ErrorId, "WinUsbIdentityProbeFailed",
+                "WinUSB 身份读取未完成，未将失败接口跳过", "请检查设备、驱动、权限与身份兼容记录");
+        return new OperationResult<DeviceIdentity?>.Failure(error);
     }
     private static OperationResult<DeviceIdentity?> Failed(string code, string reason) =>
         new OperationResult<DeviceIdentity?>.Failure(AppError.Create(code, reason, "请核实实际接口与 USB 描述符后重新检测"));

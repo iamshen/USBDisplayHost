@@ -14,6 +14,8 @@ public sealed partial class AppUpdateViewModel : ObservableObject
     private readonly ApplicationSettingsPageViewModel settings;
     private readonly IUiDispatcher dispatcher;
     private readonly IErrorReporter reporter;
+    private readonly string? releasePageUrl;
+    private readonly string? unavailableStatus;
     private readonly CancellationTokenSource lifetime = new();
     private Task? background;
     private Func<Task>? install;
@@ -23,14 +25,18 @@ public sealed partial class AppUpdateViewModel : ObservableObject
     private AppUpdateSnapshot snapshot;
 
     public AppUpdateViewModel(IAppUpdateService service, ApplicationSettingsPageViewModel settings,
-        IUiDispatcher dispatcher, IErrorReporter reporter)
+        IUiDispatcher dispatcher, IErrorReporter reporter, string? releasePageUrl = GitHubAppUpdateService.ReleasesUrl,
+        string? unavailableStatus = null)
     {
         this.service = service; this.settings = settings; this.dispatcher = dispatcher; this.reporter = reporter;
+        this.releasePageUrl = releasePageUrl;
+        this.unavailableStatus = unavailableStatus;
         snapshot = service.Snapshot;
         service.Changed += OnChanged;
     }
 
     public string CurrentVersion => snapshot.CurrentVersion;
+    public bool HasReleasePage => releasePageUrl is not null;
     public string ActionText => snapshot.State switch
     {
         AppUpdateState.Available => "下载更新",
@@ -39,7 +45,8 @@ public sealed partial class AppUpdateViewModel : ObservableObject
     };
     public string StatusText => snapshot.State switch
     {
-        AppUpdateState.Unavailable => "开发或便携构建不支持应用内更新，请下载并安装完整版本。",
+        AppUpdateState.Unavailable => updatedVersion is not null ? $"已更新至 {updatedVersion}"
+            : unavailableStatus ?? "开发或便携构建不支持应用内更新，请下载并安装完整版本。",
         AppUpdateState.Checking => "正在检查 GitHub Release",
         AppUpdateState.UpToDate => updatedVersion is null ? "未发现更高的已发布版本" : $"已更新至 {updatedVersion}",
         AppUpdateState.Available => $"发现新版本 {snapshot.TargetVersion}",
@@ -74,6 +81,7 @@ public sealed partial class AppUpdateViewModel : ObservableObject
             if (expectedVersion == CurrentVersion && settings.IsReady && settings.ErrorText.Length == 0 && desktopReady())
             { updatedVersion = expectedVersion; }
             Refresh();
+            if (snapshot.State == AppUpdateState.Unavailable) { return; }
             using var timer = new PeriodicTimer(TimeSpan.FromMinutes(15));
             do
             {
@@ -112,7 +120,8 @@ public sealed partial class AppUpdateViewModel : ObservableObject
     [RelayCommand]
     private void OpenReleases()
     {
-        try { Process.Start(new ProcessStartInfo(GitHubAppUpdateService.ReleasesUrl) { UseShellExecute = true }); }
+        if (releasePageUrl is null) { return; }
+        try { Process.Start(new ProcessStartInfo(releasePageUrl) { UseShellExecute = true }); }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         { reporter.Report(exception, "OpenGitHubReleases"); }
     }

@@ -5,13 +5,23 @@
 - `global.json` 禁止 SDK 前滚。本机只有 10.0.403 时，可从 Microsoft 下载并校验 10.0.401 Windows x64 便携包，解压到独立目录，把该目录临时加入本次构建的 PATH。先在仓库目录核对 `dotnet --version`，再运行 `./build.ps1 -Action Build`。
 - WinUI 非 MSIX 自包含需分别设置 `SelfContained` 和 `WindowsAppSDKSelfContained`。构建后可用输出目录的 `coreclr.dll` 和 `Microsoft.UI.Xaml.dll` 核对依赖是否随应用输出。安装、更新和净机运行分别验证。
 
+## WinUI Beta 打包与离屏编码
+
+- WinUI 非 MSIX 自包含编译会生成应用 PRI，发布输出可能遗漏。用 `IncludeWinUiResourceIndex` 显式加入发布清单。用 MakePri dump 核对 App、主窗口、五页 XBF，再检查完整 nupkg 中有 `lib/app/UsbDisplayHost.WinUI.pri`。
+- WIC 写 JPEG 时可能吞掉写入预算异常并留下零字节。编码器返回后检查输出长度，再决定成功、降质重试或报告超出预算。用 1 字节预算及正常预览覆盖两类结果。
+- WinUI `ComboBox.SelectedValue` 绑定托管枚举可能让默认值或撤销后的值显示为空。用选项对象同步选中项和枚举值。在实际窗口核对图片适配「完整显示」和设备设置「0°」。
+- Beta 的入口版本独立于 Windows 适配程序集。用宿主 InformationalVersion 初始化诊断，ZIP 摘要沿用日志记录的版本。核对应用设置、日志和 ZIP 的 Beta 后缀。
+- 本机验收用 Velopack `Setup.exe --installto` 指向专用测试目录并使用本地完整包索引。已验证 Beta 1 到 2 的应用内确认、Beta 2 到 3 的更新服务交接及重启，以及 Beta 3 卸载移除独立自启和保留测试配置。验证正式配置 SHA-256 和正式安装版本；测试通过后归档独立 Beta 数据。未配置在线源时，用新 Setup 对同一测试目录覆盖升级。Beta 3 到 4 已实测版本切换、原生窗口、运行库和原偏好校验值，卸载后再核对正式安装清单和偏好校验值。
+
+- 深色验收在默认 1024×768 客体发现主题首屏的模板名被滚动视口截断。预览高度应先给预览标题和完整一行模板留空间。Beta 5 在同环境复拍确认三模板名称完整，并用键盘焦点复核堆叠布局下的属性与更新设置。
+
 ## Issue 机器人标签
 
 - 表单齐全不代表信息足以复现。机器人仅维护 `form-incomplete`，不能移除维护者用于索要日志或澄清的 `needs-info`；自动修复遇到任一标签都先等待。验证覆盖缺项添加、重复检查不刷屏、补齐移除和人工标签保留。
 
 ## GitHub Release 更新
 
-- 更新源是公开的 `iamshen/USBDisplayHost`，通道 `win-x64`。vpk 1.2.161 的完整包名包含通道：`USBDisplayHost-<Version>-win-x64-full.nupkg`；不要凭示例省略中间字段。
+- 正式更新源是公开的 `iamshen/USBDisplayHost`，通道 `win-x64`。Beta 用 `-BetaUpdateRepository owner/repository` 指定独立仓库。默认包停用在线检查，使用完整 Setup 覆盖升级。旧正式客户端仅查询最近 10 条 Release，向同仓库累积预发布会挤出旧正式版。vpk 1.2.161 的完整包名包含通道：`USBDisplayHost-<Version>-win-x64-full.nupkg`；不要凭示例省略中间字段。
 - SDK 的 `DownloadUpdatesAsync` 遇到已有文件会直接返回，必须自行复核缓存的大小、SHA-256 和包内身份；待安装记录保存在独立数据目录，恢复及安装前仍需复核。启动保持 `SetAutoApplyOnStartup(false)`。
 - 安装复用退出保存决策；先关闭设备及探测句柄，再启动等待退出的更新器。交接失败只有确认所有者已释放才恢复新建会话；更新重启参数禁止自动切换模式。不能将启动更新器当作更新成功。
 - `main` 推送保存 Actions 产物；与项目版本一致的 `vX.Y.Z` 标签才发布 Release。草稿完整上传后转公开，同版本不覆盖。v0.1.2 已完成无设备下的 GitHub 下载、确认退出、安装重启及 Setup 覆盖安装；签名和实物会话验证仍待完成。见 `docs/verification/upgrade-v0.1.2-2026-10-23.md`。
@@ -48,6 +58,8 @@
 - `RenderTargetBitmap` 只验证进程内布局；真实点击、滚动和 DPI 变化必须操作实际窗口。桌面工具返回逻辑尺寸图像时，不能用图片宽高推断 DPI 或原始物理像素清晰度。
 - 截图前确认窗口处于稳定、未被遮挡的状态；不要将过渡帧、其他窗口或含账户信息的系统设置截图归档为应用证据。
 - Computer Use 报 `GetCursorPos` 拒绝访问且捕获全黑时，即使能读取可访问树，也不能认定真实窗口可交互或视觉检查通过。停止输入，确认用户桌面已解锁且会话可交互后重新获取窗口；不操作锁屏、不用进程内渲染替代。2026-10-22 原始运行记录仅在本机忽略目录归档。
+
+- 宿主锁屏时可用断网客体验证净机和键盘。QEMU 6.2／WSL 在 Windows PE 阶段复现蓝屏；校验 Windows 原生 QEMU 11.1 后，用相同 LTSC 镜像完成安装。在客体内先检查系统级运行库、框架包和应用数据，再启动安装版并核对已加载模块路径。
 
 ## 离线安装打包
 

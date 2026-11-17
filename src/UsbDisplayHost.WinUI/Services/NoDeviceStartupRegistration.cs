@@ -5,15 +5,20 @@ namespace UsbDisplayHost.WinUI.Services;
 
 internal sealed class NoDeviceStartupRegistration : IStartupRegistration
 {
+    private sealed class NoDeviceCheckpoint : IStartupRegistrationCheckpoint;
+
     public Task<OperationResult<StartupRegistrationState>> QueryAsync(CancellationToken cancellationToken) =>
-        Task.FromResult<OperationResult<StartupRegistrationState>>(
-            new OperationResult<StartupRegistrationState>.Success(new(false, false)));
+        Disabled<StartupRegistrationState>();
 
     public Task<OperationResult<IStartupRegistrationCheckpoint>> ChangeAsync(bool enabled, CancellationToken cancellationToken) =>
-        Disabled<IStartupRegistrationCheckpoint>();
+        enabled ? Disabled<IStartupRegistrationCheckpoint>()
+            : Task.FromResult<OperationResult<IStartupRegistrationCheckpoint>>(
+                new OperationResult<IStartupRegistrationCheckpoint>.Success(new NoDeviceCheckpoint()));
 
     public Task<OperationResult<Unit>> RestoreAsync(IStartupRegistrationCheckpoint checkpoint, CancellationToken cancellationToken) =>
-        Disabled<Unit>();
+        checkpoint is NoDeviceCheckpoint
+            ? Task.FromResult<OperationResult<Unit>>(new OperationResult<Unit>.Success(new Unit()))
+            : Disabled<Unit>();
 
     private static Task<OperationResult<T>> Disabled<T>() => Task.FromResult<OperationResult<T>>(
         new OperationResult<T>.Failure(AppError.Create("UiOnlyStartupDisabled",

@@ -9,7 +9,7 @@ using UsbDisplayHost.Core.Operations;
 
 namespace UsbDisplayHost.Windows.Usb;
 
-public sealed class WinUsbSessionFactory(IErrorReporter errorReporter)
+public sealed class WinUsbSessionFactory(IErrorReporter errorReporter, bool exclusiveAccess)
 {
     private int opening;
     private WinUsbOpenedSession? activeOwner;
@@ -67,7 +67,8 @@ public sealed class WinUsbSessionFactory(IErrorReporter errorReporter)
             pathOwner = ((OperationResult<WinUsbPathOwnership>.Success)claimed).Value;
             pathOwner.RetainResourceOwner(this);
             if (!IsAdmissionCurrent(admission, identity)) { return Reject("WinUsbAdmissionChangedBeforeOpen", "路径预约后发现凭据已经变化"); }
-            file = WinUsbNative.CreateFile(identity.InterfacePath, 0xC0000000, 3, 0, 3, 0x40000000, 0);
+            file = WinUsbNative.CreateFile(identity.InterfacePath, 0xC0000000,
+                UsbInterfaceFileAccess.GetShareMode(exclusiveAccess), 0, 3, 0x40000000, 0);
             if (file.IsInvalid) { throw NativeFailure(); }
             fileOpened = true;
             token.ThrowIfCancellationRequested();
@@ -178,7 +179,8 @@ public sealed class WinUsbSessionFactory(IErrorReporter errorReporter)
             return new OperationResult<WinUsbOpenedSession>.Success(session);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { return new OperationResult<WinUsbOpenedSession>.Cancelled(); }
-        catch (Exception exception) when (exception is not OutOfMemoryException) { return Failure(exception); }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        { return Failure(exception, exclusiveAccess && file is { IsInvalid: true }); }
         finally
         {
             if (!transferredOwnership)
@@ -242,10 +244,11 @@ public sealed class WinUsbSessionFactory(IErrorReporter errorReporter)
     private static Win32Exception NativeFailure() => new(Marshal.GetLastPInvokeError());
     private static OperationResult<WinUsbOpenedSession> Reject(string code, string reason) =>
         new OperationResult<WinUsbOpenedSession>.Failure(AppError.Create(code, reason, "请重新选择设备并核对兼容记录"));
-    private OperationResult<WinUsbOpenedSession> Failure(Exception exception)
+    private OperationResult<WinUsbOpenedSession> Failure(Exception exception, bool exclusiveFileOpen = false)
     {
         var report = errorReporter.Report(exception, "WinUsbOpen");
-        return new OperationResult<WinUsbOpenedSession>.Failure(new(report.ErrorId, "WinUsbOpenFailed",
-            "WinUSB 接口打开或核验失败", "请检查所选设备连接、驱动绑定与访问权限"));
+        var error = UsbInterfaceFileAccess.DescribeSharingViolation(exception, report.ErrorId, exclusiveFileOpen)
+            ?? new AppError(report.ErrorId, "WinUsbOpenFailed", "WinUSB 接口打开或核验失败", "请检查所选设备连接、驱动绑定与访问权限");
+        return new OperationResult<WinUsbOpenedSession>.Failure(error);
     }
 }

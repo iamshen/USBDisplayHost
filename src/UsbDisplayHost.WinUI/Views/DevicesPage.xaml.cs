@@ -132,7 +132,8 @@ public sealed partial class DevicesPage : Page
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (sender is DevicesPageViewModel model && args.PropertyName is null or ""
-            or nameof(DevicesPageViewModel.Snapshot) or nameof(DevicesPageViewModel.DiscoveredDevices))
+            or nameof(DevicesPageViewModel.Snapshot) or nameof(DevicesPageViewModel.DiscoveredDevices)
+            or nameof(DevicesPageViewModel.HasRetainedLocalResult))
         {
             RefreshState(model);
         }
@@ -144,6 +145,7 @@ public sealed partial class DevicesPage : Page
         bool hasSessionStatus = snapshot.DeviceKey is not null
             && snapshot.Connection is ConnectionState.Opening or ConnectionState.Ready or ConnectionState.Recovering or ConnectionState.Faulted;
         bool hasCandidates = !model.DiscoveredDevices.IsEmpty;
+        bool hasRetainedLocalResult = model.HasRetainedLocalResult;
 
         ConnectionHeading.Text = snapshot.Connection switch
         {
@@ -158,8 +160,9 @@ public sealed partial class DevicesPage : Page
         EmptyDeviceIcon.Visibility = VisibleWhen(!hasSessionStatus && !hasCandidates);
         CurrentWorkspace.Visibility = VisibleWhen(hasSessionStatus);
         ConnectionDetails.Visibility = VisibleWhen(hasSessionStatus);
+        DisconnectButton.Visibility = VisibleWhen(hasSessionStatus || hasRetainedLocalResult);
         ThemeButton.Content = hasSessionStatus ? "编辑主题" : "先预览主题";
-        NoDeviceHelp.Visibility = VisibleWhen(!hasSessionStatus && !hasCandidates);
+        NoDeviceHelp.Visibility = VisibleWhen(!hasSessionStatus && !hasCandidates && !hasRetainedLocalResult);
         NoDeviceHelp.Text = uiOnly ? "当前以无设备模式运行。"
             : "为设备接通电源并使用支持数据传输的 USB 线缆，然后重新检测。";
 

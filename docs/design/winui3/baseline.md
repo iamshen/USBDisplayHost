@@ -14,17 +14,17 @@ Apps 截图把选项、筛选和排序集中到列表上方，行内先显示名
 
 ## 五页布局草图
 
-顶部导航在各页的相同位置，当前项有填充、文字和原生选择语义。以下是布局草图，样板只开放设备和诊断两个入口。
+首次启动使用侧边导航，应用设置可预览并保存顶部导航。两种导航都以选中填充、文字和原生选择语义标记当前页。五页职责与控件分布如下。
 
 | 页面 | 主区 | 次要信息与动作 |
 | --- | --- | --- |
-| 设备 | 未连接时居中呈现 USB 连接状态与下一步。连接后显示当前设备、模式和主机活动画面 | 候选列表与当前会话分开。连接、断开和模式切换反馈紧邻操作，失败附错误编号 |
+| 设备 | 未连接时居中呈现 USB 连接状态与下一步。连接后显示当前设备、模式和主机活动画面 | 候选列表与当前会话分开。设备资源关闭后若仍保留本地结果，连接状态区继续提供「完成本地交接」。失败附错误编号 |
 | 主题 | 主预览优先，三种模板排在预览下方。属性列随模板变化 | 颜色细节可展开，应用与撤销聚在编辑区底部。活动预览与设备读回各有明确位置 |
 | 设备设置 | 当前会话标识和可读写参数。每行保持标签、范围及单位 | 警告和不可用原因就近显示。设备应用、本地恢复保存与读回分别反馈 |
 | 诊断 | 列表或分组记录为主体，明确事件级别、时间和错误编号 | 详情按需查看，刷新、打开目录、导出和验证集中在列表操作区 |
 | 应用设置 | 使用对齐的表单行分组显示外观、导航、启动和退出偏好 | 更新单独成组显示版本、进度与下一步。撤销和保存跟随偏好编辑 |
 
-默认参照 1180×820 DIP，受当前工作区可用大小约束。导航与状态优先用原生 WinUI 控件。正文用系统 UI 字体及中文回退，标题、状态正文与辅助文字按层级区分。页面外边距以 32 DIP 为起点，邻近控制项以 8–12 DIP 分隔，内容分组以 24 DIP 分隔。导航使用胶囊选中样式，设置行与表单沿用控件圆角。
+默认参照 1180×820 DIP，受当前工作区可用大小约束。导航与状态优先用原生 WinUI 控件。正文用系统 UI 字体及中文回退，标题、状态正文与辅助文字按层级区分。页面外边距以 32 DIP 为起点，邻近控制项以 8–12 DIP 分隔，内容分组以 24 DIP 分隔。顶部导航使用胶囊选中样式，侧边导航和表单沿用原生控件样式。
 
 浅色和深色用 `ThemeResource` 切换画布、表面、文字、边界与选中状态。高对比映射系统窗口、文本和高亮颜色。当前页靠选中语义及可见填充识别，设备和错误状态始终提供明确文本。交互控件保留可访问名称、默认焦点提示和键盘操作。
 
@@ -32,8 +32,8 @@ Apps 截图把选项、筛选和排序集中到列表上方，行内先显示名
 
 - 样板为 `UsbDisplayHost.WinUI`，沿用 `global.json` 的 .NET SDK 10.0.401，锁定稳定版 Microsoft.WindowsAppSDK 2.6.5。项目目标为 `net10.0-windows10.0.19041.0`。
 - 样板以 Windows 10 build 19041 为目标下限，使用本机 Windows SDK 构建 win-x64。最低版本的安装和运行仍需实际环境验证。
-- 非 MSIX 路径分别设置 .NET 与 Windows App SDK 自包含。后续 Beta 由独立 Velopack 安装身份与 `win-x64-beta` 通道分发。WinUI 开发入口的 Beta 配置、素材和诊断使用 `%LocalAppData%\UsbDisplayHost.Beta.Data`。
-- 仓库 `build.ps1 -Action Build` 编译两个入口。`Publish` 和 `Package` 继续使用 WPF 入口。构建与打包均不启动程序。
+- 非 MSIX 路径分别设置 .NET 与 Windows App SDK 自包含。Beta 使用独立 Velopack 安装身份 `USBDisplayHost.Beta` 与 `win-x64-beta` 通道，配置、素材和诊断使用 `%LocalAppData%\UsbDisplayHost.Beta.Data`。
+- 仓库 `build.ps1 -Action Build` 编译两个入口。`Publish` 和 `Package` 默认使用 WPF，带 `-Channel Beta` 时使用 WinUI。构建与打包均不启动程序。
 - 无设备验证从仓库根目录运行 `dotnet run --project src/UsbDisplayHost.WinUI -c Release --no-build -- --ui-only`。该模式跳过设备发现和连接，应用数据写入独立临时目录。设备页入口和顶部导航都能打开诊断，查看本次启动记录。启动记录保留在 `%TEMP%\UsbDisplayHost.WinUI\startup-*.log` 的五个槽中。
 
 [Windows App SDK 稳定版](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) · [Windows 版本与 SDK](https://learn.microsoft.com/windows/apps/get-started/versioning-overview) · [部署说明](https://learn.microsoft.com/windows/apps/package-and-deploy/deploy-overview)

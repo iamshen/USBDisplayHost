@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using UsbDisplayHost.Core.Configuration;
@@ -12,6 +13,7 @@ using UsbDisplayHost.Windows.Diagnostics;
 using UsbDisplayHost.Windows.Lifecycle;
 using UsbDisplayHost.Windows.Storage;
 using UsbDisplayHost.Windows.Telemetry;
+using UsbDisplayHost.Windows.Updates;
 using UsbDisplayHost.WinUI.Services;
 
 namespace UsbDisplayHost.WinUI;
@@ -22,17 +24,17 @@ public partial class App : Application
     private readonly ApplicationDataPaths paths;
     private readonly WinUiDispatcher dispatcher;
     private readonly bool uiOnly;
-    private readonly bool updateRestart;
+    private readonly string? updatedTo;
     private readonly StartupLog log = new();
     private MainWindow? window;
     private bool activationPending;
 
-    internal App(DiagnosticLog diagnostics, ApplicationDataPaths paths, DispatcherQueue queue, bool uiOnly, bool updateRestart)
+    internal App(DiagnosticLog diagnostics, ApplicationDataPaths paths, DispatcherQueue queue, bool uiOnly, string? updatedTo)
     {
         this.diagnostics = diagnostics;
         this.paths = paths;
         this.uiOnly = uiOnly;
-        this.updateRestart = updateRestart;
+        this.updatedTo = updatedTo;
         dispatcher = new WinUiDispatcher(queue);
         UnhandledException += OnUnhandledException;
         log.Write(uiOnly ? "启动无设备模式" : "启动 USB Display Beta");
@@ -54,6 +56,12 @@ public partial class App : Application
                 : new WindowsStartupRegistration(diagnostics, Program.ProductId, Program.ExecutableName);
             var settingsService = new ApplicationSettingsService(profiles, startup, diagnostics, () => coordinator.Current);
             var settings = new ApplicationSettingsPageViewModel(settingsService, diagnostics);
+            string? updateRepository = typeof(App).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                .FirstOrDefault(attribute => attribute.Key == "BetaUpdateRepository")?.Value;
+            var updateService = GitHubAppUpdateService.ForBeta(paths, diagnostics, !uiOnly, updateRepository);
+            var updates = new AppUpdateViewModel(updateService, settings, dispatcher, diagnostics, updateService.ReleasePageUrl,
+                updateService.ReleasePageUrl is null ? "此 Beta 包未配置在线更新。可使用测试方提供的完整安装包。" : null);
+            settings.Updates = updates;
             var assets = new FileAssetStore(paths, new WpfImageValidator(diagnostics), storage);
             var renderer = new WpfFrameRenderer(assets, TimeProvider.System, diagnostics);
             var metrics = new MetricSamplingService(new WindowsHostMetricProvider(TimeProvider.System, diagnostics),
@@ -71,13 +79,14 @@ public partial class App : Application
                 new DiagnosticFolderOpener(paths, diagnostics), pickers, themes.CaptureDiagnosticSummary, sessions);
 
             var snapshots = new DeviceSnapshotPresenter(coordinator, sessions, dispatcher, devices, workspace, diagnostics, themes, deviceSettings, settings);
-            var discovery = new DeviceDiscoveryLifetime(dispatcher, devices, coordinator, sessions, diagnostics);
-            var protocol = new DeviceProtocolService(coordinator, sessions, discovery, profiles, assets, renderer, metrics, diagnostics);
+            var discovery = new DeviceDiscoveryLifetime(dispatcher, devices, coordinator, sessions, diagnostics, exclusiveAccess: true);
+            var protocol = new DeviceProtocolService(coordinator, sessions, discovery, profiles, assets, renderer, metrics, diagnostics, exclusiveAccess: true);
             if (!uiOnly) { devices.AttachProtocol(protocol, discovery.StartAsync); }
             lifetime = new ThemeWorkspaceLifetime(themes, settings, deviceSettings, diagnosticsView, draftPreview,
                 renderer, metrics, sessions, coordinator, snapshots, discovery, diagnostics, protocol, devices);
 
-            window = new MainWindow(log, workspace, devices, diagnostics, uiOnly);
+            await deviceSettings.InitializeAsync();
+            window = new MainWindow(log, workspace, devices, themes, deviceSettings, diagnosticsView, settings, diagnostics, uiOnly);
             var modeNotice = new ModeSwitchNoticeService(settingsService, window.ConfirmModeSwitchAsync);
             devices.AttachModeSwitchConfirmation(modeNotice.ConfirmAsync);
             lifetime.AttachNotices(new WorkspaceNoticeLifetime(dispatcher, window.ShowNotice, devices, themes, deviceSettings, diagnostics));
@@ -93,8 +102,10 @@ public partial class App : Application
                 window.RestoreAndActivate();
             }
 
+            updates.Start(() => windowLifetime.RequestUpdateAsync(updateService), updatedTo,
+                () => windowLifetime.IsReadyForUpdate);
             if (uiOnly) { await settings.InitializeAsync(); }
-            else { await devices.InitializeProtocolAsync(settings, updateRestart); }
+            else { await devices.InitializeProtocolAsync(settings, updatedTo is not null); }
         }
         catch (Exception exception) when (exception is not OutOfMemoryException)
         {

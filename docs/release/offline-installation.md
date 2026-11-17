@@ -59,4 +59,12 @@ dotnet restore src/UsbDisplayHost.Desktop/UsbDisplayHost.Desktop.csproj --force-
 
 当前没有签名参数或证书。GitHub 发布、无设备在线升级及 Setup 覆盖安装已完成实际验证；正式 V1 发布验收仍须完成签名验签、干净机、卸载、故障场景和设备验收。
 
+## WinUI Beta
+
+用 PowerShell 7 执行 `./build.ps1 -Action Package -Channel Beta`，从 `.artifacts/installers/win-x64-beta/<Version>/` 取得 `USBDisplayHost.Beta-win-x64-beta-Setup.exe` 和校验值。版本来自 WinUI 工程文件，使用 `X.Y.Z-beta.N`。完整包包含 .NET Desktop Runtime、Windows App SDK、应用资源和许可。
+
+Beta 默认安装到 `%LocalAppData%\USBDisplayHost.Beta`，窗口、快捷方式和卸载项显示为 USB Display Beta。配置、素材、日志与更新状态保存在 `%LocalAppData%\UsbDisplayHost.Beta.Data`，自启项使用 `USBDisplayHost.Beta`。测试时使用独立资料或专门提供的副本。
+
+本地包默认使用完整安装包手动更新。启用在线 Beta 时使用 `./build.ps1 -Action Package -Channel Beta -BetaUpdateRepository owner/repository`，或设置构建工作流变量 `USB_DISPLAY_BETA_UPDATE_REPOSITORY`。该仓库的 GitHub 预发布需包含 `win-x64-beta` 索引和完整包；正式仓库继续提供正式更新。Beta 可在「应用设置 → 软件更新」检查、下载并校验独立仓库的包，再由用户确认重启安装。公开发布前仍需验证真实仓库及客户端。需要退出 Beta 试用时，从托盘退出并卸载 USB Display Beta，再打开正式版继续使用其原有数据。跨版本恢复前先备份 Beta 数据并核对格式兼容性。
+
 参考：[Velopack 安装器](https://docs.velopack.io/packaging/installer)、[Windows 安装目录](https://docs.velopack.io/packaging/operating-systems/windows)、[C# 生命周期](https://docs.velopack.io/getting-started/csharp)。实际行为以锁定的 1.2.161 源码和后续运行证据为准。

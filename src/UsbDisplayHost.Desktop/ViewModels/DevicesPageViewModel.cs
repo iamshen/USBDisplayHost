@@ -95,6 +95,7 @@ public sealed partial class DevicesPageViewModel(
     private bool isDisconnecting;
     [ObservableProperty] private string disconnectText = string.Empty;
     [ObservableProperty] private string disconnectErrorText = string.Empty;
+    public bool HasRetainedLocalResult => sessions.Current is { Stage: SessionLifecycleStage.RetainedLocalResult, NativeClosed: true };
     public string DisconnectActionText => sessions.Current.NativeClosed ? "完成本地交接" : "断开设备";
     private bool CanDisconnect()
     {
@@ -311,7 +312,9 @@ public sealed partial class DevicesPageViewModel(
         if (value.Version <= lifecycleVersion) { return; }
         lifecycleVersion = value.Version;
         ConfirmSelectionCommand.NotifyCanExecuteChanged();
+        RescanCommand.NotifyCanExecuteChanged();
         DisconnectCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(HasRetainedLocalResult));
         OnPropertyChanged(nameof(DisconnectActionText));
         LifecycleText = value.Stage switch
         {

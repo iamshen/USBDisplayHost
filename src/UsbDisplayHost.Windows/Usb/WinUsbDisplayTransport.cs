@@ -22,9 +22,10 @@ public sealed class WinUsbDisplayTransport : IDisplayTransport
     private bool closing, draining;
     public byte? InterfaceNumber { get { lock (syncRoot) { return session?.InterfaceNumber; } } }
 
-    public WinUsbDisplayTransport(DeviceSelectionAdmission admission, WinUsbBinding binding, WinUsbIoPolicy policy, IErrorReporter reporter)
+    public WinUsbDisplayTransport(DeviceSelectionAdmission admission, WinUsbBinding binding, WinUsbIoPolicy policy, IErrorReporter reporter,
+        bool exclusiveAccess)
     {
-        this.admission = admission; this.binding = binding; this.policy = policy; this.reporter = reporter; factory = new(reporter);
+        this.admission = admission; this.binding = binding; this.policy = policy; this.reporter = reporter; factory = new(reporter, exclusiveAccess);
     }
 
     public Task<OperationResult<TransportLimits>> OpenAsync(DeviceIdentity identity, CancellationToken cancellationToken)

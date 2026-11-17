@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using System.Runtime.InteropServices;
 using UsbDisplayHost.Core.Configuration;
 using UsbDisplayHost.Core.Diagnostics;
+using UsbDisplayHost.Core.Updates;
 using UsbDisplayHost.Desktop.Services;
 using UsbDisplayHost.Desktop.ViewModels;
 using WinRT.Interop;
@@ -55,6 +56,9 @@ internal sealed class WinUiWindowLifetime : IWindowExitHost
 
     public bool HasTray => tray is not null;
     public bool IsClosed { get; private set; }
+    public bool IsReadyForUpdate => !IsClosed && appWindow.IsVisible && tray is { IsAvailable: true };
+
+    public Task RequestUpdateAsync(IAppUpdateService updateService) => exit.RequestUpdateAsync(this, updateService);
 
     public void Show() => window.RestoreAndActivate();
 

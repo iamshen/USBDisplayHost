@@ -1,0 +1,41 @@
+name: Windows Beta 安装包
+
+on:
+  push:
+    branches: ['feature/winui3-mole']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: 构建 Beta 自包含安装包
+        env:
+          USB_DISPLAY_BETA_UPDATE_REPOSITORY: ${{ vars.USB_DISPLAY_BETA_UPDATE_REPOSITORY }}
+        run: ./build.ps1 -Action Package -Channel Beta -BetaUpdateRepository $env:USB_DISPLAY_BETA_UPDATE_REPOSITORY
+      - name: 保存 Beta 安装包和更新索引
+        uses: actions/upload-artifact@v7
+        with:
+          name: USBDisplayHost-Beta-win-x64
+          path: .artifacts/installers/win-x64-beta/**/*
+          if-no-files-found: error
+          retention-days: 14

@@ -22,6 +22,7 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
     private static readonly Dictionary<string, HidInterfaceIdentityProbe> PathOwners = new(StringComparer.OrdinalIgnoreCase);
     private readonly ImmutableArray<HidIdentityCompatibility> compatibility;
     private readonly IErrorReporter reporter;
+    private readonly bool exclusiveAccess;
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly object closeSync = new();
     private Task<OperationResult<Unit>>? closing;
@@ -31,13 +32,16 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
     private int stopping;
     private HidOpenedSession? activeSession;
 
-    private HidInterfaceIdentityProbe(ImmutableArray<HidIdentityCompatibility> compatibility, IErrorReporter reporter)
+    private HidInterfaceIdentityProbe(ImmutableArray<HidIdentityCompatibility> compatibility, IErrorReporter reporter,
+        bool exclusiveAccess)
     {
-        this.compatibility = compatibility; this.reporter = reporter;
+        this.compatibility = compatibility;
+        this.reporter = reporter;
+        this.exclusiveAccess = exclusiveAccess;
     }
     // 创建本身没有原生调用；清单由实际兼容记录提供，不内置设计 VID/PID。
     public static OperationResult<HidInterfaceIdentityProbe> Create(ImmutableArray<HidIdentityCompatibility> compatibility,
-        IErrorReporter reporter)
+        IErrorReporter reporter, bool exclusiveAccess)
     {
         if (compatibility.IsDefaultOrEmpty || compatibility.Length > 8
             || compatibility.Any(item => item is null || item.VendorId == 0
@@ -58,7 +62,7 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
                 return new OperationResult<HidInterfaceIdentityProbe>.Failure(AppError.Create("HidProbeOwnerLimit",
                     "目标 HID 身份已有探测所有者或达到限额", "请先确认现有探测器关闭；未知句柄不能用新实例替代"));
             }
-            var owner = new HidInterfaceIdentityProbe(compatibility, reporter);
+            var owner = new HidInterfaceIdentityProbe(compatibility, reporter, exclusiveAccess);
             Owners.Add(owner);
             return new OperationResult<HidInterfaceIdentityProbe>.Success(owner);
         }
@@ -154,6 +158,7 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
         verifiedFile = null;
         SafeUsbFileHandle? file = null;
         bool opened = false;
+        bool exclusiveFileOpen = exclusiveAccess && retainVerifiedFile;
         bool claimed = false;
         OperationResult<DeviceIdentity?> result;
         try
@@ -180,7 +185,7 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
             if (canOpen is not null && !canOpen())
             { return Failed("HidAdmissionChangedBeforeOpen", "文件打开前发现凭据已经变化", "重新检测并明确选择设备"); }
             file = HidIdentityNative.CreateFileW(path.Path, retainVerifiedFile ? 0xC0000000u : 0,
-                3, nint.Zero, 3, retainVerifiedFile ? 0x40000000u : 0, nint.Zero);
+                UsbInterfaceFileAccess.GetShareMode(exclusiveFileOpen), nint.Zero, 3, retainVerifiedFile ? 0x40000000u : 0, nint.Zero);
             if (file.IsInvalid) { throw new Win32Exception(Marshal.GetLastPInvokeError()); }
             opened = true;
             result = ReadIdentity(file, path, token);
@@ -214,7 +219,8 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
             }
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { result = new OperationResult<DeviceIdentity?>.Cancelled(); }
-        catch (Exception exception) when (exception is not OutOfMemoryException) { result = ReportFailure(exception, readFeature); }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        { result = ReportFailure(exception, readFeature, exclusiveFileOpen && file is { IsInvalid: true }); }
         finally
         {
             if (retainedPreparsedData is not null) { retainedHandle = file; }
@@ -452,12 +458,14 @@ public sealed class HidInterfaceIdentityProbe : IDeviceInterfaceIdentityProbe
         _ = await CloseAsync().ConfigureAwait(false);
         GC.KeepAlive(retainedHandle);
     }
-    private OperationResult<DeviceIdentity?> ReportFailure(Exception exception, bool readFeature = false)
+    private OperationResult<DeviceIdentity?> ReportFailure(Exception exception, bool readFeature = false, bool exclusiveFileOpen = false)
     {
         var report = reporter.Report(exception, readFeature ? "HidV2FeatureProbe" : "HidIdentityProbe");
-        return new OperationResult<DeviceIdentity?>.Failure(new(report.ErrorId, "HidIdentityProbeFailed",
-            readFeature ? "HID 身份或协议查询失败，未启用控制能力" : "HID 身份读取失败，未把接口作为非目标设备跳过",
-            "请检查设备、接口权限与兼容记录后重新检测"));
+        var error = UsbInterfaceFileAccess.DescribeSharingViolation(exception, report.ErrorId, exclusiveFileOpen)
+            ?? new AppError(report.ErrorId, "HidIdentityProbeFailed",
+                readFeature ? "HID 身份或协议查询失败，未启用控制能力" : "HID 身份读取失败，未把接口作为非目标设备跳过",
+                "请检查设备、接口权限与兼容记录后重新检测");
+        return new OperationResult<DeviceIdentity?>.Failure(error);
     }
     private static OperationResult<DeviceIdentity?> Failed(string code, string reason, string action) =>
         new OperationResult<DeviceIdentity?>.Failure(AppError.Create(code, reason, action));

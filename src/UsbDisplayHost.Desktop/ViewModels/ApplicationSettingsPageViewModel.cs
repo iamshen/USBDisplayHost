@@ -237,6 +237,7 @@ public partial class ApplicationSettingsPageViewModel(ApplicationSettingsService
             OperationResult<StartupRegistrationState>.Success { Value.IsManaged: false } => "自启注册：同名启动项与当前应用不匹配",
             OperationResult<StartupRegistrationState>.Success success =>
                 $"自启注册：{(success.Value.IsEnabled ? "已启用" : "未启用")}{(success.Value.IsEnabled == service.Current.StartWithWindows ? "" : "（与已保存设置不一致）")}",
+            OperationResult<StartupRegistrationState>.Failure { Error.Code: "UiOnlyStartupDisabled" } => "无设备模式跳过 Windows 自启",
             OperationResult<StartupRegistrationState>.Failure failure => $"自启注册：读取未完成。错误编号：{failure.Error.ErrorId}",
             OperationResult<StartupRegistrationState>.Unknown unknown => $"自启注册：待确认。错误编号：{unknown.Error.ErrorId}",
             _ => "自启注册：读取已取消"

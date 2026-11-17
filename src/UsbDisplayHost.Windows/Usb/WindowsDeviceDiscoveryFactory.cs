@@ -12,7 +12,7 @@ public sealed record WindowsDiscoveryConfiguration(Guid? HidInterfaceClass,
 public static class WindowsDeviceDiscoveryFactory
 {
     public static async Task<OperationResult<WindowsDeviceDiscovery>> CreateAsync(WindowsDiscoveryConfiguration configuration,
-        IErrorReporter reporter, CancellationToken token)
+        IErrorReporter reporter, bool exclusiveAccess, CancellationToken token)
     {
         if (configuration is null || reporter is null || configuration.HidCompatibility.IsDefault
             || configuration.WinUsbCompatibility.IsDefault
@@ -89,14 +89,14 @@ public static class WindowsDeviceDiscoveryFactory
             var routes = ImmutableArray.CreateBuilder<DeviceIdentityProbeRoute>();
             if (configuration.HidInterfaceClass is { } interfaceClass)
             {
-                var created = HidInterfaceIdentityProbe.Create(configuration.HidCompatibility, reporter);
+                var created = HidInterfaceIdentityProbe.Create(configuration.HidCompatibility, reporter, exclusiveAccess);
                 if (created is not OperationResult<HidInterfaceIdentityProbe>.Success actual) { return Convert(created); }
                 hidProbe = actual.Value;
                 owned.Add(actual.Value); routes.Add(new(interfaceClass, actual.Value));
             }
             if (!configuration.WinUsbCompatibility.IsEmpty)
             {
-                var created = WinUsbInterfaceIdentityProbe.Create(configuration.WinUsbCompatibility, reporter);
+                var created = WinUsbInterfaceIdentityProbe.Create(configuration.WinUsbCompatibility, reporter, exclusiveAccess);
                 if (created is not OperationResult<WinUsbInterfaceIdentityProbe>.Success actual) { return Convert(created); }
                 owned.Add(actual.Value);
                 foreach (var winUsbClass in configuration.WinUsbCompatibility.Select(item => item.InterfaceClass).Distinct())

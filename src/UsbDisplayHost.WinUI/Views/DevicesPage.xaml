@@ -48,6 +48,8 @@
                     TextAlignment="Center" />
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="8">
                     <Button x:Name="RescanButton" Content="重新检测" Command="{Binding RescanCommand}" />
+                    <Button x:Name="DisconnectButton" Content="{Binding DisconnectActionText}"
+                            Command="{Binding DisconnectCommand}" Visibility="Collapsed" />
                     <Button x:Name="ThemeButton" Content="先预览主题" Visibility="Collapsed" Click="OnThemeClick" />
                     <Button Content="查看诊断" Click="OnDiagnosticsClick" />
                 </StackPanel>
@@ -149,7 +151,6 @@
                             <Button x:Name="WakeButton" Content="唤醒" Command="{Binding WakeDisplayCommand}" Visibility="Collapsed" />
                             <Button x:Name="PauseButton" Content="暂停播放" Command="{Binding PauseStreamingCommand}" Visibility="Collapsed" />
                             <Button x:Name="ResumeButton" Content="恢复播放" Command="{Binding ResumeStreamingCommand}" Visibility="Collapsed" />
-                            <Button Content="{Binding DisconnectActionText}" Command="{Binding DisconnectCommand}" />
                         </StackPanel>
                         <TextBlock Text="{Binding StreamingResultText}"
                                    Visibility="{Binding StreamingResultText, Converter={StaticResource DeviceValueVisibility}}"

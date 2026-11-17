@@ -169,13 +169,12 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         Rect cell, double unit)
     {
         var foreground = Brush(content.Foreground);
-        var secondary = MixBrush(content.Background, content.Foreground, .7);
         double innerWidth = cell.Width * .84;
         double labelSize = Math.Min(unit * .055, cell.Height * .15);
-        var label = FittedText(metric.Label, secondary, labelSize, innerWidth, FontWeights.SemiBold);
+        var label = FittedText(metric.Label, foreground, labelSize, innerWidth, FontWeights.SemiBold);
         double valueSize = Math.Min(cell.Width * .34, cell.Height * .46);
         if (metric.Unavailable) { valueSize *= .58; }
-        var value = CreateText(metric.Value, metric.Unavailable ? secondary : foreground, valueSize, FontWeights.Bold);
+        var value = CreateText(metric.Value, foreground, valueSize, FontWeights.Bold);
         var suffix = CreateText(metric.Unit, foreground, valueSize * .42, FontWeights.SemiBold);
         double valueGap = string.IsNullOrEmpty(metric.Unit) ? 0 : valueSize * .04;
         double combinedWidth = value.WidthIncludingTrailingWhitespace + valueGap + suffix.WidthIncludingTrailingWhitespace;
@@ -189,7 +188,7 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
         }
         string status = metric.Unavailable ? $"{metric.Source} · 暂无有效读数"
             : metric.Stale ? $"{metric.Source} · 数据已过期 · 保留最近读数" : $"来源：{metric.Source}";
-        var statusText = FittedText(status, secondary, labelSize * .6, innerWidth);
+        var statusText = FittedText(status, foreground, labelSize * .6, innerWidth);
         double gap = labelSize * .35;
         double groupHeight = label.Height + gap + value.Height + gap + statusText.Height;
         double top = cell.Top + (cell.Height - groupHeight) / 2;

@@ -100,11 +100,15 @@ public sealed class WpfFrameRenderer : IFrameRenderer
             var encoder = new JpegBitmapEncoder { QualityLevel = quality };
             encoder.Frames.Add(BitmapFrame.Create(bitmap));
             try { encoder.Save(output); }
-            catch (Exception exception) when (exception is not OutOfMemoryException && output.HasExceededLimit) { continue; }
             catch (Exception exception) when (exception is not OutOfMemoryException && cancellationToken.IsCancellationRequested)
             {
                 throw new OperationCanceledException(cancellationToken);
             }
+            catch (Exception exception) when (exception is not OutOfMemoryException && output.HasExceededLimit) { continue; }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            // WIC 可能在流拒绝超限写入后正常返回，仍应继续尝试较低画质。
+            if (output.HasExceededLimit) { continue; }
             return new OperationResult<EncodedFrame>.Success(new EncodedFrame(
                 ImmutableArray.CreateRange(output.ToArray()), request.Width, request.Height,
                 timeProvider.GetTimestamp(), request.Context, request.FrameNumber, request.Purpose));

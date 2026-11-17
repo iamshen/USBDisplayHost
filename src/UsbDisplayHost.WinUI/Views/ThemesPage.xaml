@@ -1,0 +1,221 @@
+<UserControl
+    x:Class="UsbDisplayHost.WinUI.Views.ThemesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:UsbDisplayHost.WinUI.Views"
+    HorizontalContentAlignment="Stretch"
+    VerticalContentAlignment="Stretch">
+    <UserControl.Resources>
+        <views:DeviceValueVisibilityConverter x:Key="ThemeVisibility" />
+        <views:ThemeColorBrushConverter x:Key="ThemeColorBrush" />
+        <Style x:Key="ThumbnailFrameStyle" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource WorkspaceCanvasBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource WorkspaceDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <ItemsPanelTemplate x:Key="PalettePanel">
+            <ItemsStackPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+        <DataTemplate x:Key="PaletteItemTemplate">
+            <Border Width="24" Height="24" CornerRadius="4" BorderThickness="1"
+                    BorderBrush="{ThemeResource WorkspaceDividerBrush}" Background="{Binding Brush}"
+                    ToolTipService.ToolTip="{Binding Label}" />
+        </DataTemplate>
+        <Style x:Key="PaletteItemStyle" TargetType="ListViewItem">
+            <Setter Property="MinWidth" Value="36" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="0,0,2,0" />
+        </Style>
+        <Style x:Key="PaletteStyle" TargetType="ListView">
+            <Setter Property="ItemsPanel" Value="{StaticResource PalettePanel}" />
+            <Setter Property="ItemTemplate" Value="{StaticResource PaletteItemTemplate}" />
+            <Setter Property="ItemContainerStyle" Value="{StaticResource PaletteItemStyle}" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled" />
+            <Setter Property="ScrollViewer.VerticalScrollMode" Value="Disabled" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid MaxWidth="1200" Padding="32,26,32,20" RowDefinitions="Auto,*,Auto">
+        <StackPanel Margin="0,0,0,20" Spacing="4">
+            <TextBlock Text="主题" Style="{StaticResource WorkspaceStateHeadingStyle}" AutomationProperties.HeadingLevel="Level1" />
+            <TextBlock Text="{Binding SessionDeviceText}" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+        </StackPanel>
+
+        <ScrollViewer x:Name="EditorScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch"
+                      SizeChanged="OnEditorSizeChanged">
+            <Grid x:Name="EditorLayout" ColumnDefinitions="*,304" RowDefinitions="Auto,Auto"
+                  ColumnSpacing="24" SizeChanged="OnEditorSizeChanged">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="本地预览" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                               AutomationProperties.HeadingLevel="Level2" />
+                    <Border x:Name="PreviewFrame" HorizontalAlignment="Left" CornerRadius="12" BorderThickness="1"
+                            Background="{ThemeResource WorkspaceNavigationBrush}" BorderBrush="{ThemeResource WorkspaceDividerBrush}">
+                        <Grid>
+                            <Image x:Name="PreviewImage" Stretch="Uniform" AutomationProperties.Name="当前草稿的本地画面预览" />
+                            <TextBlock x:Name="PreviewStatus" MaxWidth="320" Margin="16"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"
+                                       Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Spacing="8" Visibility="{Binding PreviewErrorText, Converter={StaticResource ThemeVisibility}}">
+                        <InfoBar IsOpen="True" IsClosable="False" Severity="Error" Message="{Binding PreviewErrorText}" />
+                        <Button Content="重试预览" Command="{Binding RetryPreviewCommand}" />
+                    </StackPanel>
+
+                    <RadioButtons x:Name="TemplateSelector" HorizontalAlignment="Left" MaxColumns="3"
+                                  Header="内容模板" IsEnabled="{Binding CanEdit}" SelectionChanged="OnTemplateChanged"
+                                  AutomationProperties.Name="内容模板">
+                        <RadioButton AutomationProperties.Name="图片">
+                            <StackPanel Spacing="4">
+                                <Border x:Name="PictureThumbnail" Style="{StaticResource ThumbnailFrameStyle}">
+                                    <Grid AutomationProperties.AccessibilityView="Raw">
+                                        <FontIcon Glyph="&#xEB9F;" />
+                                        <Image x:Name="PictureThumbnailImage" Stretch="Uniform" />
+                                    </Grid>
+                                </Border>
+                                <TextBlock Text="图片" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton AutomationProperties.Name="时钟">
+                            <StackPanel Spacing="4">
+                                <Border x:Name="ClockThumbnail" Style="{StaticResource ThumbnailFrameStyle}">
+                                    <Grid AutomationProperties.AccessibilityView="Raw">
+                                        <FontIcon Glyph="&#xE823;" />
+                                        <Image x:Name="ClockThumbnailImage" Stretch="Uniform" />
+                                    </Grid>
+                                </Border>
+                                <TextBlock Text="时钟" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton AutomationProperties.Name="仪表盘">
+                            <StackPanel Spacing="4">
+                                <Border x:Name="DashboardThumbnail" Style="{StaticResource ThumbnailFrameStyle}">
+                                    <Grid AutomationProperties.AccessibilityView="Raw">
+                                        <FontIcon Glyph="&#xE9D9;" />
+                                        <Image x:Name="DashboardThumbnailImage" Stretch="Uniform" />
+                                    </Grid>
+                                </Border>
+                                <TextBlock Text="仪表盘" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </RadioButton>
+                    </RadioButtons>
+                </StackPanel>
+
+                <Border x:Name="FieldsBoundary" Grid.Column="1" BorderThickness="1,0,0,0" Padding="24,0,0,0"
+                        BorderBrush="{ThemeResource WorkspaceDividerBrush}">
+                    <StackPanel Spacing="16">
+                        <TextBlock x:Name="FieldsHeading" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                                   AutomationProperties.HeadingLevel="Level2" />
+
+                        <StackPanel Spacing="8" Visibility="{Binding IsImage, Converter={StaticResource ThemeVisibility}}">
+                            <Button Content="选择图片…" HorizontalAlignment="Stretch" MinHeight="36"
+                                    Command="{Binding SelectImageCommand}" ToolTipService.ToolTip="支持 PNG、JPEG 图片" />
+                            <TextBlock Text="{Binding ImageDescription}" Style="{StaticResource WorkspaceSupportingTextStyle}"
+                                       TextTrimming="CharacterEllipsis" MaxLines="2"
+                                       ToolTipService.ToolTip="{Binding ImageDescription}" />
+                            <Button Content="取消导入" Command="{Binding SelectImageCancelCommand}"
+                                    Visibility="{Binding SelectImageCommand.IsRunning, Converter={StaticResource ThemeVisibility}}" />
+                            <ComboBox x:Name="FitBox" Header="图片适配" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" SelectionChanged="OnFitChanged"
+                                      IsEnabled="{Binding CanEdit}" AutomationProperties.Name="图片适配" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4" Visibility="{Binding IsClock, Converter={StaticResource ThemeVisibility}}">
+                                <CheckBox Content="24 小时制" IsEnabled="{Binding CanEdit}"
+                                          IsChecked="{Binding Use24HourClock, Mode=TwoWay}" />
+                                <CheckBox Content="显示日期" IsEnabled="{Binding CanEdit}"
+                                          IsChecked="{Binding ShowDate, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="4"
+                              Visibility="{Binding IsDashboard, Converter={StaticResource ThemeVisibility}}">
+                                <CheckBox Content="CPU 使用率" IsEnabled="{Binding CanEdit}"
+                                          IsChecked="{Binding ShowCpuUsage, Mode=TwoWay}" />
+                                <CheckBox Grid.Column="1" Content="内存占用" IsEnabled="{Binding CanEdit}"
+                                          IsChecked="{Binding ShowMemoryUsage, Mode=TwoWay}" />
+                                <CheckBox Grid.Row="1" Content="主机温度" IsEnabled="{Binding CanEdit}"
+                                          IsChecked="{Binding ShowHostTemperature, Mode=TwoWay}" />
+                                <CheckBox Grid.Row="1" Grid.Column="1" Content="设备温度" IsEnabled="{Binding CanEdit}"
+                                          IsChecked="{Binding ShowDeviceTemperature, Mode=TwoWay}" />
+                        </Grid>
+
+                        <StackPanel Spacing="8">
+                            <Expander x:Name="BackgroundColorEntry" HorizontalAlignment="Stretch"
+                                      HorizontalContentAlignment="Stretch" IsEnabled="{Binding CanEdit}"
+                                      AutomationProperties.Name="背景色设置" PreviewKeyDown="OnColorPreviewKeyDown">
+                                <Expander.Header>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="背景色" VerticalAlignment="Center" />
+                                        <Border Width="14" Height="14" CornerRadius="7" BorderThickness="1"
+                                                BorderBrush="{ThemeResource WorkspaceDividerBrush}"
+                                                Background="{Binding BackgroundColor, Converter={StaticResource ThemeColorBrush}}" />
+                                        <TextBlock Text="{Binding BackgroundColor}" FontFamily="Consolas" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Expander.Header>
+                                <StackPanel Spacing="8">
+                                    <TextBox PlaceholderText="#RRGGBB" AutomationProperties.Name="背景色，十六进制 RGB"
+                                             Text="{Binding BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ListView x:Name="BackgroundPalette" Style="{StaticResource PaletteStyle}"
+                                              SelectionChanged="OnPaletteSelectionChanged"
+                                              ContainerContentChanging="OnPaletteContainerChanged"
+                                              AutomationProperties.Name="背景色色板" />
+                                </StackPanel>
+                            </Expander>
+                            <Expander x:Name="ForegroundColorEntry" HorizontalAlignment="Stretch"
+                                      HorizontalContentAlignment="Stretch" IsEnabled="{Binding CanEdit}"
+                                      AutomationProperties.Name="文字色设置" PreviewKeyDown="OnColorPreviewKeyDown">
+                                <Expander.Header>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="文字色" VerticalAlignment="Center" />
+                                        <Border Width="14" Height="14" CornerRadius="7" BorderThickness="1"
+                                                BorderBrush="{ThemeResource WorkspaceDividerBrush}"
+                                                Background="{Binding ForegroundColor, Converter={StaticResource ThemeColorBrush}}" />
+                                        <TextBlock Text="{Binding ForegroundColor}" FontFamily="Consolas" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Expander.Header>
+                                <StackPanel Spacing="8">
+                                    <TextBox PlaceholderText="#RRGGBB" AutomationProperties.Name="文字色，十六进制 RGB"
+                                             Text="{Binding ForegroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ListView x:Name="ForegroundPalette" Style="{StaticResource PaletteStyle}"
+                                              SelectionChanged="OnPaletteSelectionChanged"
+                                              ContainerContentChanging="OnPaletteContainerChanged"
+                                              AutomationProperties.Name="文字色色板" />
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" Margin="0,16,0,0" Padding="0,12,0,0" RowDefinitions="Auto,Auto" RowSpacing="8"
+              BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="0,1,0,0">
+            <StackPanel Spacing="8">
+                <InfoBar IsOpen="True" IsClosable="False" Severity="Warning" Message="{Binding ValidationText}"
+                         Visibility="{Binding ValidationText, Converter={StaticResource ThemeVisibility}}" />
+                <InfoBar IsOpen="True" IsClosable="False" Severity="Error" Message="{Binding ErrorText}"
+                         Visibility="{Binding ErrorText, Converter={StaticResource ThemeVisibility}}" />
+                <TextBlock Text="{Binding ApplicationText}" Visibility="{Binding ApplicationText, Converter={StaticResource ThemeVisibility}}"
+                           Style="{StaticResource WorkspaceSupportingTextStyle}" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <TextBlock Text="{Binding EditorStatus}" VerticalAlignment="Center" Style="{StaticResource WorkspaceSupportingTextStyle}"
+                           AutomationProperties.LiveSetting="Polite" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Content="恢复默认" Command="{Binding RestoreDefaultsCommand}" />
+                    <Button Content="撤销" Command="{Binding UndoCommand}" />
+                    <Button Content="取消应用" Command="{Binding ApplyCancelCommand}"
+                            Visibility="{Binding IsApplying, Converter={StaticResource ThemeVisibility}}" />
+                    <Button Content="重试保存配置" Command="{Binding RetryApplicationSaveCommand}"
+                            Visibility="{Binding HasApplicationSave, Converter={StaticResource ThemeVisibility}}" />
+                    <Button Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}" Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

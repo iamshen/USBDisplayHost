@@ -21,17 +21,19 @@ public sealed class DiagnosticLog : IDiagnosticService
     private int stopped;
     private long reportingFailures;
 
-    public DiagnosticLog(ApplicationDataPaths paths, TimeProvider timeProvider)
+    public DiagnosticLog(ApplicationDataPaths paths, TimeProvider timeProvider, string? applicationVersion = null)
     {
         this.timeProvider = timeProvider;
+        ApplicationVersion = applicationVersion ?? typeof(DiagnosticLog).Assembly.GetName().Version?.ToString() ?? "unknown";
         file = new StrictRollingFileSink(paths.Logs);
         logger = new LoggerConfiguration().MinimumLevel.Information()
-            .Enrich.WithProperty("ApplicationVersion", typeof(DiagnosticLog).Assembly.GetName().Version?.ToString() ?? "unknown")
+            .Enrich.WithProperty("ApplicationVersion", ApplicationVersion)
             .WriteTo.Async(sink => sink.Sink(file), bufferSize: 512, blockWhenFull: false, monitor: monitor)
             .CreateLogger();
     }
 
     public DiagnosticJournal Journal { get; } = new();
+    internal string ApplicationVersion { get; }
     internal LogFileSnapshot[] CaptureLogSnapshot() => file.CaptureSnapshot();
 
     public ErrorReport Report(Exception exception, string stage) => ReportCore(exception, stage, null);

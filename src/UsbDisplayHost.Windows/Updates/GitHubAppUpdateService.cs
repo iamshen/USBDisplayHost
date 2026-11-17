@@ -3,12 +3,14 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Core.Operations;
 using UsbDisplayHost.Core.Updates;
 using UsbDisplayHost.Windows.Storage;
 using Velopack;
+using Velopack.Logging;
 using Velopack.NuGet;
 using Velopack.Sources;
 
@@ -18,7 +20,11 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
 {
     public const string RepositoryUrl = "https://github.com/iamshen/USBDisplayHost";
     public const string ReleasesUrl = RepositoryUrl + "/releases";
-    private const string ProductId = "USBDisplayHost";
+    public const string BetaProductId = "USBDisplayHost.Beta";
+    public const string BetaChannel = "win-x64-beta";
+    private static readonly UpdateChannel Stable = new("USBDisplayHost", "win-x64", false);
+    private static readonly UpdateChannel Beta = new(BetaProductId, BetaChannel, true);
+    private readonly UpdateChannel channel;
     private readonly SemaphoreSlim operation = new(1, 1);
     private readonly IDiagnosticService diagnostics;
     private readonly string stateDirectory;
@@ -28,17 +34,47 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
     private AppUpdateSnapshot snapshot;
 
     public GitHubAppUpdateService(ApplicationDataPaths paths, IDiagnosticService diagnostics)
+        : this(paths, diagnostics, Stable, updatesEnabled: true, repositoryUrl: RepositoryUrl)
+    {
+    }
+
+    public static GitHubAppUpdateService ForBeta(ApplicationDataPaths paths, IDiagnosticService diagnostics, bool updatesEnabled,
+        string? repository = null) =>
+        new(paths, diagnostics, Beta, updatesEnabled, GetBetaRepositoryUrl(repository));
+
+    public string? ReleasePageUrl { get; }
+
+    private static string? GetBetaRepositoryUrl(string? repository)
+    {
+        if (repository is null || !Regex.IsMatch(repository, @"\A[A-Za-z0-9-]+/(?!\.{1,2}\z)[A-Za-z0-9_.-]+\z")
+            || string.Equals(repository, "iamshen/USBDisplayHost", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+        return "https://github.com/" + repository;
+    }
+
+    private GitHubAppUpdateService(ApplicationDataPaths paths, IDiagnosticService diagnostics, UpdateChannel channel, bool updatesEnabled,
+        string? repositoryUrl)
     {
         this.diagnostics = diagnostics;
+        this.channel = channel;
+        ReleasePageUrl = repositoryUrl is null ? null : repositoryUrl + "/releases";
         stateDirectory = Path.Combine(paths.Root, "updates");
         downloader = new UpdateDownloader((received, total) =>
             Set(Snapshot with { DownloadedBytes = received, TotalBytes = total }));
-        manager = new VerifiedUpdateManager(new GithubSource(RepositoryUrl, null, false, downloader));
+        IUpdateSource source = repositoryUrl is null
+            ? new SimpleFileSource(new DirectoryInfo(stateDirectory))
+            : channel.IsBeta
+                ? new BetaGithubSource(repositoryUrl, downloader)
+                : new GithubSource(repositoryUrl, null, false, downloader);
+        manager = new VerifiedUpdateManager(source, channel);
         string version = manager.CurrentVersion?.ToString()
             ?? Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
             ?? "未知";
-        bool available = manager.IsInstalled && !manager.IsPortable && manager.AppId == ProductId
-            && RuntimeInformation.ProcessArchitecture == Architecture.X64;
+        bool available = updatesEnabled && repositoryUrl is not null && manager.IsInstalled && !manager.IsPortable
+            && manager.AppId == channel.ProductId && RuntimeInformation.ProcessArchitecture == Architecture.X64
+            && manager.CurrentVersion is { } installedVersion && channel.AllowsVersion(installedVersion);
         snapshot = new(available ? AppUpdateState.Idle : AppUpdateState.Unavailable, version, null, 0, null, null, null);
     }
 
@@ -62,7 +98,7 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
             var pending = JsonSerializer.Deserialize<PendingPackage>(
                 await File.ReadAllTextAsync(pendingPath, cancellationToken).ConfigureAwait(false));
             if (pending is null) { throw new InvalidDataException("待安装包记录无效"); }
-            var asset = pending.ToAsset();
+            var asset = pending.ToAsset(channel.ProductId);
             if (asset.Version <= manager.CurrentVersion) { File.Delete(pendingPath); return; }
             ValidateTarget(asset);
             Set(Snapshot with { State = AppUpdateState.Verifying, TargetVersion = asset.Version.ToString() });
@@ -137,11 +173,7 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
 
     private void ValidateTarget(VelopackAsset asset)
     {
-        string expectedName = $"{ProductId}-{asset.Version}-win-x64-full.nupkg";
-        if (asset.PackageId != ProductId || asset.Type != VelopackAssetType.Full || asset.Version is null
-            || asset.Version <= manager.CurrentVersion || asset.Version.IsPrerelease || asset.Size <= 0
-            || asset.FileName != expectedName || asset.SHA256 is not { Length: 64 }
-            || !asset.SHA256.All(Uri.IsHexDigit))
+        if (!channel.AllowsAsset(asset) || asset.Version <= manager.CurrentVersion)
         { throw new InvalidDataException("更新包的产品、版本、文件名或校验信息不符合要求"); }
     }
 
@@ -183,8 +215,41 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
         Changed?.Invoke(value);
     }
 
-    private sealed class VerifiedUpdateManager(IUpdateSource source) : UpdateManager(source,
-        new UpdateOptions { ExplicitChannel = "win-x64", AllowVersionDowngrade = false, MaximumDeltasBeforeFallback = -1 })
+    private sealed record UpdateChannel(string ProductId, string ChannelName, bool IsBeta)
+    {
+        public bool AllowsVersion(SemanticVersion version)
+        {
+            if (!IsBeta) { return !version.IsPrerelease; }
+            return version.ReleaseLabels.ToArray() is ["beta", var number]
+                && int.TryParse(number, NumberStyles.None, CultureInfo.InvariantCulture, out int iteration) && iteration > 0;
+        }
+
+        public bool AllowsAsset(VelopackAsset asset) =>
+            asset.PackageId == ProductId && asset.Type == VelopackAssetType.Full
+            && asset.Version is { } version && AllowsVersion(version)
+            && asset.FileName == $"{ProductId}-{version}-{ChannelName}-full.nupkg"
+            && asset.Size > 0 && asset.SHA256 is { Length: 64 } && asset.SHA256.All(Uri.IsHexDigit);
+    }
+
+    private sealed class BetaGithubSource(string repositoryUrl, IFileDownloader downloader) : GithubSource(repositoryUrl, null, true, downloader)
+    {
+        protected override async Task<GithubRelease[]> GetReleases(bool includePrereleases)
+        {
+            var releases = await base.GetReleases(includePrereleases).ConfigureAwait(false);
+            return releases.Where(release => release.Prerelease && release.PublishedAt.HasValue).ToArray();
+        }
+
+        public override async Task<VelopackAssetFeed> GetReleaseFeed(IVelopackLogger logger, string? appId,
+            string channel, Guid? stagingId = null, VelopackAsset? latestLocalRelease = null)
+        {
+            if (appId != BetaProductId || channel != BetaChannel) { return new VelopackAssetFeed(); }
+            var feed = await base.GetReleaseFeed(logger, appId, channel, stagingId, latestLocalRelease).ConfigureAwait(false);
+            return new VelopackAssetFeed { Assets = feed.Assets.Where(Beta.AllowsAsset).ToArray() };
+        }
+    }
+
+    private sealed class VerifiedUpdateManager(IUpdateSource source, UpdateChannel channel) : UpdateManager(source,
+        new UpdateOptions { ExplicitChannel = channel.ChannelName, AllowVersionDowngrade = false, MaximumDeltasBeforeFallback = -1 })
     {
         public async Task VerifyAsync(VelopackAsset asset)
         {
@@ -195,7 +260,7 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
             var metadata = XDocument.Load(stream).Root?.Elements().Single(element => element.Name.LocalName == "metadata")
                 ?? throw new InvalidDataException("更新包缺少元数据");
             string? Value(string name) => metadata.Elements().SingleOrDefault(element => element.Name.LocalName == name)?.Value;
-            if (Value("id") != ProductId || Value("version") != asset.Version.ToString() || Value("channel") != "win-x64"
+            if (Value("id") != channel.ProductId || Value("version") != asset.Version.ToString() || Value("channel") != channel.ChannelName
                 || Value("rid") != "win-x64" || Value("os") != "win" || Value("machineArchitecture") != "x64")
             { throw new InvalidDataException("包内产品、版本、系统或架构与发布索引不一致"); }
             if (Value("osMinVersion") is { Length: > 0 } minimum
@@ -216,9 +281,9 @@ public sealed class GitHubAppUpdateService : IAppUpdateService
     private sealed record PendingPackage(string Version, string FileName, long Size, string SHA256, string SHA1)
     {
         public static PendingPackage From(VelopackAsset asset) => new(asset.Version.ToString(), asset.FileName, asset.Size, asset.SHA256, asset.SHA1);
-        public VelopackAsset ToAsset() => new()
+        public VelopackAsset ToAsset(string productId) => new()
         {
-            PackageId = ProductId, Version = SemanticVersion.Parse(Version), Type = VelopackAssetType.Full,
+            PackageId = productId, Version = SemanticVersion.Parse(Version), Type = VelopackAssetType.Full,
             FileName = FileName, Size = Size, SHA256 = SHA256, SHA1 = SHA1
         };
     }

@@ -45,28 +45,28 @@ Windows 原生 USB 屏上位机。编辑主题，预览内容，管理设备。
 
 ## 开发
 
-使用 Windows 与 .NET SDK **10.0.401**，版本由 `global.json` 锁定。界面基于 WPF、WPF UI 和 CommunityToolkit.Mvvm。
+使用 Windows、PowerShell 7 与 .NET SDK **10.0.401**，SDK 版本由 `global.json` 锁定。正式版使用 WPF，Beta 使用 WinUI 3，两者共享设备业务和离屏渲染。
 
 在仓库根目录执行：
 
 ```powershell
 ./build.ps1 -Action Build
 ./build.ps1 -Action Package
+./build.ps1 -Action Package -Channel Beta
 ```
 
-安装包输出到 `.artifacts/installers/win-x64/<Version>/`。构建与打包不会启动应用。
-
-`Build` 同时编译 WPF 和 [WinUI 3 开发入口](docs/design/winui3/baseline.md)。`Package` 生成 WPF 安装包。
+`Build` 同时编译 WPF 和 [WinUI 3](docs/design/winui3/baseline.md)。正式和 Beta 安装包分别输出到 `.artifacts/installers/win-x64/<Version>/` 和 `.artifacts/installers/win-x64-beta/<Version>/`。构建与打包不会启动应用。[Beta 安装说明](docs/release/offline-installation.md#winui-beta)
 
 无设备查看界面：
 
 ```powershell
 dotnet run --project src/UsbDisplayHost.Desktop -- --ui-only
+dotnet run --project src/UsbDisplayHost.WinUI -c Release --no-build -- --ui-only
 ```
 
-`--ui-only` 不连接 USB 设备，应用偏好、素材和日志仍使用当前用户的数据目录。
+`--ui-only` 跳过 USB 设备。WPF 使用当前用户的数据目录，WinUI Beta 为每次运行分配独立临时目录。
 
-代码按 `Core`（业务模型）、`Windows`（系统与设备适配）、`Rendering`（离屏绘图）、`Desktop`（界面）组织，均位于 [`src/`](src/)。
+代码位于 [`src/`](src/)。`Core` 负责业务模型，`Windows` 负责系统与设备适配，`Rendering` 负责离屏绘图，`Desktop` 和 `WinUI` 负责各自的窗口与发布入口。
 
 推送 `main` 自动打包；推送与项目版本一致的 `vX.Y.Z` 标签自动发布 GitHub Release。详见 [发布与更新说明](docs/release/github-release.md)。
 

@@ -9,7 +9,7 @@ namespace UsbDisplayHost.Desktop.Services;
 
 // 工作区拥有可选发现生命周期；未附加时不创建监视器或执行原生调用。
 public sealed class DeviceDiscoveryLifetime(IUiDispatcher dispatcher, DevicesPageViewModel devices,
-    DeviceCoordinator coordinator, DeviceSessionLifetime deviceSessions, IErrorReporter reporter)
+    DeviceCoordinator coordinator, DeviceSessionLifetime deviceSessions, IErrorReporter reporter, bool exclusiveAccess = false)
 {
     private readonly object sync = new();
     private WindowsDeviceDiscoverySession? session;
@@ -37,7 +37,8 @@ public sealed class DeviceDiscoveryLifetime(IUiDispatcher dispatcher, DevicesPag
             if (closed is not OperationResult<Unit>.Success) { return closed; }
             discoveryOwner = null;
         }
-        var created = await WindowsDeviceDiscoveryFactory.CreateAsync(Ad102V2DiscoveryConfiguration.ReadInstalledBindings(), reporter, token);
+        var created = await WindowsDeviceDiscoveryFactory.CreateAsync(
+            Ad102V2DiscoveryConfiguration.ReadInstalledBindings(), reporter, exclusiveAccess, token);
         if (created is not OperationResult<WindowsDeviceDiscovery>.Success discovery)
         { return Ad102V2DeviceSession.Convert<Unit, WindowsDeviceDiscovery>(created); }
         discoveryOwner = discovery.Value;

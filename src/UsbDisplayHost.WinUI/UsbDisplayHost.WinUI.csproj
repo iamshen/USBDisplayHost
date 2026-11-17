@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
+        <Version>0.2.0-beta.5</Version>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
         <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
         <Platforms>x64</Platforms>
@@ -17,8 +18,11 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <ApplicationIcon>../UsbDisplayHost.Desktop/Assets/Branding/app.ico</ApplicationIcon>
     </PropertyGroup>
+    <ItemGroup Condition="'$(BetaUpdateRepository)' != ''">
+        <AssemblyMetadata Include="BetaUpdateRepository" Value="$(BetaUpdateRepository)" />
+    </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" GeneratePathProperty="true" />
         <PackageReference Include="CommunityToolkit.Mvvm" />
         <PackageReference Include="Velopack" />
     </ItemGroup>
@@ -52,5 +56,22 @@
                  Link="Assets/Branding/app.ico"
                  CopyToOutputDirectory="PreserveNewest"
                  CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="../../licenses/**/*" Exclude="../../licenses/WPF-UI/**/*"
+                 Link="licenses/%(RecursiveDir)%(Filename)%(Extension)"
+                 CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="$(PkgMicrosoft_WindowsAppSDK)/license.txt;$(PkgMicrosoft_WindowsAppSDK)/NOTICE.txt"
+                 Link="licenses/WindowsAppSDK/%(Filename)%(Extension)"
+                 CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
+
+    <!-- 非 MSIX 构建生成包含 XBF 的项目 PRI，当前 App SDK 不会自动纳入发布目录。 -->
+    <Target Name="IncludeWinUiResourceIndex" BeforeTargets="ComputeResolvedFilesToPublishList"
+            Condition="'$(WindowsPackageType)' == 'None'">
+        <Error Condition="!Exists('$(ProjectPriFullPath)')" Text="未生成 WinUI 应用资源索引：$(ProjectPriFullPath)" />
+        <ItemGroup>
+            <ResolvedFileToPublish Include="$(ProjectPriFullPath)"
+                                   RelativePath="$(ProjectPriFileName)"
+                                   CopyToPublishDirectory="PreserveNewest" />
+        </ItemGroup>
+    </Target>
 </Project>
