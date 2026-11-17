@@ -3,10 +3,10 @@ using System.Runtime.InteropServices;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using UsbDisplayHost.Core.Configuration;
 using UsbDisplayHost.Core.Diagnostics;
 using UsbDisplayHost.Desktop.Services;
 using UsbDisplayHost.Desktop.ViewModels;
+using UsbDisplayHost.Windows.Storage;
 using Windows.Graphics;
 using WinRT.Interop;
 
@@ -26,26 +26,27 @@ public sealed partial class MainWindow : Window
 
     internal MainWindow(StartupLog log, WorkspaceViewModel workspace, DevicesPageViewModel devices,
         ThemePageViewModel themes, DeviceSettingsPageViewModel deviceSettings, DiagnosticsPageViewModel diagnostics,
-        ApplicationSettingsPageViewModel settings, IErrorReporter reporter, bool uiOnly)
+        ApplicationSettingsPageViewModel settings, FileProfileStore profiles, IErrorReporter reporter, bool uiOnly)
     {
         this.log = log;
         this.workspace = workspace;
         this.settings = settings;
         InitializeComponent();
         Title = Program.ProductName;
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(TitleDragRegion);
         ApplyInitialSize();
+        UpdateAppearance();
 
         DevicesView.InitializeView(devices, reporter, uiOnly);
-        ThemesView.InitializeView(themes, reporter);
+        ThemesView.InitializeView(themes, profiles, reporter);
         DeviceSettingsView.InitializeView(deviceSettings);
         DiagnosticsView.InitializeView(diagnostics, reporter);
         AppSettingsView.InitializeView(settings, uiOnly);
         DevicesView.DiagnosticsRequested += OnDiagnosticsRequested;
         DevicesView.ThemeRequested += OnThemeRequested;
         SelectPage("Devices");
-        UpdateNavigationLayout();
-        WorkspaceNavigation.SelectionChanged += OnTopSelectionChanged;
-        SideNavigation.SelectionChanged += OnSideSelectionChanged;
+        WorkspaceNavigation.SelectionChanged += OnNavigationSelectionChanged;
         settings.PropertyChanged += OnSettingsChanged;
         workspace.PropertyChanged += OnWorkspaceChanged;
         Closed += OnClosed;
@@ -66,8 +67,12 @@ public sealed partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(message)) { return; }
         WorkspaceNotice.Message = message;
         WorkspaceNotice.Severity = failed ? InfoBarSeverity.Error : InfoBarSeverity.Success;
+        WorkspaceNotice.Visibility = Visibility.Visible;
         WorkspaceNotice.IsOpen = true;
     }
+
+    private void OnNoticeClosed(InfoBar sender, InfoBarClosedEventArgs args) =>
+        sender.Visibility = Visibility.Collapsed;
 
     internal async Task<WindowExitChoice> ShowExitDecisionAsync(string message, WindowExitPrompt prompt, CancellationToken token)
     {
@@ -136,6 +141,7 @@ public sealed partial class MainWindow : Window
             return ContentDialogResult.None;
         }
         dialog.XamlRoot = root;
+        dialog.RequestedTheme = ElementTheme.Dark;
         dialogOpen = true;
         try
         {
@@ -172,28 +178,17 @@ public sealed partial class MainWindow : Window
     private void OpenPage(string page)
     {
         SelectPage(page);
-        if (settings.NavigationLayout == NavigationLayout.Side)
-        {
-            (SideNavigation.SelectedItem as Control)?.Focus(FocusState.Programmatic);
-        }
-        else
-        {
-            WorkspaceNavigation.SelectedItem?.Focus(FocusState.Programmatic);
-        }
+        WorkspaceNavigation.SelectedItem?.Focus(FocusState.Programmatic);
     }
 
-    private void OnTopSelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args) =>
+    private void OnNavigationSelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args) =>
         SelectPage(sender.SelectedItem?.Tag as string);
-
-    private void OnSideSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args) =>
-        SelectPage((args.SelectedItem as NavigationViewItem)?.Tag as string);
 
     private void SelectPage(string? page)
     {
         if (page is null || page == selectedPage) { return; }
         selectedPage = page;
         WorkspaceNavigation.SelectedItem = WorkspaceNavigation.Items.First(item => Equals(item.Tag, page));
-        SideNavigation.SelectedItem = SideNavigation.MenuItems.OfType<NavigationViewItem>().First(item => Equals(item.Tag, page));
 
         DevicesView.Visibility = VisibleWhen(page == "Devices");
         ThemesView.Visibility = VisibleWhen(page == "Themes");
@@ -213,14 +208,19 @@ public sealed partial class MainWindow : Window
 
     private void OnSettingsChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(ApplicationSettingsPageViewModel.NavigationLayout)) { UpdateNavigationLayout(); }
+        if (args.PropertyName == nameof(ApplicationSettingsPageViewModel.Appearance)) { UpdateAppearance(); }
     }
 
-    private void UpdateNavigationLayout()
+    private void UpdateAppearance()
     {
-        bool side = settings.NavigationLayout == NavigationLayout.Side;
-        TopNavigation.Visibility = VisibleWhen(!side);
-        SideNavigation.Visibility = VisibleWhen(side);
+        WorkspacePalette.Apply(settings.Appearance);
+        var titleBar = AppWindow.TitleBar;
+        titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+        titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+        titleBar.ButtonForegroundColor = WorkspacePalette.GetColor("Text/Primary", settings.Appearance);
+        titleBar.ButtonInactiveForegroundColor = WorkspacePalette.GetColor("Text/Secondary", settings.Appearance);
+        titleBar.ButtonHoverBackgroundColor = WorkspacePalette.GetColor("Surface/Hover", settings.Appearance);
+        titleBar.ButtonPressedBackgroundColor = WorkspacePalette.GetColor("Surface/Selected", settings.Appearance);
     }
 
     private static Visibility VisibleWhen(bool condition) => condition ? Visibility.Visible : Visibility.Collapsed;
@@ -232,8 +232,7 @@ public sealed partial class MainWindow : Window
 
     private void OnClosed(object sender, WindowEventArgs args)
     {
-        WorkspaceNavigation.SelectionChanged -= OnTopSelectionChanged;
-        SideNavigation.SelectionChanged -= OnSideSelectionChanged;
+        WorkspaceNavigation.SelectionChanged -= OnNavigationSelectionChanged;
         settings.PropertyChanged -= OnSettingsChanged;
         DevicesView.DiagnosticsRequested -= OnDiagnosticsRequested;
         DevicesView.ThemeRequested -= OnThemeRequested;

@@ -42,6 +42,8 @@ public partial class ApplicationSettingsPageViewModel(ApplicationSettingsService
     [ObservableProperty] private bool automaticallyCheckUpdates = true;
     [ObservableProperty] private bool closeToTray = true;
     [ObservableProperty] private NavigationLayout navigationLayout;
+    [ObservableProperty] private ApplicationAppearance appearance;
+    partial void OnAppearanceChanged(ApplicationAppearance value) => Edited();
     public bool IsTopNavigation
     {
         get => NavigationLayout == NavigationLayout.Top;
@@ -245,9 +247,10 @@ public partial class ApplicationSettingsPageViewModel(ApplicationSettingsService
     }
 
     private ApplicationSettingsEdit Capture() => new(StartWithWindows, SwitchToThemeOnStartup,
-        SwitchToSecondaryOnExit, AutomaticallyCheckUpdates, CloseToTray, NavigationLayout);
+        SwitchToSecondaryOnExit, AutomaticallyCheckUpdates, CloseToTray, NavigationLayout, Appearance);
     private static ApplicationSettingsEdit ToEdit(ApplicationSettings settings) => new(settings.StartWithWindows,
-        settings.SwitchToThemeOnStartup, settings.SwitchToSecondaryOnExit, settings.AutomaticallyCheckUpdates, settings.CloseToTray, settings.NavigationLayout);
+        settings.SwitchToThemeOnStartup, settings.SwitchToSecondaryOnExit, settings.AutomaticallyCheckUpdates,
+        settings.CloseToTray, settings.NavigationLayout, settings.Appearance);
     private void Restore(ApplicationSettingsEdit edit)
     {
         restoring = true;
@@ -259,6 +262,7 @@ public partial class ApplicationSettingsPageViewModel(ApplicationSettingsService
             AutomaticallyCheckUpdates = edit.AutomaticallyCheckUpdates;
             CloseToTray = edit.CloseToTray;
             NavigationLayout = edit.NavigationLayout;
+            Appearance = edit.Appearance;
         }
         finally { restoring = false; }
     }

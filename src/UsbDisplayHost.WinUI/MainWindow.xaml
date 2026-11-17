@@ -4,91 +4,48 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="using:UsbDisplayHost.WinUI.Views"
     Title="USB Display Beta">
-    <Grid x:Name="WorkspaceRoot" Background="{ThemeResource WorkspaceCanvasBrush}" RowDefinitions="Auto,*,Auto">
+    <Grid x:Name="WorkspaceRoot" Background="{ThemeResource WorkspaceCanvasBrush}"
+          RowDefinitions="36,68,*,Auto" RequestedTheme="Dark">
+        <Border x:Name="TitleDragRegion" />
         <Border
-            x:Name="TopNavigation"
+            Grid.Row="1"
             HorizontalAlignment="Center"
-            Margin="16,20,16,0"
-            Padding="4"
+            VerticalAlignment="Top"
+            Margin="0,4,0,0"
+            Padding="6,2"
+            Width="496"
+            Height="48"
             Background="{ThemeResource WorkspaceNavigationBrush}"
-            BorderBrush="{ThemeResource WorkspaceDividerBrush}"
-            BorderThickness="1"
-            CornerRadius="22">
-            <SelectorBar x:Name="WorkspaceNavigation" AutomationProperties.Name="页面导航">
-                <SelectorBarItem Tag="Devices" Text="设备" Style="{StaticResource WorkspaceNavigationItemStyle}">
-                    <SelectorBarItem.Icon>
-                        <FontIcon Glyph="&#xE7F4;" />
-                    </SelectorBarItem.Icon>
-                </SelectorBarItem>
-                <SelectorBarItem Tag="Themes" Text="主题" Style="{StaticResource WorkspaceNavigationItemStyle}">
-                    <SelectorBarItem.Icon>
-                        <FontIcon Glyph="&#xE790;" />
-                    </SelectorBarItem.Icon>
-                </SelectorBarItem>
-                <SelectorBarItem Tag="DeviceSettings" Text="设备设置" Style="{StaticResource WorkspaceNavigationItemStyle}">
-                    <SelectorBarItem.Icon>
-                        <FontIcon Glyph="&#xE713;" />
-                    </SelectorBarItem.Icon>
-                </SelectorBarItem>
-                <SelectorBarItem Tag="Diagnostics" Text="诊断" Style="{StaticResource WorkspaceNavigationItemStyle}">
-                    <SelectorBarItem.Icon>
-                        <FontIcon Glyph="&#xE9CE;" />
-                    </SelectorBarItem.Icon>
-                </SelectorBarItem>
-                <SelectorBarItem Tag="AppSettings" Text="应用设置" Style="{StaticResource WorkspaceNavigationItemStyle}">
-                    <SelectorBarItem.Icon>
-                        <FontIcon Glyph="&#xE115;" />
-                    </SelectorBarItem.Icon>
-                </SelectorBarItem>
-            </SelectorBar>
+            CornerRadius="24">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+                <Border Width="38" Height="38" VerticalAlignment="Center" CornerRadius="19"
+                        Background="{ThemeResource WorkspaceInsetBrush}">
+                    <FontIcon Glyph="&#xE7F4;" FontSize="20" AutomationProperties.AccessibilityView="Raw" />
+                </Border>
+                <SelectorBar x:Name="WorkspaceNavigation" Padding="2,4" VerticalAlignment="Center"
+                             AutomationProperties.Name="页面导航">
+                    <SelectorBarItem Tag="Devices" Text="设备" Style="{StaticResource WorkspaceNavigationItemStyle}" />
+                    <SelectorBarItem Tag="Themes" Text="主题" Style="{StaticResource WorkspaceNavigationItemStyle}" />
+                    <SelectorBarItem Tag="DeviceSettings" Text="设备设置" Width="102" Style="{StaticResource WorkspaceNavigationItemStyle}" />
+                    <SelectorBarItem Tag="Diagnostics" Text="诊断" Style="{StaticResource WorkspaceNavigationItemStyle}" />
+                    <SelectorBarItem Tag="AppSettings" Text="应用设置" Width="102" Style="{StaticResource WorkspaceNavigationItemStyle}" />
+                </SelectorBar>
+            </StackPanel>
         </Border>
 
-        <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
-            <NavigationView x:Name="SideNavigation" Width="208" OpenPaneLength="208"
-                            PaneDisplayMode="Left" IsPaneOpen="True" IsPaneToggleButtonVisible="False"
-                            IsBackButtonVisible="Collapsed" IsSettingsVisible="False"
-                            Visibility="Collapsed" AutomationProperties.Name="侧边导航">
-                <NavigationView.MenuItems>
-                    <NavigationViewItem Tag="Devices" Content="设备">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE7F4;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem Tag="Themes" Content="主题">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE790;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem Tag="DeviceSettings" Content="设备设置">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE713;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem Tag="Diagnostics" Content="诊断">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE9CE;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem Tag="AppSettings" Content="应用设置">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE115;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                </NavigationView.MenuItems>
-            </NavigationView>
-
-            <Grid Grid.Column="1">
-                <views:DevicesPage x:Name="DevicesView" />
-                <views:ThemesPage x:Name="ThemesView" Visibility="Collapsed" />
-                <views:DeviceSettingsPage x:Name="DeviceSettingsView" Visibility="Collapsed" />
-                <views:DiagnosticsPage x:Name="DiagnosticsView" Visibility="Collapsed" />
-                <views:ApplicationSettingsPage x:Name="AppSettingsView" Visibility="Collapsed" />
-            </Grid>
+        <Grid Grid.Row="2">
+            <views:DevicesPage x:Name="DevicesView" />
+            <views:ThemesPage x:Name="ThemesView" Visibility="Collapsed" />
+            <views:DeviceSettingsPage x:Name="DeviceSettingsView" Visibility="Collapsed" />
+            <views:DiagnosticsPage x:Name="DiagnosticsView" Visibility="Collapsed" />
+            <views:ApplicationSettingsPage x:Name="AppSettingsView" Visibility="Collapsed" />
         </Grid>
 
         <InfoBar x:Name="WorkspaceNotice"
-                 Grid.Row="2"
+                 Grid.Row="3"
                  IsOpen="False"
+                 Visibility="Collapsed"
+                 Closed="OnNoticeClosed"
                  Margin="32,0,32,16"
                  AutomationProperties.Name="操作反馈" />
     </Grid>

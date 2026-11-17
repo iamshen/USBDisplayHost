@@ -26,6 +26,7 @@ public sealed partial class ThemePageViewModel : ObservableObject
     private string? assetId;
     private long revision;
     private ThemeContent appliedContent = ThemeContent.Default;
+    private ThemeContent? locallySavedContent;
     private ActiveProfile? observedActive;
     private bool restoring;
     private bool pageVisible;
@@ -81,8 +82,11 @@ public sealed partial class ThemePageViewModel : ObservableObject
     public bool IsDashboard => SelectedTemplate == ThemeKind.Dashboard;
     public bool IsDirty => !string.IsNullOrEmpty(ValidationText) || draft.Content != appliedContent;
     public bool CanEdit => CanOperate();
+    public ThemeContent EditorContent => draft.Content;
+    public bool HasUnsavedExitEdits => IsDirty && (!string.IsNullOrEmpty(ValidationText) || draft.Content != locallySavedContent);
+    public void MarkLocallySaved(ThemeContent content) => locallySavedContent = content;
     public DiagnosticConfigurationSummary CaptureDiagnosticSummary() => new("ThemeEditor",
-        SelectedTemplate switch { ThemeKind.Image => "Image", ThemeKind.Clock => "Clock", ThemeKind.Dashboard => "Dashboard", _ => "Unknown" },
+        draft.Content is ThemeContent.Scene ? "Scene" : SelectedTemplate.ToString(),
         IsDirty, string.IsNullOrEmpty(ValidationText), assetId is not null);
     private bool CanOperate() => !IsBusy && !stopping;
     private bool CanApplyContent() => CanOperate() && !unsupportedVersion && string.IsNullOrEmpty(ValidationText);
@@ -153,8 +157,8 @@ public sealed partial class ThemePageViewModel : ObservableObject
         IsBusy = true; IsApplying = true;
         try
         {
-            if (candidate.Content is ThemeContent.Image { AssetId: not null } image
-                && !TryAcquireReference(image.AssetId, AssetReferenceOwner.Candidate, out candidateAsset)) { return; }
+            if (candidate.Content.GetImageAssetId() is { } id
+                && !TryAcquireReference(id, AssetReferenceOwner.Candidate, out candidateAsset)) { return; }
             ApplicationText = "正在发送主题…";
             var samples = metrics.GetSnapshot();
             ErrorText = string.Empty;
@@ -301,6 +305,46 @@ public sealed partial class ThemePageViewModel : ObservableObject
         SynchronizeActiveContent();
         preview.Request(draft);
         return initialization = Task.CompletedTask;
+    }
+
+    public bool SetEditorContent(ThemeContent content)
+    {
+        if (!CanOperate() || revision == long.MaxValue) { return false; }
+        if (ThemeValidation.Validate(content) is OperationResult<Unit>.Failure invalid)
+        {
+            ShowError(invalid.Error);
+            return false;
+        }
+        if (!Restore(new ThemeDraft(null, revision + 1, content))) { return false; }
+        ValidationText = string.Empty;
+        ErrorText = string.Empty;
+        preview.Request(draft);
+        RefreshDeviceActions();
+        return true;
+    }
+
+    public async Task<ImportedAsset?> PickSceneImageAsync(CancellationToken token)
+    {
+        if (!CanOperate()) { return null; }
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, lifetime.Token);
+        IsBusy = true;
+        try
+        {
+            string? path = await imagePicker.PickImageAsync(cancellation.Token);
+            if (path is null) { return null; }
+            var result = await assets.ImportAsync(path, cancellation.Token);
+            if (result is OperationResult<ImportedAsset>.Success imported) { return imported.Value; }
+            if (result is OperationResult<ImportedAsset>.Failure failure) { ShowError(failure.Error); }
+            if (result is OperationResult<ImportedAsset>.Unknown unknown) { ShowError(unknown.Error); }
+            return null;
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { return null; }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            Report(exception, "ThemeSceneImage");
+            return null;
+        }
+        finally { IsBusy = false; }
     }
 
     [RelayCommand(CanExecute = nameof(CanOperate), IncludeCancelCommand = true)]

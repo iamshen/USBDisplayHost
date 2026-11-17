@@ -96,6 +96,7 @@ public sealed partial class DevicesPageViewModel(
     [ObservableProperty] private string disconnectText = string.Empty;
     [ObservableProperty] private string disconnectErrorText = string.Empty;
     public bool HasRetainedLocalResult => sessions.Current is { Stage: SessionLifecycleStage.RetainedLocalResult, NativeClosed: true };
+    public AppError? RetainedLocalError => HasRetainedLocalResult ? sessions.Current.Error : null;
     public string DisconnectActionText => sessions.Current.NativeClosed ? "完成本地交接" : "断开设备";
     private bool CanDisconnect()
     {
@@ -155,6 +156,7 @@ public sealed partial class DevicesPageViewModel(
     public ImmutableArray<DiscoveredDeviceItem> DiscoveredDevices { get; private set; } = [];
     [ObservableProperty] private string discoveryStatusText = "设备发现尚未启用";
     [ObservableProperty] private string discoveryErrorText = "";
+    public AppError? DiscoveryError { get; private set; }
     [ObservableProperty] private string selectionText = "未选择发现设备";
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmSelectionCommand))]
@@ -172,6 +174,7 @@ public sealed partial class DevicesPageViewModel(
         if (value.Version <= discoveryVersion) { return; }
         discoveryVersion = value.Version;
         selectedDevice = null; selectedAdmission = null; SelectedCandidate = null; SelectionText = "未选择发现设备";
+        DiscoveryError = value.Error;
         DiscoveryErrorText = value.Error is { } error ? Describe(error) : "";
         DiscoveryStatusText = value.IsScanning ? "正在检测设备" : value.CanSelect
             ? value.Interfaces.IsEmpty ? "未发现设备" : "请选择设备" : value.Error is null ? "设备发现已停止" : "设备检测未完成";

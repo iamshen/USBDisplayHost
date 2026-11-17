@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <Version>0.2.0-beta.5</Version>
+        <Version>0.2.0-beta.6</Version>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
         <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
         <Platforms>x64</Platforms>
@@ -52,6 +52,9 @@
         <Compile Include="$(DesktopSource)/Services/WorkspaceNoticeLifetime.cs" LinkBase="Shared/Services" />
     </ItemGroup>
     <ItemGroup>
+        <Content Include="Assets/Workspace/*.jpg;Assets/Workspace/*.png"
+                 CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+        <EmbeddedResource Include="Assets/Workspace/tokens.json" LogicalName="UsbDisplayHost.WinUI.WorkspaceTokens.json" />
         <Content Include="$(DesktopSource)/Assets/Branding/app.ico"
                  Link="Assets/Branding/app.ico"
                  CopyToOutputDirectory="PreserveNewest"

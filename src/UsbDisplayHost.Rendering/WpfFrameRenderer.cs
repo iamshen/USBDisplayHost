@@ -48,10 +48,10 @@ public sealed class WpfFrameRenderer : IFrameRenderer
         }
 
         BitmapSource? image = null;
-        if (request.Content is ThemeContent.Image { AssetId: not null } picture)
+        if (request.Content.GetImageAssetId() is { } assetId)
         {
             // 等待只发生在专用 STA 工作线程，不占用管理窗口 Dispatcher。
-            var sourceResult = assets.OpenReadAsync(picture.AssetId, cancellationToken).GetAwaiter().GetResult();
+            var sourceResult = assets.OpenReadAsync(assetId, cancellationToken).GetAwaiter().GetResult();
             if (sourceResult is OperationResult<Stream>.Failure missing)
             {
                 return new OperationResult<EncodedFrame>.Failure(missing.Error);

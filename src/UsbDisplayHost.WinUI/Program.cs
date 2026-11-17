@@ -36,7 +36,8 @@ internal static class Program
                 .Run();
 
             string dataRoot = uiOnly
-                ? Path.Combine(Path.GetTempPath(), "UsbDisplayHost.Beta.UiOnly", Guid.NewGuid().ToString("N"))
+                ? Environment.GetEnvironmentVariable("USB_DISPLAY_HOST_UI_ONLY_DATA_ROOT")
+                    ?? Path.Combine(Path.GetTempPath(), "UsbDisplayHost.Beta.UiOnly", Guid.NewGuid().ToString("N"))
                 : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UsbDisplayHost.Beta.Data");
             var paths = new ApplicationDataPaths(dataRoot);
             string? version = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()

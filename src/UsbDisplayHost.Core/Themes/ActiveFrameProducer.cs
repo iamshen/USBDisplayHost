@@ -71,7 +71,7 @@ public sealed class ActiveFrameProducer : IAsyncDisposable
                 await CollectReceiptsAsync(false).ConfigureAwait(false);
                 var active = coordinator.CurrentActiveProfile;
                 if (active is null || active.Context.DeviceKey != deviceKey || active.Context.SessionGeneration != generation
-                    || active.Content is ThemeContent.Image) { continue; }
+                    || !active.Content.IsDynamic) { continue; }
                 if (!scheduler.CanAcceptFrames) { continue; }
                 lock (syncRoot) { if (receiptRecoveryRequired || failedRevision == active.PipelineRevision) { continue; } }
                 var frameContext = new FrameContext(active.Context.DeviceKey, active.Context.SessionGeneration,

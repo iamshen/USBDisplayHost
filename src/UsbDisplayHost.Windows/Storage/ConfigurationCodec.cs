@@ -80,9 +80,16 @@ internal static class ConfigurationCodec
                 };
             }
         }
+        ApplicationAppearance appearance = ApplicationAppearance.DeepBlue;
+        if (fields.Remove("appearance", out var appearanceValue) && appearanceValue.ValueKind == JsonValueKind.Number
+            && appearanceValue.TryGetInt32(out int appearanceNumber)
+            && Enum.IsDefined((ApplicationAppearance)appearanceNumber))
+        {
+            appearance = (ApplicationAppearance)appearanceNumber;
+        }
         var data = JsonSerializer.SerializeToElement(fields, AtomicJsonStorage.Options)
             .Deserialize<ApplicationSettings>(AtomicJsonStorage.Options);
-        if (data is not null) { data = data with { NavigationLayout = layout }; }
+        if (data is not null) { data = data with { NavigationLayout = layout, Appearance = appearance }; }
         return data is null ? Invalid<ApplicationSettings>() : new OperationResult<ApplicationSettings>.Success(data);
     }
 
@@ -95,7 +102,7 @@ internal static class ConfigurationCodec
         return ThemeValidation.Validate(profile.Content);
     }
 
-    private static ThemeData Encode(ThemeContent content) => content switch
+    internal static ThemeData Encode(ThemeContent content) => content switch
     {
         ThemeContent.Image image => new("image", image.AssetId, image.Fit, image.Background,
             default, true, true, true, true, false, false),
@@ -104,10 +111,12 @@ internal static class ConfigurationCodec
         ThemeContent.Dashboard dashboard => new("dashboard", null, ImageFit.Contain, dashboard.Background,
             dashboard.Foreground, true, true, dashboard.ShowCpuUsage, dashboard.ShowMemoryUsage,
             dashboard.ShowHostTemperature, dashboard.ShowDeviceTemperature),
+        ThemeContent.Scene scene => new("scene", scene.AssetId, ImageFit.Contain, scene.Background,
+            default, true, false, false, false, false, false, scene.Backdrop, scene.Elements),
         _ => throw new InvalidDataException("Unknown theme type.")
     };
 
-    private static OperationResult<ThemeContent> DecodeTheme(ThemeData data)
+    internal static OperationResult<ThemeContent> DecodeTheme(ThemeData data)
     {
         ThemeContent? content = data.Kind switch
         {
@@ -115,6 +124,7 @@ internal static class ConfigurationCodec
             "clock" => new ThemeContent.Clock(data.Use24HourClock, data.ShowDate, data.Background, data.Foreground),
             "dashboard" => new ThemeContent.Dashboard(data.ShowCpuUsage, data.ShowMemoryUsage,
                 data.ShowHostTemperature, data.ShowDeviceTemperature, data.Background, data.Foreground),
+            "scene" when data.Elements is { } elements => new ThemeContent.Scene(data.Backdrop, data.Background, data.AssetId, elements),
             _ => null
         };
         return content is not null && ThemeValidation.Validate(content) is OperationResult<Unit>.Success

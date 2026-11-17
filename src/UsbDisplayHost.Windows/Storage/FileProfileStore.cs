@@ -5,20 +5,22 @@ using UsbDisplayHost.Core.Themes;
 
 namespace UsbDisplayHost.Windows.Storage;
 
-public sealed class FileProfileStore : IProfileStore, IApplicationSettingsStore, IDeviceSettingsDraftStore, IAssetReferenceInventoryStore
+public sealed partial class FileProfileStore : IProfileStore, IApplicationSettingsStore, IDeviceSettingsDraftStore, IAssetReferenceInventoryStore
 {
     private readonly ApplicationDataPaths paths;
     private readonly AtomicJsonStorage storage;
     private readonly StorageBoundary boundary;
     private readonly AssetReferenceRegistry references;
+    private readonly ApplicationSettings settingsDefaults;
 
-    public FileProfileStore(ApplicationDataPaths paths, StorageCoordinator coordinator)
+    public FileProfileStore(ApplicationDataPaths paths, StorageCoordinator coordinator, ApplicationSettings? settingsDefaults = null)
     {
         coordinator.VerifyPaths(paths);
         this.paths = paths;
         storage = new AtomicJsonStorage(coordinator.Reporter);
         boundary = coordinator.Boundary;
         references = coordinator.References;
+        this.settingsDefaults = settingsDefaults ?? ApplicationSettings.Default;
     }
 
     public Task<OperationResult<AssetReferenceInventory>> ScanAssetReferencesAsync(CancellationToken cancellationToken) =>
@@ -168,7 +170,7 @@ public sealed class FileProfileStore : IProfileStore, IApplicationSettingsStore,
             var result = await storage.ReadAsync(paths.Settings,
                 ConfigurationCodec.DecodeApplicationSettings, cancellationToken).ConfigureAwait(false);
             return new OperationResult<ApplicationSettingsReadResult>.Success(new ApplicationSettingsReadResult(
-                result.Value ?? ApplicationSettings.Default, result.Recovery, result.Error));
+                result.Value ?? settingsDefaults, result.Recovery, result.Error));
         }, "ApplicationSettingsLoad", cancellationToken);
 
     public Task<OperationResult<Unit>> SaveSettingsAsync(ApplicationSettings settings, CancellationToken cancellationToken) =>
@@ -198,13 +200,13 @@ public sealed class FileProfileStore : IProfileStore, IApplicationSettingsStore,
     // 在共同存储边界内核实素材并持有只读句柄到写入收敛，不保存已清理的素材引用。
     private OperationResult<FileStream?> OpenAssetForSave(ThemeContent content)
     {
-        if (content is not ThemeContent.Image { AssetId: not null } image)
+        if (content.GetImageAssetId() is not { } assetId)
         {
             return new OperationResult<FileStream?>.Success(null);
         }
         try
         {
-            string path = Path.Combine(paths.Assets, image.AssetId.ToLowerInvariant() + ".image");
+            string path = Path.Combine(paths.Assets, assetId.ToLowerInvariant() + ".image");
             var attributes = File.GetAttributes(path);
             if ((attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
             {
@@ -232,11 +234,11 @@ public sealed class FileProfileStore : IProfileStore, IApplicationSettingsStore,
 
     private OperationResult<AssetReferenceLease?> RetainReadAsset(ThemeContent? content)
     {
-        if (content is not ThemeContent.Image { AssetId: not null } image)
+        if (content?.GetImageAssetId() is not { } assetId)
         {
             return new OperationResult<AssetReferenceLease?>.Success(null);
         }
-        return references.Acquire(image.AssetId, AssetReferenceOwner.ConfigurationRead) switch
+        return references.Acquire(assetId, AssetReferenceOwner.ConfigurationRead) switch
         {
             OperationResult<AssetReferenceLease>.Success acquired => new OperationResult<AssetReferenceLease?>.Success(acquired.Value),
             OperationResult<AssetReferenceLease>.Failure failure => new OperationResult<AssetReferenceLease?>.Failure(failure.Error),

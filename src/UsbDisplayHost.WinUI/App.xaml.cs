@@ -49,7 +49,7 @@ public partial class App : Application
         {
             var workspace = new WorkspaceViewModel();
             var storage = new StorageCoordinator(paths, diagnostics);
-            var profiles = new FileProfileStore(paths, storage);
+            var profiles = new FileProfileStore(paths, storage, ApplicationSettings.Default with { NavigationLayout = NavigationLayout.Top });
             var coordinator = new DeviceCoordinator(diagnostics, TimeProvider.System);
             IStartupRegistration startup = uiOnly
                 ? new NoDeviceStartupRegistration()
@@ -86,7 +86,7 @@ public partial class App : Application
                 renderer, metrics, sessions, coordinator, snapshots, discovery, diagnostics, protocol, devices);
 
             await deviceSettings.InitializeAsync();
-            window = new MainWindow(log, workspace, devices, themes, deviceSettings, diagnosticsView, settings, diagnostics, uiOnly);
+            window = new MainWindow(log, workspace, devices, themes, deviceSettings, diagnosticsView, settings, profiles, diagnostics, uiOnly);
             var modeNotice = new ModeSwitchNoticeService(settingsService, window.ConfirmModeSwitchAsync);
             devices.AttachModeSwitchConfirmation(modeNotice.ConfirmAsync);
             lifetime.AttachNotices(new WorkspaceNoticeLifetime(dispatcher, window.ShowNotice, devices, themes, deviceSettings, diagnostics));

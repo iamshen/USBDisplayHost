@@ -198,7 +198,7 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
         var current = coordinator.CurrentActiveProfile;
         pendingSave = new(snapshot.DeviceKey!, current?.Content ?? ThemeContent.Default,
             current?.Settings ?? DeviceSettings.Default, snapshot.ObservedBrightness, snapshot.Power);
-        if (pendingSave.Content is ThemeContent.Image { AssetId: { } currentAsset })
+        if (pendingSave.Content.GetImageAssetId() is { } currentAsset)
         {
             var retained = assets.AcquireReference(currentAsset, AssetReferenceOwner.PendingRestore);
             if (retained is not OperationResult<AssetReferenceLease>.Success lease) { return Convert(retained); }
@@ -209,7 +209,7 @@ public sealed partial class DeviceProtocolService(DeviceCoordinator coordinator,
         using var reference = stored.Value;
         pendingSave = new(snapshot.DeviceKey!, current?.Content ?? reference.Profile?.Content ?? ThemeContent.Default,
             current?.Settings ?? reference.Profile?.Settings ?? DeviceSettings.Default, snapshot.ObservedBrightness, snapshot.Power);
-        if (pendingAsset is null && pendingSave.Content is ThemeContent.Image { AssetId: { } assetId })
+        if (pendingAsset is null && pendingSave.Content.GetImageAssetId() is { } assetId)
         {
             var retained = assets.AcquireReference(assetId, AssetReferenceOwner.PendingRestore);
             if (retained is not OperationResult<AssetReferenceLease>.Success lease) { return Convert(retained); }

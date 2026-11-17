@@ -51,8 +51,6 @@ public sealed partial class DevicesPage : Page
         this.reporter = reporter;
         this.uiOnly = uiOnly;
         DataContext = viewModel;
-        DiscoveryPanel.Visibility = VisibleWhen(!uiOnly);
-        RescanButton.Visibility = VisibleWhen(!uiOnly);
         RefreshState(viewModel);
         UpdateActivation();
     }
@@ -133,7 +131,10 @@ public sealed partial class DevicesPage : Page
     {
         if (sender is DevicesPageViewModel model && args.PropertyName is null or ""
             or nameof(DevicesPageViewModel.Snapshot) or nameof(DevicesPageViewModel.DiscoveredDevices)
-            or nameof(DevicesPageViewModel.HasRetainedLocalResult))
+            or nameof(DevicesPageViewModel.HasRetainedLocalResult) or nameof(DevicesPageViewModel.IsProtocolBusy)
+            or nameof(DevicesPageViewModel.DiscoveryStatusText) or nameof(DevicesPageViewModel.DiscoveryErrorText)
+            or nameof(DevicesPageViewModel.ProtocolText) or nameof(DevicesPageViewModel.ProtocolErrorText)
+            or nameof(DevicesPageViewModel.PendingSaveText) or nameof(DevicesPageViewModel.SubscriptionErrorText))
         {
             RefreshState(model);
         }
@@ -142,29 +143,60 @@ public sealed partial class DevicesPage : Page
     private void RefreshState(DevicesPageViewModel model)
     {
         var snapshot = model.Snapshot;
-        bool hasSessionStatus = snapshot.DeviceKey is not null
-            && snapshot.Connection is ConnectionState.Opening or ConnectionState.Ready or ConnectionState.Recovering or ConnectionState.Faulted;
         bool hasCandidates = !model.DiscoveredDevices.IsEmpty;
-        bool hasRetainedLocalResult = model.HasRetainedLocalResult;
+        bool handoff = model.HasRetainedLocalResult;
+        var occupied = new[] { model.ProtocolError, model.DiscoveryError, snapshot.Error }
+            .FirstOrDefault(error => error?.Code == "UsbInterfaceInUse");
+        bool connected = !handoff && snapshot.Connection == ConnectionState.Ready;
+        bool poweredOff = connected && snapshot.Power == PowerState.Off;
+        bool showWorkspace = connected && !poweredOff;
+        bool detecting = model.DiscoveryStatusText == "正在检测设备";
 
-        ConnectionHeading.Text = snapshot.Connection switch
+        ConnectionHeading.Text = handoff ? "设备已断开"
+            : occupied is not null ? "USB 接口被占用"
+            : poweredOff ? "屏幕已关闭"
+            : detecting ? "正在检测设备…"
+            : snapshot.Connection switch
         {
-            ConnectionState.Discovered => "设备待连接",
+            ConnectionState.Discovered => "检测到设备",
             ConnectionState.Opening => "正在连接设备",
-            ConnectionState.Ready => "设备已连接",
             ConnectionState.Recovering => "正在恢复连接",
             ConnectionState.Faulted => "设备连接异常",
-            _ => "未连接设备"
+            _ => hasCandidates ? "检测到设备" : "未检测到设备"
         };
-        CurrentDeviceText.Visibility = VisibleWhen(hasSessionStatus);
-        EmptyDeviceIcon.Visibility = VisibleWhen(!hasSessionStatus && !hasCandidates);
-        CurrentWorkspace.Visibility = VisibleWhen(hasSessionStatus);
-        ConnectionDetails.Visibility = VisibleWhen(hasSessionStatus);
-        DisconnectButton.Visibility = VisibleWhen(hasSessionStatus || hasRetainedLocalResult);
-        ThemeButton.Content = hasSessionStatus ? "编辑主题" : "先预览主题";
-        NoDeviceHelp.Visibility = VisibleWhen(!hasSessionStatus && !hasCandidates && !hasRetainedLocalResult);
-        NoDeviceHelp.Text = uiOnly ? "当前以无设备模式运行。"
-            : "为设备接通电源并使用支持数据传输的 USB 线缆，然后重新检测。";
+        HeroBadge.Text = model.RetainedLocalError is { } localError ? $"本地交接待完成 · {localError.ErrorId}"
+            : occupied is not null ? $"连接失败 · {occupied.ErrorId}"
+            : poweredOff ? "已连接" : string.Empty;
+        HeroBadge.Visibility = VisibleWhen(HeroBadge.Text.Length > 0);
+        ConnectionHeading.Margin = new Thickness(0, HeroBadge.Text.Length > 0 ? 0 : 42, 0, 0);
+        StateHero.Visibility = VisibleWhen(!showWorkspace);
+        ConnectedHeading.Visibility = CurrentWorkspace.Visibility = ConnectionDetails.Visibility = VisibleWhen(showWorkspace);
+        DeviceNotices.Visibility = VisibleWhen(model.IsProtocolBusy || occupied is null
+            && (model.ProtocolText.Length > 0 || model.ProtocolErrorText.Length > 0
+                || model.DeviceErrorText.Length > 0 || model.SubscriptionErrorText.Length > 0));
+        ConnectedStatus.Text = snapshot.Mode switch
+        {
+            DeviceMode.Theme => "已连接 · 主题模式",
+            DeviceMode.SecondaryDisplay => "已连接 · 副屏模式",
+            _ => "已连接"
+        };
+        DisconnectButton.Visibility = VisibleWhen(handoff || poweredOff
+            || snapshot.Connection is ConnectionState.Recovering or ConnectionState.Faulted);
+        HeroWakeButton.Visibility = VisibleWhen(poweredOff);
+        RescanButton.Visibility = VisibleWhen(!handoff && !poweredOff);
+        RescanButton.Content = detecting ? "正在检测" : "重新检测";
+        ThemeButton.Visibility = VisibleWhen(themeRequested is not null && occupied is null && !handoff && !poweredOff);
+        HeroDiagnostics.Visibility = VisibleWhen(occupied is not null || handoff || snapshot.Connection == ConnectionState.Faulted);
+        HeroRetrySave.Visibility = VisibleWhen(handoff && model.PendingSaveText.Length > 0);
+        RetryPendingSaveButton.Visibility = VisibleWhen(!handoff && model.PendingSaveText.Length > 0);
+        NoDeviceHelp.Text = handoff ? model.PendingSaveText.Length > 0
+                ? "先重试保存恢复配置，再完成本地交接。" : "完成本地交接后可重新连接。"
+            : occupied is not null ? "在占用该设备的程序中断开连接，然后重新检测。"
+            : poweredOff ? "USB Display 仍保持连接。"
+            : detecting ? "请保持 USB 数据线连接。"
+            : hasCandidates ? $"发现 {model.DiscoveredDevices.Length} 台 USB 显示设备。"
+            : uiOnly ? "无设备试用模式，USB 检测已停用。"
+            : "接通电源，插入 USB 数据线。";
 
         if (displayedCandidates != model.DiscoveredDevices)
         {
@@ -172,6 +204,8 @@ public sealed partial class DevicesPage : Page
             CandidateList.ItemsSource = displayedCandidates.ToArray();
         }
         CandidatePanel.Visibility = VisibleWhen(hasCandidates);
+        DiscoveryPanel.Visibility = VisibleWhen(!handoff && !poweredOff && occupied is null
+            && (hasCandidates || !string.IsNullOrEmpty(model.DiscoveryErrorText)));
 
         ModeText.Text = snapshot.Mode switch
         {
@@ -194,9 +228,7 @@ public sealed partial class DevicesPage : Page
         };
         SwitchThemeButton.Visibility = VisibleWhen(snapshot.Mode == DeviceMode.SecondaryDisplay);
         SwitchScreenButton.Visibility = VisibleWhen(snapshot.Mode == DeviceMode.Theme);
-        ModeUnavailableReason.Visibility = VisibleWhen(snapshot.Mode != DeviceMode.Unknown && snapshot.Power == PowerState.Off);
         SleepButton.Visibility = VisibleWhen(snapshot.Power == PowerState.On);
-        WakeButton.Visibility = VisibleWhen(snapshot.Power == PowerState.Off);
         PauseButton.Visibility = VisibleWhen(snapshot.Streaming == StreamingState.Running);
         ResumeButton.Visibility = VisibleWhen(snapshot.Streaming == StreamingState.Paused);
     }
@@ -207,7 +239,8 @@ public sealed partial class DevicesPage : Page
         CurrentWorkspace.ColumnDefinitions[1].Width = stacked ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
         Grid.SetColumn(SessionPanel, stacked ? 0 : 1);
         Grid.SetRow(SessionPanel, stacked ? 1 : 0);
-        CurrentWorkspace.ColumnSpacing = stacked ? 0 : 16;
+        CurrentWorkspace.ColumnSpacing = stacked ? 0 : 52;
+        SessionPanel.Margin = stacked ? new Thickness() : new Thickness(0, 30, 0, 0);
     }
 
     private void OnThemeClick(object sender, RoutedEventArgs args) => themeRequested?.Invoke(this, EventArgs.Empty);

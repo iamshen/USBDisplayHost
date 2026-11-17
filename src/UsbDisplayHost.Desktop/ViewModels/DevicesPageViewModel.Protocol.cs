@@ -66,22 +66,26 @@ public sealed partial class DevicesPageViewModel
     [RelayCommand(CanExecute = nameof(CanRetryProtocolSave))]
     private Task RetryProtocolSaveAsync() => RunProtocolAsync(() => protocol!.RetrySaveAsync(ProtocolToken), "本地设置已保存");
 
+    public AppError? ProtocolError { get; private set; }
+
     private async Task RunProtocolAsync(Func<Task<OperationResult<Unit>>> action, string success)
     {
         if (IsProtocolBusy || stopping) { return; }
         protocolCancellation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+        ProtocolError = null;
         IsProtocolBusy = true; ProtocolText = "正在处理"; ProtocolErrorText = string.Empty; RefreshProtocolActions();
         try
         {
             var result = await action();
-            ProtocolText = result is OperationResult<Unit>.Success ? success : "操作未完成";
-            ProtocolErrorText = result switch
+            ProtocolError = result switch
             {
-                OperationResult<Unit>.Failure failure => Describe(failure.Error),
-                OperationResult<Unit>.Unknown unknown => Describe(unknown.Error),
-                OperationResult<Unit>.Cancelled => "操作已取消，请核实当前设备状态",
-                _ => string.Empty
+                OperationResult<Unit>.Failure failed => failed.Error,
+                OperationResult<Unit>.Unknown unknown => unknown.Error,
+                _ => null
             };
+            ProtocolText = result is OperationResult<Unit>.Success ? success : "操作未完成";
+            ProtocolErrorText = ProtocolError is { } error ? Describe(error)
+                : result is OperationResult<Unit>.Cancelled ? "操作已取消，请核实当前设备状态" : string.Empty;
             if (coordinator.Current.ObservedBrightness is { } brightness) { BrightnessValue = brightness.ToString(); }
         }
         catch (OperationCanceledException) when (ProtocolToken.IsCancellationRequested) { ProtocolText = "操作已取消，请核实设备状态"; }

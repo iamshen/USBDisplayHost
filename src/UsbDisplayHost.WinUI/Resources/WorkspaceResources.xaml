@@ -3,40 +3,143 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-            <SolidColorBrush x:Key="WorkspaceCanvasBrush" Color="#171A22" />
-            <SolidColorBrush x:Key="WorkspaceNavigationBrush" Color="#212531" />
-            <SolidColorBrush x:Key="WorkspaceDividerBrush" Color="#383E4D" />
-            <SolidColorBrush x:Key="WorkspaceTextPrimaryBrush" Color="#F2F4F8" />
-            <SolidColorBrush x:Key="WorkspaceTextSecondaryBrush" Color="#B3BAC8" />
-            <SolidColorBrush x:Key="SelectorBarItemBackgroundSelected" Color="#363E52" />
-            <SolidColorBrush x:Key="SelectorBarItemBackgroundPointerOver" Color="#303748" />
-        </ResourceDictionary>
-        <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="WorkspaceCanvasBrush" Color="#F6F7FA" />
-            <SolidColorBrush x:Key="WorkspaceNavigationBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="WorkspaceDividerBrush" Color="#D1D6E0" />
-            <SolidColorBrush x:Key="WorkspaceTextPrimaryBrush" Color="#202633" />
-            <SolidColorBrush x:Key="WorkspaceTextSecondaryBrush" Color="#4D576B" />
-            <SolidColorBrush x:Key="SelectorBarItemBackgroundSelected" Color="#DDE5F3" />
-            <SolidColorBrush x:Key="SelectorBarItemBackgroundPointerOver" Color="#EDF1F8" />
+            <LinearGradientBrush x:Key="WorkspaceCanvasBrush" StartPoint="0.5,0" EndPoint="0.5,1">
+                <GradientStop Color="#252E49" Offset="0" />
+                <GradientStop Color="#191D30" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="WorkspaceNavigationBrush" Color="#303953" />
+            <SolidColorBrush x:Key="WorkspaceInsetBrush" Color="#1D2337" />
+            <SolidColorBrush x:Key="WorkspaceHoverBrush" Color="#343E58" />
+            <SolidColorBrush x:Key="WorkspaceSelectedBrush" Color="#3B4865" />
+            <SolidColorBrush x:Key="WorkspaceModalBrush" Color="#2C354D" />
+            <SolidColorBrush x:Key="WorkspaceTextPrimaryBrush" Color="#F7F8FB" />
+            <SolidColorBrush x:Key="WorkspaceTextSecondaryBrush" Color="#BDC7D8" />
+            <SolidColorBrush x:Key="WorkspaceTextDisabledBrush" Color="#8994AB" />
+            <SolidColorBrush x:Key="WorkspaceDividerBrush" Color="#414C65" />
+            <SolidColorBrush x:Key="WorkspaceBorderStrongBrush" Color="#657897" />
+            <SolidColorBrush x:Key="WorkspaceActionBrush" Color="#FAFAFC" />
+            <SolidColorBrush x:Key="WorkspaceOnActionBrush" Color="#171B2C" />
+            <SolidColorBrush x:Key="WorkspaceLinkBrush" Color="#A6CFFF" />
+            <SolidColorBrush x:Key="WorkspaceSuccessBrush" Color="#94DFC4" />
+            <SolidColorBrush x:Key="WorkspaceWarningBrush" Color="#FFCF8E" />
+            <SolidColorBrush x:Key="WorkspaceErrorBrush" Color="#FFAEB6" />
+            <SolidColorBrush x:Key="WorkspaceFocusBrush" Color="#93C6FF" />
+            <SolidColorBrush x:Key="WorkspacePreviewBrush" Color="#121419" />
+            <SolidColorBrush x:Key="WorkspacePreviewTextBrush" Color="#F4F6F8" />
+            <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="#F7F8FB" />
+            <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="#BDC7D8" />
+            <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="#8994AB" />
+            <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="#1D2337" />
+            <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="#343E58" />
+            <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="#1D2337" />
+            <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#414C65" />
+            <SolidColorBrush x:Key="ControlStrokeColorSecondaryBrush" Color="#657897" />
+            <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#FAFAFC" />
+            <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#FAFAFC" />
+            <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#FAFAFC" />
+            <SolidColorBrush x:Key="AccentFillColorDisabledBrush" Color="#343E58" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#FAFAFC" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#BDC7D8" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#343E58" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#171B2C" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#171B2C" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#8994AB" />
+            <SolidColorBrush x:Key="TextOnAccentFillColorPrimaryBrush" Color="#171B2C" />
+            <SolidColorBrush x:Key="TextOnAccentFillColorSecondaryBrush" Color="#171B2C" />
+            <SolidColorBrush x:Key="TextOnAccentFillColorDisabledBrush" Color="#8994AB" />
+            <SolidColorBrush x:Key="ContentDialogBackground" Color="#2C354D" />
+            <SolidColorBrush x:Key="ContentDialogBorderBrush" Color="#657897" />
+            <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="#1D2337" />
+            <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#FFAEB6" />
+            <SolidColorBrush x:Key="SystemFillColorCautionBrush" Color="#FFCF8E" />
+            <SolidColorBrush x:Key="SystemFillColorSuccessBrush" Color="#94DFC4" />
+            <SolidColorBrush x:Key="FocusStrokeColorOuterBrush" Color="#93C6FF" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="#F7F8FB" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="#F7F8FB" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="#F7F8FB" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#3B4865" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#3B4865" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#343E58" />
+            <SolidColorBrush x:Key="ListViewItemBackgroundSelected" Color="#3B4865" />
+            <SolidColorBrush x:Key="ListViewItemBackgroundSelectedPointerOver" Color="#3B4865" />
+            <SolidColorBrush x:Key="ListViewItemBackgroundPointerOver" Color="#343E58" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="WorkspaceCanvasBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="WorkspaceNavigationBrush" Color="{ThemeResource SystemColorWindowColor}" />
-            <SolidColorBrush x:Key="WorkspaceDividerBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceInsetBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="WorkspaceHoverBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="WorkspaceSelectedBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="WorkspaceModalBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="WorkspaceTextPrimaryBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="WorkspaceTextSecondaryBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
-            <SolidColorBrush x:Key="SelectorBarItemBackgroundSelected" Color="{ThemeResource SystemColorHighlightColor}" />
-            <SolidColorBrush x:Key="SelectorBarItemForegroundSelected" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceTextDisabledBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceDividerBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceBorderStrongBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceActionBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="WorkspaceOnActionBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceLinkBrush" Color="{ThemeResource SystemColorHotlightColor}" />
+            <SolidColorBrush x:Key="WorkspaceSuccessBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceWarningBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceErrorBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="WorkspaceFocusBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="WorkspacePreviewBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="WorkspacePreviewTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
+
     <Style x:Key="WorkspaceNavigationItemStyle" TargetType="SelectorBarItem">
         <Setter Property="CornerRadius" Value="18" />
-        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="Width" Value="72" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="SelectorBarItem">
+                    <Grid x:Name="PART_ContainerRoot" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CombinedStates">
+                                <VisualState x:Name="UnselectedNormal" />
+                                <VisualState x:Name="UnselectedPointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_ContainerRoot.Background" Value="{ThemeResource WorkspaceHoverBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="UnselectedPressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_ContainerRoot.Background" Value="{ThemeResource WorkspaceSelectedBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="SelectedNormal">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_ContainerRoot.Background" Value="{ThemeResource WorkspaceActionBrush}" />
+                                        <Setter Target="PART_TextVisual.Foreground" Value="{ThemeResource WorkspaceOnActionBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="SelectedPointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_ContainerRoot.Background" Value="{ThemeResource WorkspaceActionBrush}" />
+                                        <Setter Target="PART_TextVisual.Foreground" Value="{ThemeResource WorkspaceOnActionBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="SelectedPressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_ContainerRoot.Background" Value="{ThemeResource WorkspaceActionBrush}" />
+                                        <Setter Target="PART_TextVisual.Foreground" Value="{ThemeResource WorkspaceOnActionBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <TextBlock x:Name="PART_TextVisual" Text="{TemplateBinding Text}" Foreground="{ThemeResource WorkspaceTextSecondaryBrush}"
+                                   FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style x:Key="WorkspaceStateHeadingStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="32" />
-        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{ThemeResource WorkspaceTextPrimaryBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
@@ -52,10 +155,42 @@
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
     <Style x:Key="WorkspacePanelStyle" TargetType="Border">
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="Background" Value="{ThemeResource WorkspaceNavigationBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource WorkspaceDividerBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="18,12" />
+        <Setter Property="Background" Value="{ThemeResource WorkspaceInsetBrush}" />
         <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style x:Key="WorkspacePrimaryButton" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
+        <Setter Property="MinHeight" Value="46" />
+        <Setter Property="MinWidth" Value="136" />
+        <Setter Property="CornerRadius" Value="23" />
+        <Setter Property="Padding" Value="20,9" />
+        <Setter Property="Background" Value="{ThemeResource WorkspaceActionBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource WorkspaceOnActionBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="WorkspaceSecondaryButton" TargetType="Button">
+        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="Padding" Value="16,6" />
+        <Setter Property="Background" Value="{ThemeResource WorkspaceNavigationBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource WorkspaceTextPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="WorkspaceGhostButton" TargetType="Button">
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{ThemeResource WorkspaceTextPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="WorkspaceChoiceButton" TargetType="ToggleButton">
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="MinWidth" Value="65" />
+        <Setter Property="CornerRadius" Value="17" />
+        <Setter Property="Padding" Value="12,4" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{ThemeResource WorkspaceTextSecondaryBrush}" />
     </Style>
 </ResourceDictionary>

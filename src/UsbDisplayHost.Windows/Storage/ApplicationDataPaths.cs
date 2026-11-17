@@ -19,6 +19,8 @@ public sealed class ApplicationDataPaths
     public string PendingAssetCleanup => Path.Combine(Root, "asset-cleanup.pending.json");
     public string Profiles => Path.Combine(Root, "profiles");
     public string Drafts => Path.Combine(Root, "drafts");
+    public string Themes => Path.Combine(Root, "themes");
+    public string Theme(Guid id) => Path.Combine(Themes, id.ToString("N") + ".json");
     public string DeviceSettingsDrafts => Path.Combine(Root, "device-settings-drafts");
     public string DeviceSettingsDraft(DeviceKey? deviceKey) => Path.Combine(DeviceSettingsDrafts,
         (deviceKey is null ? "offline" : FileKey(deviceKey)) + ".json");

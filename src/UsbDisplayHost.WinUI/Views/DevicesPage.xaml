@@ -9,53 +9,145 @@
             <Setter Property="Foreground" Value="{ThemeResource SystemFillColorCriticalBrush}" />
             <Setter Property="IsTextSelectionEnabled" Value="True" />
         </Style>
+        <Style x:Key="SessionRow" TargetType="Grid">
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="0,8" />
+            <Setter Property="BorderBrush" Value="{ThemeResource WorkspaceDividerBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
     </Page.Resources>
 
     <ScrollViewer HorizontalContentAlignment="Stretch">
-        <StackPanel Margin="24,40,24,32" MaxWidth="1056" Spacing="24">
-            <StackPanel HorizontalAlignment="Center" Spacing="12">
-                <Border
-                    x:Name="EmptyDeviceIcon"
-                    Width="76"
-                    Height="76"
-                    HorizontalAlignment="Center"
-                    Background="{ThemeResource WorkspaceNavigationBrush}"
-                    BorderBrush="{ThemeResource WorkspaceDividerBrush}"
-                    BorderThickness="1"
-                    CornerRadius="24">
-                    <FontIcon
-                        Glyph="&#xE7F4;"
-                        FontSize="36"
-                        Foreground="{ThemeResource WorkspaceTextPrimaryBrush}"
-                        AutomationProperties.AccessibilityView="Raw" />
-                </Border>
-                <TextBlock
-                    x:Name="ConnectionHeading"
-                    Text="未连接设备"
-                    Style="{StaticResource WorkspaceStateHeadingStyle}"
-                    TextAlignment="Center"
-                    AutomationProperties.HeadingLevel="Level1" />
-                <TextBlock
-                    x:Name="CurrentDeviceText"
-                    Text="{Binding DeviceText}"
-                    Visibility="Collapsed"
-                    Style="{StaticResource WorkspaceSupportingTextStyle}"
-                    TextAlignment="Center"
-                    IsTextSelectionEnabled="True" />
-                <TextBlock
-                    x:Name="NoDeviceHelp"
-                    Style="{StaticResource WorkspaceSupportingTextStyle}"
-                    TextAlignment="Center" />
-                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="RescanButton" Content="重新检测" Command="{Binding RescanCommand}" />
-                    <Button x:Name="DisconnectButton" Content="{Binding DisconnectActionText}"
-                            Command="{Binding DisconnectCommand}" Visibility="Collapsed" />
-                    <Button x:Name="ThemeButton" Content="先预览主题" Visibility="Collapsed" Click="OnThemeClick" />
-                    <Button Content="查看诊断" Click="OnDiagnosticsClick" />
+        <StackPanel Margin="48,30,48,32" Spacing="22">
+            <StackPanel x:Name="StateHero" Margin="0,72,0,0" HorizontalAlignment="Center" Spacing="12" MaxWidth="720">
+                <Image x:Name="DeviceIllustration" Source="ms-appx:///Assets/Workspace/device.png" Width="352" Height="262"
+                       Stretch="Uniform" AutomationProperties.AccessibilityView="Raw" />
+                <TextBlock x:Name="HeroBadge" Foreground="{ThemeResource WorkspaceWarningBrush}" FontWeight="Medium" Margin="0,12,0,0"
+                           HorizontalAlignment="Center" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
+                <TextBlock x:Name="ConnectionHeading" Text="未检测到设备" FontSize="32" FontWeight="Bold"
+                           TextAlignment="Center" TextWrapping="Wrap" AutomationProperties.HeadingLevel="Level1" />
+                <TextBlock x:Name="NoDeviceHelp" Style="{StaticResource WorkspaceSupportingTextStyle}"
+                           TextAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+                <Button x:Name="RescanButton" Content="重新检测" Command="{Binding RescanCommand}"
+                        HorizontalAlignment="Center" Style="{StaticResource WorkspacePrimaryButton}" MinWidth="250" Margin="0,23,0,0" />
+                <Button x:Name="HeroWakeButton" Content="开启屏幕" Command="{Binding WakeDisplayCommand}"
+                        HorizontalAlignment="Center" Style="{StaticResource WorkspacePrimaryButton}" Visibility="Collapsed" MinWidth="250" />
+                <Button x:Name="DisconnectButton" Content="{Binding DisconnectActionText}" Command="{Binding DisconnectCommand}"
+                        HorizontalAlignment="Center" Style="{StaticResource WorkspacePrimaryButton}" Visibility="Collapsed" MinWidth="250" Margin="0,23,0,0" />
+                <Button x:Name="ThemeButton" Content="预览主题" Visibility="Collapsed" Click="OnThemeClick"
+                        HorizontalAlignment="Center" Style="{StaticResource WorkspaceGhostButton}" Foreground="{ThemeResource WorkspaceLinkBrush}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
+                    <Button x:Name="HeroRetrySave" Content="重试本地保存" Visibility="Collapsed" Command="{Binding RetryPendingSaveCommand}"
+                            Style="{StaticResource WorkspaceGhostButton}" Foreground="{ThemeResource WorkspaceLinkBrush}" />
+                    <Button x:Name="HeroDiagnostics" Content="查看诊断" Visibility="Collapsed" Click="OnDiagnosticsClick"
+                            Style="{StaticResource WorkspaceGhostButton}" Foreground="{ThemeResource WorkspaceLinkBrush}" />
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel HorizontalAlignment="Center" Spacing="8">
+            <StackPanel x:Name="ConnectedHeading" Visibility="Collapsed" Spacing="9">
+                <TextBlock Text="显示屏" Style="{StaticResource WorkspaceStateHeadingStyle}" AutomationProperties.HeadingLevel="Level1" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Ellipse Fill="{ThemeResource WorkspaceSuccessBrush}" Width="8" Height="8" VerticalAlignment="Center"
+                             AutomationProperties.AccessibilityView="Raw" />
+                    <TextBlock x:Name="ConnectedStatus" Foreground="{ThemeResource WorkspaceSuccessBrush}" FontWeight="Medium" />
+                </StackPanel>
+            </StackPanel>
+
+            <Grid x:Name="CurrentWorkspace" Visibility="Collapsed" ColumnSpacing="52" RowSpacing="28"
+                  SizeChanged="OnWorkspaceSizeChanged">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border>
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Text="主机活动预览"
+                            Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                            AutomationProperties.HeadingLevel="Level2" />
+                        <Viewbox MaxHeight="380" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                            <Border Width="676" Height="380" CornerRadius="12"
+                                    Background="{ThemeResource WorkspacePreviewBrush}"
+                                    BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="1">
+                                <Image Source="{Binding HostPreview}" Stretch="Uniform"
+                                       AutomationProperties.Name="主机画面预览" />
+                            </Border>
+                        </Viewbox>
+                        <TextBlock Text="{Binding HostPreviewText}" Margin="0,6,0,0" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                        <TextBlock
+                            Text="{Binding HostPreviewErrorText}"
+                            Visibility="{Binding HostPreviewErrorText, Converter={StaticResource DeviceValueVisibility}}"
+                            Style="{StaticResource DeviceErrorStyle}" />
+                        <Button
+                            Content="重试预览"
+                            Command="{Binding RetryHostPreviewCommand}"
+                            Visibility="{Binding HostPreviewErrorText, Converter={StaticResource DeviceValueVisibility}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="SessionPanel" Grid.Column="1" Margin="0,30,0,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="当前会话" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                                   AutomationProperties.HeadingLevel="Level2" />
+                        <StackPanel>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Style="{StaticResource SessionRow}">
+                                <TextBlock x:Name="DeviceLabel" Text="设备" Style="{StaticResource WorkspaceSupportingTextStyle}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding DeviceText}" TextAlignment="Right" TextWrapping="Wrap"
+                                           VerticalAlignment="Center" IsTextSelectionEnabled="True"
+                                           AutomationProperties.LabeledBy="{Binding ElementName=DeviceLabel}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource SessionRow}">
+                                <TextBlock x:Name="ResolutionLabel" Text="分辨率" Style="{StaticResource WorkspaceSupportingTextStyle}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding ResolutionText}" VerticalAlignment="Center"
+                                           AutomationProperties.LabeledBy="{Binding ElementName=ResolutionLabel}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource SessionRow}">
+                                <TextBlock x:Name="ModeLabel" Text="显示模式" Style="{StaticResource WorkspaceSupportingTextStyle}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="ModeText" Grid.Column="1" VerticalAlignment="Center"
+                                           AutomationProperties.LabeledBy="{Binding ElementName=ModeLabel}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource SessionRow}">
+                                <TextBlock x:Name="PowerLabel" Text="屏幕电源" Style="{StaticResource WorkspaceSupportingTextStyle}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PowerText" Grid.Column="1" VerticalAlignment="Center"
+                                           AutomationProperties.LabeledBy="{Binding ElementName=PowerLabel}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource SessionRow}">
+                                <TextBlock x:Name="StreamingLabel" Text="主机推流" Style="{StaticResource WorkspaceSupportingTextStyle}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="StreamingText" Grid.Column="1" VerticalAlignment="Center"
+                                           AutomationProperties.LabeledBy="{Binding ElementName=StreamingLabel}" />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="SleepButton" Content="关闭屏幕" MinWidth="118" Style="{StaticResource WorkspaceSecondaryButton}"
+                                        Command="{Binding SleepDisplayCommand}" Visibility="Collapsed" />
+                                <Button Content="断开设备" MinWidth="118" Command="{Binding DisconnectCommand}"
+                                        Style="{StaticResource WorkspaceSecondaryButton}" />
+                            </StackPanel>
+                            <Button x:Name="SwitchThemeButton" Content="切换到主题模式"
+                                    Command="{Binding SwitchThemeCommand}" Visibility="Collapsed" />
+                            <Button x:Name="SwitchScreenButton" Content="切换到副屏模式"
+                                    Command="{Binding SwitchScreenCommand}" Visibility="Collapsed" />
+                            <Button x:Name="PauseButton" Content="暂停播放" Command="{Binding PauseStreamingCommand}" Visibility="Collapsed" />
+                            <Button x:Name="ResumeButton" Content="恢复播放" Command="{Binding ResumeStreamingCommand}" Visibility="Collapsed" />
+                            <Button Content="编辑主题" Click="OnThemeClick" Style="{StaticResource WorkspaceGhostButton}" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding StreamingResultText}"
+                                   Visibility="{Binding StreamingResultText, Converter={StaticResource DeviceValueVisibility}}"
+                                   Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                        <TextBlock Text="{Binding StreamingErrorText}"
+                                   Visibility="{Binding StreamingErrorText, Converter={StaticResource DeviceValueVisibility}}"
+                                   Style="{StaticResource DeviceErrorStyle}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <StackPanel x:Name="DeviceNotices" HorizontalAlignment="Center" Spacing="8">
                 <TextBlock
                     Text="{Binding ProtocolText}"
                     Visibility="{Binding ProtocolText, Converter={StaticResource DeviceValueVisibility}}"
@@ -80,87 +172,6 @@
                     Visibility="{Binding IsProtocolBusy, Converter={StaticResource DeviceValueVisibility}}"
                     HorizontalAlignment="Center" />
             </StackPanel>
-
-            <Grid x:Name="CurrentWorkspace" Visibility="Collapsed" ColumnSpacing="16" RowSpacing="16"
-                  SizeChanged="OnWorkspaceSizeChanged">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <Border Style="{StaticResource WorkspacePanelStyle}">
-                    <StackPanel Spacing="12">
-                        <TextBlock
-                            Text="主机活动预览"
-                            Style="{StaticResource WorkspaceSectionHeadingStyle}"
-                            AutomationProperties.HeadingLevel="Level2" />
-                        <Viewbox MaxHeight="300" StretchDirection="DownOnly">
-                            <Border Width="576" Height="324" CornerRadius="8"
-                                    Background="{ThemeResource WorkspaceCanvasBrush}"
-                                    BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="1">
-                                <Image Source="{Binding HostPreview}" Stretch="Uniform"
-                                       AutomationProperties.Name="主机画面预览" />
-                            </Border>
-                        </Viewbox>
-                        <TextBlock Text="{Binding HostPreviewText}" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                        <TextBlock
-                            Text="{Binding HostPreviewErrorText}"
-                            Visibility="{Binding HostPreviewErrorText, Converter={StaticResource DeviceValueVisibility}}"
-                            Style="{StaticResource DeviceErrorStyle}" />
-                        <Button
-                            Content="重试预览"
-                            Command="{Binding RetryHostPreviewCommand}"
-                            Visibility="{Binding HostPreviewErrorText, Converter={StaticResource DeviceValueVisibility}}" />
-                    </StackPanel>
-                </Border>
-
-                <Border x:Name="SessionPanel" Grid.Column="1" Style="{StaticResource WorkspacePanelStyle}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="当前设备状态" Style="{StaticResource WorkspaceSectionHeadingStyle}"
-                                   AutomationProperties.HeadingLevel="Level2" />
-                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
-                            <TextBlock x:Name="ModeLabel" Text="显示模式" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            <TextBlock x:Name="ModeText" Grid.Column="1" HorizontalAlignment="Right"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=ModeLabel}" />
-                            <TextBlock x:Name="PowerLabel" Text="屏幕电源" Grid.Row="1" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            <TextBlock x:Name="PowerText" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=PowerLabel}" />
-                            <TextBlock x:Name="StreamingLabel" Text="画面发送" Grid.Row="2" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            <TextBlock x:Name="StreamingText" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=StreamingLabel}" />
-                            <TextBlock x:Name="ResolutionLabel" Text="分辨率" Grid.Row="3" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            <TextBlock Text="{Binding ResolutionText}" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=ResolutionLabel}" />
-                            <TextBlock Text="设备反馈亮度" Grid.Row="4" Style="{StaticResource WorkspaceSupportingTextStyle}"
-                                       x:Name="BrightnessLabel" />
-                            <TextBlock Text="{Binding BrightnessText}" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=BrightnessLabel}" />
-                        </Grid>
-                        <StackPanel Spacing="8">
-                            <Button x:Name="SwitchThemeButton" Content="切换到主题模式"
-                                    Command="{Binding SwitchThemeCommand}" Visibility="Collapsed" />
-                            <Button x:Name="SwitchScreenButton" Content="切换到副屏模式"
-                                    Command="{Binding SwitchScreenCommand}" Visibility="Collapsed" />
-                            <TextBlock x:Name="ModeUnavailableReason" Text="屏幕已熄灭，唤醒后可切换模式。"
-                                       Visibility="Collapsed" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            <Button x:Name="SleepButton" Content="熄屏" Command="{Binding SleepDisplayCommand}" Visibility="Collapsed" />
-                            <Button x:Name="WakeButton" Content="唤醒" Command="{Binding WakeDisplayCommand}" Visibility="Collapsed" />
-                            <Button x:Name="PauseButton" Content="暂停播放" Command="{Binding PauseStreamingCommand}" Visibility="Collapsed" />
-                            <Button x:Name="ResumeButton" Content="恢复播放" Command="{Binding ResumeStreamingCommand}" Visibility="Collapsed" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding StreamingResultText}"
-                                   Visibility="{Binding StreamingResultText, Converter={StaticResource DeviceValueVisibility}}"
-                                   Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                        <TextBlock Text="{Binding StreamingErrorText}"
-                                   Visibility="{Binding StreamingErrorText, Converter={StaticResource DeviceValueVisibility}}"
-                                   Style="{StaticResource DeviceErrorStyle}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
 
             <Border x:Name="DiscoveryPanel" Style="{StaticResource WorkspacePanelStyle}">
                 <StackPanel Spacing="12">
@@ -189,7 +200,7 @@
                         </ListView>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button Content="选择设备" Command="{Binding ConfirmSelectionCommand}" />
-                            <Button Content="连接设备" Command="{Binding ConnectProtocolCommand}" Style="{StaticResource AccentButtonStyle}" />
+                            <Button Content="连接设备" Command="{Binding ConnectProtocolCommand}" Style="{StaticResource WorkspacePrimaryButton}" />
                         </StackPanel>
                         <TextBlock Text="{Binding SelectionText}" Style="{StaticResource WorkspaceSupportingTextStyle}"
                                    AutomationProperties.LiveSetting="Polite" />
@@ -222,8 +233,8 @@
                 <TextBlock Text="{Binding LocalSaveErrorText}"
                            Visibility="{Binding LocalSaveErrorText, Converter={StaticResource DeviceValueVisibility}}"
                            Style="{StaticResource DeviceErrorStyle}" />
-                <Button Content="重试保存配置" Command="{Binding RetryPendingSaveCommand}"
-                        Visibility="{Binding PendingSaveText, Converter={StaticResource DeviceValueVisibility}}" />
+                <Button x:Name="RetryPendingSaveButton" Content="重试保存配置" Command="{Binding RetryPendingSaveCommand}"
+                        Visibility="Collapsed" />
                 <Button x:Name="RetrySettingsButton" Content="重试保存设置" Command="{Binding RetryProtocolSaveCommand}"
                         Visibility="{Binding IsEnabled, ElementName=RetrySettingsButton, Converter={StaticResource DeviceValueVisibility}}" />
             </StackPanel>
@@ -234,6 +245,10 @@
                         <TextBlock x:Name="FirmwareLabel" Text="固件" Style="{StaticResource WorkspaceSupportingTextStyle}" />
                         <TextBlock Text="{Binding FirmwareText}" TextWrapping="Wrap"
                                    AutomationProperties.LabeledBy="{Binding ElementName=FirmwareLabel}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <TextBlock x:Name="BrightnessLabel" Text="设备反馈亮度" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                        <TextBlock Text="{Binding BrightnessText}" AutomationProperties.LabeledBy="{Binding ElementName=BrightnessLabel}" />
                     </StackPanel>
                     <TextBlock Text="{Binding OperationText}" Style="{StaticResource WorkspaceSupportingTextStyle}" />
                 </StackPanel>

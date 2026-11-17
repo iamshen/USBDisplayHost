@@ -176,10 +176,10 @@ public sealed class DraftPreviewController : IAsyncDisposable
     private AppError? AcquireReference(ThemeDraft draft, out AssetReferenceLease? lease)
     {
         lease = null;
-        if (draft.Content is not ThemeContent.Image { AssetId: not null } image) { return null; }
+        if (draft.Content.GetImageAssetId() is not { } assetId) { return null; }
         try
         {
-            var acquired = assets.AcquireReference(image.AssetId, AssetReferenceOwner.Rendering);
+            var acquired = assets.AcquireReference(assetId, AssetReferenceOwner.Rendering);
             if (acquired is OperationResult<AssetReferenceLease>.Success success) { lease = success.Value; return null; }
             return acquired is OperationResult<AssetReferenceLease>.Failure failure ? failure.Error
                 : AppError.Create("PreviewAssetReferenceUnconfirmed", "预览素材引用未确认", "请重新选择素材后重试预览");
@@ -238,7 +238,7 @@ public sealed class DraftPreviewController : IAsyncDisposable
             {
                 lock (syncRoot)
                 {
-                    if (visible && desired is { Content: ThemeContent.Clock or ThemeContent.Dashboard }
+                    if (visible && desired is { Content.IsDynamic: true }
                         && failedRevision != desired.Revision) { signals.Writer.TryWrite(0); }
                 }
             }

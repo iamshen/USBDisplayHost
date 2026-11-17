@@ -12,7 +12,7 @@
 ## Decisions
 
 1. **窗口和业务**。使用 .NET 10.0.401、Windows App SDK 2.6.5、win-x64 非 MSIX 自包含。WinUI 负责窗口、调度、对话框、图像呈现和文件选择。Core 保持平台无关，两个入口共享 ViewModel 以及会话和退出保存规则。正式发布入口继续采用 WPF。
-2. **视觉**。采用 Mole Windows 的导航层级、状态聚焦与平行列表，保留 USB Display 品牌、原有侧边导航默认和顶部导航偏好。语义资源覆盖浅色、深色和高对比，诊断、错误及反馈留在相关位置。实际窗口作为设计验收依据。[Mole Windows](https://mole.fit/windows)
+2. **视觉**。采用 Mole Windows 的导航层级、状态聚焦与平行列表，保留 USB Display 品牌。当前 WinUI Beta 的固定顶部横向导航沿用 Figma 改版规格。语义资源覆盖两套应用配色和高对比，诊断、错误及反馈留在相关位置。实际窗口作为设计验收依据。[Mole Windows](https://mole.fit/windows)
 3. **内容**。共享 WPF 专用 STA 离屏 Rendering 继续负责模板、1920×1080、旋转和 JPEG。WinUI 使用编码帧呈现已核验会话及修订的预览。Beta 包同时携带 .NET Desktop Runtime 与 Windows App SDK。替换离屏引擎前先对照布局、编码和实物。
 4. **交付**。Beta 使用 `X.Y.Z-beta.N` 版本，当前候选为 `0.2.0-beta.4`。Velopack 身份 `USBDisplayHost.Beta`，更新通道 `win-x64-beta`，数据根 `%LocalAppData%\UsbDisplayHost.Beta.Data`。`--ui-only` 使用临时数据根和独立实例标识。发布目标显式携带包含 App、主窗口及五页 XBF 的 PRI。
 5. **实施方式**。按 [任务](tasks.md) 在本地推进，统一编译、运行和评审候选。保留 #8–#15 与 PR #16 作为需求和既有审核的追踪入口。一轮候选成熟后再决定汇总的远端评审和合并安排。

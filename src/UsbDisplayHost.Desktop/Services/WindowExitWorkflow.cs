@@ -193,7 +193,7 @@ internal sealed class WindowExitWorkflow(ThemeWorkspaceLifetime workspace, IErro
             if (workspace.DeviceSettings.IsDirty
                 && await ShowDialogAsync(window, "设备设置有尚未应用的更改。退出将放弃这些更改。是否退出？",
                     WindowExitPrompt.Continue) != WindowExitChoice.Confirm) { return; }
-            if (workspace.Themes.IsDirty
+            if (workspace.Themes.HasUnsavedExitEdits
                 && await ShowDialogAsync(window, "主题有尚未应用的更改。退出将放弃这些更改。是否退出？",
                     WindowExitPrompt.Continue) != WindowExitChoice.Confirm) { return; }
             if (workspace.IsDeviceSessionBusy)

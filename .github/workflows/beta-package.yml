@@ -2,7 +2,7 @@ name: Windows Beta 安装包
 
 on:
   push:
-    branches: ['feature/winui3-mole']
+    branches: ['feature/winui3-mole', 'feature/winui3-beta-candidate']
   workflow_dispatch:
 
 permissions:

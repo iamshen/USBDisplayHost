@@ -14,9 +14,12 @@ public sealed record ApplicationSettings(
     bool AutomaticallyCheckUpdates, bool HasSeenTrayNotice, bool CloseToTray = true,
     bool SuppressModeSwitchNotice = false,
     [property: System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<NavigationLayout>))]
-    NavigationLayout NavigationLayout = NavigationLayout.Side)
+    NavigationLayout NavigationLayout = NavigationLayout.Side,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    ApplicationAppearance Appearance = ApplicationAppearance.DeepBlue)
 {
     public static ApplicationSettings Default { get; } = new(false, false, false, true, false);
 }
 
 public enum NavigationLayout { Top, Side }
+public enum ApplicationAppearance { DeepBlue, WarmBrown }

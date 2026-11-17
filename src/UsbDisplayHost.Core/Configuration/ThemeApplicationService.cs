@@ -92,12 +92,12 @@ public sealed class ThemeApplicationService(DeviceKey deviceKey, DeviceCoordinat
             if (captured is OperationResult<ThemeApplicationBase>.Failure rejected) { return new OperationResult<ThemeApplicationResult>.Failure(rejected.Error); }
             var basis = ((OperationResult<ThemeApplicationBase>.Success)captured).Value;
             var candidate = new ActiveProfile(context, basis.Content, basis.Settings, basis.PipelineRevision);
-            if (candidate.Content is ThemeContent.Image { AssetId: not null } image)
+            if (candidate.Content.GetImageAssetId() is { } assetId)
             {
                 AssetReferenceOwner[] owners = [AssetReferenceOwner.Candidate, AssetReferenceOwner.ActiveProfile, AssetReferenceOwner.PendingRestore];
                 for (int index = 0; index < owners.Length; index++)
                 {
-                    var acquired = assets.AcquireReference(image.AssetId, owners[index]);
+                    var acquired = assets.AcquireReference(assetId, owners[index]);
                     if (acquired is OperationResult<AssetReferenceLease>.Failure referenceFailure)
                     {
                         return new OperationResult<ThemeApplicationResult>.Failure(referenceFailure.Error);

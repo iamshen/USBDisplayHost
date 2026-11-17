@@ -37,6 +37,7 @@ public sealed partial class AppUpdateViewModel : ObservableObject
 
     public string CurrentVersion => snapshot.CurrentVersion;
     public bool HasReleasePage => releasePageUrl is not null;
+    public bool CanOfferUpdateAction => snapshot.State != AppUpdateState.Unavailable;
     public string ActionText => snapshot.State switch
     {
         AppUpdateState.Available => "下载更新",
@@ -138,6 +139,7 @@ public sealed partial class AppUpdateViewModel : ObservableObject
         OnPropertyChanged(nameof(ErrorText)); OnPropertyChanged(nameof(Progress));
         OnPropertyChanged(nameof(IsProgressVisible)); OnPropertyChanged(nameof(IsIndeterminate));
         OnPropertyChanged(nameof(CanCancel)); ActCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CanOfferUpdateAction));
     }
 
     public async Task StopAsync()

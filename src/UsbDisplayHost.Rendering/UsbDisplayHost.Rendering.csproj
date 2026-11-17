@@ -6,5 +6,6 @@
     <ItemGroup>
         <ProjectReference Include="../UsbDisplayHost.Core/UsbDisplayHost.Core.csproj" />
         <EmbeddedResource Include="Assets/default-landscape.png" LogicalName="UsbDisplayHost.Rendering.DefaultLandscape.png" />
+        <EmbeddedResource Include="Assets/ThemeBackdrops/*.jpg" LogicalName="UsbDisplayHost.Rendering.Backdrops.%(Filename).jpg" />
     </ItemGroup>
 </Project>

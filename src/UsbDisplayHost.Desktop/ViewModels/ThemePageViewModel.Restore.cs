@@ -7,7 +7,7 @@ public sealed partial class ThemePageViewModel
 {
     private bool Restore(ThemeDraft value)
     {
-        string? nextAsset = (value.Content as ThemeContent.Image)?.AssetId;
+        string? nextAsset = value.Content.GetImageAssetId();
         if (!ReplaceEditorAsset(nextAsset)) { return false; }
         restoring = true;
         try
@@ -50,6 +50,7 @@ public sealed partial class ThemePageViewModel
                     break;
             }
             OnPropertyChanged(nameof(IsDirty));
+            OnPropertyChanged(nameof(EditorContent));
         }
         finally { restoring = false; }
         InvalidateTemplatePreviews();

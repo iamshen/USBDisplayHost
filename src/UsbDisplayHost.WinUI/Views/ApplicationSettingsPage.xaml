@@ -9,29 +9,48 @@
             <Setter Property="Foreground" Value="{ThemeResource SystemFillColorCriticalBrush}" />
             <Setter Property="IsTextSelectionEnabled" Value="True" />
         </Style>
+        <Style x:Key="AppearanceCardButton" TargetType="ToggleButton">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="UseSystemFocusVisuals" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <ContentPresenter Background="Transparent" Content="{TemplateBinding Content}"
+                                          CornerRadius="{TemplateBinding CornerRadius}"
+                                          Control.IsTemplateFocusTarget="True" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
 
-    <Grid RowDefinitions="*,Auto" MaxWidth="1056" Margin="24,0">
+    <Grid RowDefinitions="*,Auto" Margin="48,0">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled"
                       HorizontalContentAlignment="Stretch">
-            <StackPanel Margin="0,28,0,24" Spacing="24">
+            <StackPanel Margin="0,30,0,24" Spacing="34">
                 <TextBlock Text="应用设置" Style="{StaticResource WorkspaceStateHeadingStyle}"
                            AutomationProperties.HeadingLevel="Level1" />
-                <Grid x:Name="SettingsLayout" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto"
-                      ColumnSpacing="40" RowSpacing="24" SizeChanged="OnSettingsLayoutSizeChanged">
+                <Grid x:Name="SettingsLayout" ColumnDefinitions="1.17*,*" RowDefinitions="Auto,Auto"
+                      ColumnSpacing="26" RowSpacing="24" SizeChanged="OnSettingsLayoutSizeChanged">
                     <StackPanel Spacing="24">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="窗口与启动" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                            <TextBlock Text="外观" Style="{StaticResource WorkspaceSectionHeadingStyle}"
                                        AutomationProperties.HeadingLevel="Level2" />
-                            <RadioButtons Header="导航布局" MaxColumns="2" IsEnabled="{Binding CanEdit}"
-                                          AutomationProperties.Name="导航布局">
-                                <RadioButton Content="顶部导航" IsChecked="{Binding IsTopNavigation, Mode=TwoWay}" />
-                                <RadioButton Content="侧边导航" IsChecked="{Binding IsSideNavigation, Mode=TwoWay}" />
-                            </RadioButtons>
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <TextBlock Text="应用配色" FontWeight="Medium" Margin="0,7,0,0" />
+                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0" AutomationProperties.Name="应用配色">
+                                <ToggleButton x:Name="DeepBlueButton" Click="OnAppearanceClick" AutomationProperties.Name="深蓝"
+                                              Style="{StaticResource AppearanceCardButton}" />
+                                <ToggleButton x:Name="WarmBrownButton" Click="OnAppearanceClick" AutomationProperties.Name="暖棕"
+                                              Style="{StaticResource AppearanceCardButton}" />
+                            </StackPanel>
+                            <Border Height="1" Background="{ThemeResource WorkspaceDividerBrush}" Margin="0,12,0,6" />
+                            <TextBlock Text="窗口与启动" Margin="0,8,0,0" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                                       AutomationProperties.HeadingLevel="Level2" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,4,0,0">
                                 <TextBlock x:Name="CloseBehaviorLabel" Text="关闭主窗口时" VerticalAlignment="Center"
                                            TextWrapping="Wrap" />
-                                <ComboBox Grid.Column="1" MinWidth="124" ItemsSource="{Binding CloseBehaviors}"
+                                <ComboBox Grid.Column="1" MinWidth="160" MinHeight="36" CornerRadius="8" ItemsSource="{Binding CloseBehaviors}"
                                           DisplayMemberPath="Label" SelectedValuePath="CloseToTray"
                                           SelectedValue="{Binding CloseToTray, Mode=TwoWay}" IsEnabled="{Binding CanEdit}"
                                           AutomationProperties.LabeledBy="{Binding ElementName=CloseBehaviorLabel}" />
@@ -48,7 +67,11 @@
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel Spacing="12">
+                    </StackPanel>
+
+                    <StackPanel x:Name="UpdateSettings" Grid.Column="1" Spacing="12" Padding="39,0,0,0"
+                                BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="1,0,0,0">
+                        <StackPanel Spacing="8">
                             <TextBlock Text="设备模式" Style="{StaticResource WorkspaceSectionHeadingStyle}"
                                        AutomationProperties.HeadingLevel="Level2" />
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
@@ -68,28 +91,25 @@
                                               AutomationProperties.LabeledBy="{Binding ElementName=ExitModeLabel}" />
                             </Grid>
                             <TextBlock Text="连接支持模式切换的设备后可启用"
+                                       Margin="0,6,0,0"
                                        Visibility="{x:Bind ModeRequirementVisibility(ViewModel.CanEdit, ViewModel.CanRevokeStartupMode, ViewModel.CanRevokeExitMode), Mode=OneWay}"
                                        Style="{StaticResource WorkspaceSupportingTextStyle}" />
                         </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel x:Name="UpdateSettings" Grid.Column="1" Spacing="12">
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                            <TextBlock Text="软件更新" Style="{StaticResource WorkspaceSectionHeadingStyle}"
-                                       AutomationProperties.HeadingLevel="Level2" />
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                <TextBlock Text="版本" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                                <TextBlock Text="{Binding Updates.CurrentVersion}"
-                                           Style="{StaticResource WorkspaceSupportingTextStyle}"
-                                           IsTextSelectionEnabled="True" />
-                            </StackPanel>
+                        <Border Height="1" Background="{ThemeResource WorkspaceDividerBrush}" Margin="0,6,0,6" />
+                        <TextBlock Text="软件更新" Margin="0,4,0,0" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                                   AutomationProperties.HeadingLevel="Level2" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,8,0,0">
+                            <TextBlock x:Name="VersionLabel" Text="版本" />
+                            <TextBlock Grid.Column="1" Text="{Binding Updates.CurrentVersion}" FontFamily="Consolas"
+                                       Style="{StaticResource WorkspaceSupportingTextStyle}" IsTextSelectionEnabled="True"
+                                       AutomationProperties.LabeledBy="{Binding ElementName=VersionLabel}" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                             <TextBlock x:Name="AutomaticUpdatesLabel" Text="自动检查更新" VerticalAlignment="Center"
                                        TextWrapping="Wrap" />
                             <ToggleSwitch Grid.Column="1" MinWidth="0" OnContent="" OffContent=""
                                           IsOn="{Binding AutomaticallyCheckUpdates, Mode=TwoWay}"
-                                          IsEnabled="{Binding CanEdit}"
+                                          IsEnabled="{x:Bind UpdateOptInEnabled(ViewModel.CanEdit, ViewModel.Updates.CanOfferUpdateAction), Mode=OneWay}"
                                           AutomationProperties.LabeledBy="{Binding ElementName=AutomaticUpdatesLabel}" />
                         </Grid>
                         <StackPanel DataContext="{Binding Updates}" Spacing="8">
@@ -102,7 +122,8 @@
                                        Visibility="{Binding ErrorText, Converter={StaticResource ContentVisibility}}"
                                        AutomationProperties.LiveSetting="Polite" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Content="{Binding ActionText}" Command="{Binding ActCommand}" />
+                                <Button Content="{Binding ActionText}" Command="{Binding ActCommand}" Style="{StaticResource WorkspaceSecondaryButton}"
+                                        Visibility="{Binding CanOfferUpdateAction, Converter={StaticResource ContentVisibility}}" />
                                 <Button Content="取消更新" Command="{Binding ActCancelCommand}"
                                         Visibility="{Binding CanCancel, Converter={StaticResource ContentVisibility}}" />
                                 <Button Content="GitHub 下载页" Command="{Binding OpenReleasesCommand}"
@@ -115,27 +136,30 @@
         </ScrollViewer>
 
         <Border Grid.Row="1" BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="0,1,0,0"
-                Padding="0,12,0,16">
-            <StackPanel Spacing="8">
+                Padding="0,22,0,40">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="5">
+                <StackPanel Spacing="5" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ErrorText}" Style="{StaticResource SettingsErrorStyle}"
                            Visibility="{Binding ErrorText, Converter={StaticResource ContentVisibility}}"
                            AutomationProperties.LiveSetting="Polite" />
                 <TextBlock Text="{Binding StatusText}" Style="{StaticResource WorkspaceSupportingTextStyle}"
                            AutomationProperties.LiveSetting="Polite" />
-                <ProgressBar IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource ContentVisibility}}"
-                             AutomationProperties.Name="应用设置处理进度" />
-                <StackPanel Orientation="Horizontal" Spacing="8">
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                     <Button Content="重新读取设置" Command="{Binding ReloadCommand}"
                             Visibility="{x:Bind ReloadVisibility(ViewModel.ErrorText, ViewModel.HasUnconfirmedSave), Mode=OneWay}" />
                     <Button Content="核实保存" Command="{Binding VerifySaveCommand}"
                             Visibility="{Binding HasUnconfirmedSave, Converter={StaticResource ContentVisibility}}" />
                     <Button Content="取消保存" Command="{Binding SaveCancelCommand}"
                             Visibility="{Binding IsBusy, Converter={StaticResource ContentVisibility}}" />
-                    <Button Content="撤销更改" Command="{Binding DiscardEditsCommand}" />
-                    <Button Content="保存设置" Command="{Binding SaveCommand}"
-                            Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="撤销更改" Command="{Binding DiscardEditsCommand}" Style="{StaticResource WorkspaceGhostButton}" />
+                    <Button Content="保存设置" Command="{Binding SaveCommand}" MinWidth="162"
+                            Style="{StaticResource WorkspacePrimaryButton}" />
                 </StackPanel>
-            </StackPanel>
+                <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" IsIndeterminate="True"
+                             Visibility="{Binding IsBusy, Converter={StaticResource ContentVisibility}}"
+                             AutomationProperties.Name="应用设置处理进度" />
+            </Grid>
         </Border>
     </Grid>
 </Page>

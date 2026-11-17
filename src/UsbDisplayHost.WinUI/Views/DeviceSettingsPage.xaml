@@ -5,126 +5,150 @@
     xmlns:views="using:UsbDisplayHost.WinUI.Views">
     <Page.Resources>
         <views:DeviceValueVisibilityConverter x:Key="DeviceValueVisibility" />
-        <views:DisplayRotationAngleConverter x:Key="DisplayRotationAngle" />
         <Style x:Key="DeviceSettingErrorStyle" TargetType="TextBlock" BasedOn="{StaticResource WorkspaceSupportingTextStyle}">
             <Setter Property="Foreground" Value="{ThemeResource SystemFillColorCriticalBrush}" />
             <Setter Property="IsTextSelectionEnabled" Value="True" />
         </Style>
+        <Style x:Key="OutputRow" TargetType="Grid">
+            <Setter Property="MinHeight" Value="88" />
+            <Setter Property="Padding" Value="0,12,0,16" />
+            <Setter Property="BorderBrush" Value="{ThemeResource WorkspaceDividerBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style x:Key="OutputChoice" TargetType="ComboBox">
+            <Setter Property="Width" Value="128" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+        <Style x:Key="OutputNumber" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
     </Page.Resources>
 
-    <Grid MaxWidth="920" Padding="24,24,24,12" RowDefinitions="*,Auto" RowSpacing="12">
+    <Grid Padding="48,29,48,48" RowDefinitions="*,Auto" RowSpacing="12">
         <ScrollViewer HorizontalContentAlignment="Stretch">
-            <StackPanel Spacing="18">
-                <StackPanel Spacing="4">
+            <StackPanel Spacing="40">
+                <StackPanel Spacing="8">
                     <TextBlock Text="设备设置" Style="{StaticResource WorkspaceStateHeadingStyle}"
                                AutomationProperties.HeadingLevel="Level1" />
                     <TextBlock Text="{Binding DeviceText}"
                                Visibility="{Binding IsConnected, Converter={StaticResource DeviceValueVisibility}}"
                                Style="{StaticResource WorkspaceSupportingTextStyle}" IsTextSelectionEnabled="True" />
+                    <TextBlock x:Name="OfflineReason" Foreground="{ThemeResource WorkspaceWarningBrush}" TextWrapping="Wrap" />
                 </StackPanel>
 
-                <Border Style="{StaticResource WorkspacePanelStyle}">
-                    <StackPanel Spacing="14">
+                <Grid x:Name="OutputSections" ColumnDefinitions="*,1.09*" RowDefinitions="Auto,Auto" ColumnSpacing="34"
+                      SizeChanged="OnOutputSizeChanged">
+                    <StackPanel>
                         <TextBlock Text="图像输出" Style="{StaticResource WorkspaceSectionHeadingStyle}"
                                    AutomationProperties.HeadingLevel="Level2" />
-                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="10">
-                            <TextBlock x:Name="RotationLabel" Text="显示方向" VerticalAlignment="Center" />
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                                <Border Width="76" Height="44" CornerRadius="6"
-                                        Background="{ThemeResource WorkspaceCanvasBrush}"
-                                        BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="1"
-                                        AutomationProperties.AccessibilityView="Raw">
-                                    <FontIcon Glyph="&#xE74A;" FontSize="22"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                                              Foreground="{ThemeResource WorkspaceTextPrimaryBrush}"
-                                              RenderTransformOrigin="0.5,0.5">
-                                        <FontIcon.RenderTransform>
-                                            <RotateTransform Angle="{Binding Rotation, Converter={StaticResource DisplayRotationAngle}}" />
-                                        </FontIcon.RenderTransform>
-                                    </FontIcon>
-                                </Border>
-                                <ComboBox x:Name="RotationBox" MinWidth="108" VerticalAlignment="Center"
+                        <StackPanel Margin="0,2,0,0">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource OutputRow}">
+                                <TextBlock x:Name="RotationLabel" Text="显示方向" VerticalAlignment="Center" />
+                                <ComboBox x:Name="RotationBox" Grid.Column="1" PlaceholderText="—" Style="{StaticResource OutputChoice}"
                                           DisplayMemberPath="Label" SelectionChanged="OnRotationChanged"
                                           IsEnabled="{Binding CanEdit}"
                                           AutomationProperties.LabeledBy="{Binding ElementName=RotationLabel}" />
-                            </StackPanel>
-
-                            <TextBlock x:Name="FrameRateLabel" Grid.Row="1" Text="帧率上限（fps）" VerticalAlignment="Center" />
-                            <ComboBox x:Name="FrameRateBox" Grid.Row="1" Grid.Column="1" MinWidth="108" HorizontalAlignment="Right"
-                                      SelectedItem="{Binding FramesPerSecond, Mode=TwoWay}" IsEnabled="{Binding CanEdit}"
-                                      AutomationProperties.LabeledBy="{Binding ElementName=FrameRateLabel}"
-                                      AutomationProperties.HelpText="1 到 5 帧每秒" />
-
-                            <StackPanel Grid.Row="2" Spacing="2">
-                                <TextBlock x:Name="JpegQualityLabel" Text="JPEG 画质" />
-                                <TextBlock Text="70–85 的整数" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            </StackPanel>
-                            <TextBox x:Name="JpegQualityInput" Grid.Row="2" Grid.Column="1"
-                                     Width="108" HorizontalAlignment="Right" VerticalAlignment="Center" InputScope="Number"
-                                     IsEnabled="{Binding CanEdit}" TextChanged="OnJpegQualityChanged"
-                                     AutomationProperties.LabeledBy="{Binding ElementName=JpegQualityLabel}"
-                                     AutomationProperties.HelpText="输入 70 到 85 的整数" />
-                        </Grid>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource OutputRow}">
+                                <StackPanel Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock x:Name="FrameRateLabel" Text="帧率上限（fps）" />
+                                    <TextBlock Text="1 到 5 帧每秒" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                                </StackPanel>
+                                <ComboBox x:Name="FrameRateBox" Grid.Column="1" PlaceholderText="—" Style="{StaticResource OutputChoice}"
+                                          SelectionChanged="OnFrameRateChanged" IsEnabled="{Binding CanEdit}"
+                                          AutomationProperties.LabeledBy="{Binding ElementName=FrameRateLabel}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Style="{StaticResource OutputRow}">
+                                <StackPanel Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock x:Name="JpegQualityLabel" Text="JPEG 画质" />
+                                    <TextBlock Text="70–85 的整数" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                                </StackPanel>
+                                <TextBox x:Name="JpegQualityInput" Grid.Column="1" Style="{StaticResource OutputNumber}"
+                                         Width="128" InputScope="Number" PlaceholderText="—"
+                                         IsEnabled="{Binding CanEdit}" TextChanged="OnJpegQualityChanged"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=JpegQualityLabel}"
+                                         AutomationProperties.HelpText="输入 70 到 85 的整数" />
+                            </Grid>
+                        </StackPanel>
                         <TextBlock Text="{Binding ValidationText}"
                                    Visibility="{Binding ValidationText, Converter={StaticResource DeviceValueVisibility}}"
                                    Style="{StaticResource DeviceSettingErrorStyle}" />
                     </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource WorkspacePanelStyle}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="屏幕亮度" Style="{StaticResource WorkspaceSectionHeadingStyle}"
-                                   AutomationProperties.HeadingLevel="Level2" />
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                            <StackPanel Spacing="4">
-                                <TextBlock x:Name="BrightnessSliderLabel" Text="目标亮度（%）" />
-                                <Slider Minimum="0" Maximum="100" StepFrequency="1" SnapsTo="StepValues"
-                                        IsEnabled="{Binding DeviceControls.CanAdjustBrightness}"
-                                        Value="{Binding DeviceControls.BrightnessTarget, Mode=TwoWay}"
-                                        AutomationProperties.LabeledBy="{Binding ElementName=BrightnessSliderLabel}"
-                                        AutomationProperties.HelpText="0 到 100，拖动即时应用" />
+                    <StackPanel x:Name="BrightnessAndInfo" Grid.Column="1" Spacing="15" BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="1,0,0,0" Padding="33,0,0,0">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="屏幕亮度" Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                                       AutomationProperties.HeadingLevel="Level2" />
+                            <StackPanel Margin="0,18,0,0" Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock x:Name="BrightnessSliderLabel" Text="目标亮度" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="BrightnessTargetValue" Grid.Column="1" Text="—"
+                                               Style="{StaticResource WorkspaceSectionHeadingStyle}"
+                                               AutomationProperties.LabeledBy="{Binding ElementName=BrightnessSliderLabel}" />
+                                </Grid>
+                                <Grid MinHeight="36">
+                                    <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="100" StepFrequency="1" SnapsTo="StepValues"
+                                            VerticalAlignment="Center"
+                                            IsEnabled="{Binding DeviceControls.CanAdjustBrightness}"
+                                            Value="{Binding DeviceControls.BrightnessTarget, Mode=TwoWay}"
+                                            AutomationProperties.LabeledBy="{Binding ElementName=BrightnessSliderLabel}"
+                                            AutomationProperties.HelpText="0 到 100，拖动即时应用" />
+                                    <Border x:Name="OfflineBrightnessTrack" Height="4" VerticalAlignment="Center"
+                                            Background="{ThemeResource WorkspaceDividerBrush}" CornerRadius="2" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="0%" Style="{StaticResource WorkspaceSupportingTextStyle}" FontSize="12" />
+                                    <TextBlock Grid.Column="1" Text="100%" Style="{StaticResource WorkspaceSupportingTextStyle}" FontSize="12" />
+                                </Grid>
                             </StackPanel>
-                            <ContentControl Grid.Column="1" IsEnabled="{Binding DeviceControls.CanAdjustBrightness}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBox Width="108" Header="精确亮度（%）" InputScope="Number"
-                                             Text="{Binding DeviceControls.BrightnessValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             AutomationProperties.Name="精确亮度，百分比"
-                                             AutomationProperties.HelpText="输入 0 到 100 的整数" />
-                                    <Button VerticalAlignment="Bottom" Content="设置亮度"
-                                            Command="{Binding DeviceControls.ApplyBrightnessCommand}" />
-                                </StackPanel>
-                            </ContentControl>
-                        </Grid>
-                        <TextBlock x:Name="BrightnessHint" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="BrightnessFeedbackLabel" Text="设备读回" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                            <TextBlock Text="{Binding DeviceControls.BrightnessText}"
-                                       AutomationProperties.LabeledBy="{Binding ElementName=BrightnessFeedbackLabel}" />
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,8,0,0">
+                                <TextBlock x:Name="BrightnessInputLabel" Text="精确亮度（%）" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                <TextBox x:Name="BrightnessInput" Grid.Column="1" Width="88" Style="{StaticResource OutputNumber}"
+                                         InputScope="Number" PlaceholderText="—" TextChanged="OnBrightnessInputChanged"
+                                         IsEnabled="{Binding DeviceControls.CanAdjustBrightness}"
+                                         AutomationProperties.LabeledBy="{Binding ElementName=BrightnessInputLabel}"
+                                         AutomationProperties.HelpText="输入 0 到 100 的整数" />
+                                <Button Grid.Column="2" Content="设置亮度" MinWidth="112" MinHeight="36"
+                                        Style="{StaticResource WorkspaceSecondaryButton}"
+                                        IsEnabled="{Binding DeviceControls.CanAdjustBrightness}"
+                                        Command="{Binding DeviceControls.ApplyBrightnessCommand}" />
+                            </Grid>
+                            <Border Margin="0,4,0,0" Height="1" Background="{ThemeResource WorkspaceDividerBrush}" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <TextBlock x:Name="BrightnessFeedbackLabel" Text="设备读回" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                                <TextBlock Grid.Column="1" Text="{Binding DeviceControls.BrightnessText}"
+                                           AutomationProperties.LabeledBy="{Binding ElementName=BrightnessFeedbackLabel}" />
+                            </Grid>
+                            <TextBlock x:Name="BrightnessHint" Style="{StaticResource WorkspaceSupportingTextStyle}" FontSize="12" />
+                            <TextBlock Text="{Binding DeviceControls.ProtocolErrorText}"
+                                       Visibility="{Binding DeviceControls.ProtocolErrorText, Converter={StaticResource DeviceValueVisibility}}"
+                                       Style="{StaticResource DeviceSettingErrorStyle}" />
+                            <Button x:Name="RetryBrightnessSaveButton" Content="重试保存设备设置"
+                                    Command="{Binding DeviceControls.RetryProtocolSaveCommand}"
+                                    Visibility="{Binding IsEnabled, ElementName=RetryBrightnessSaveButton, Converter={StaticResource DeviceValueVisibility}}" />
                         </StackPanel>
-                        <TextBlock Text="{Binding DeviceControls.ProtocolErrorText}"
-                                   Visibility="{Binding DeviceControls.ProtocolErrorText, Converter={StaticResource DeviceValueVisibility}}"
-                                   Style="{StaticResource DeviceSettingErrorStyle}" />
-                        <Button x:Name="RetryBrightnessSaveButton" Content="重试保存设备设置"
-                                Command="{Binding DeviceControls.RetryProtocolSaveCommand}"
-                                Visibility="{Binding IsEnabled, ElementName=RetryBrightnessSaveButton, Converter={StaticResource DeviceValueVisibility}}" />
-                    </StackPanel>
-                </Border>
 
-                <Expander Header="设备信息" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                          Visibility="{Binding IsConnected, Converter={StaticResource DeviceValueVisibility}}">
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="8">
-                        <TextBlock x:Name="ResolutionLabel" Text="分辨率" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                        <TextBlock Grid.Column="1" Text="{Binding DeviceControls.ResolutionText}"
-                                   AutomationProperties.LabeledBy="{Binding ElementName=ResolutionLabel}" />
-                        <TextBlock x:Name="FirmwareLabel" Grid.Row="1" Text="固件" Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DeviceControls.FirmwareText}" TextWrapping="Wrap"
-                                   AutomationProperties.LabeledBy="{Binding ElementName=FirmwareLabel}" />
-                        <TextBlock x:Name="RequestedBrightnessLabel" Grid.Row="2" Text="已受理亮度"
-                                   Style="{StaticResource WorkspaceSupportingTextStyle}" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DeviceControls.RequestedBrightnessText}"
-                                   AutomationProperties.LabeledBy="{Binding ElementName=RequestedBrightnessLabel}" />
-                    </Grid>
-                </Expander>
+
+                        <TextBlock Text="设备信息" Margin="0,12,0,0" Style="{StaticResource WorkspaceSectionHeadingStyle}" AutomationProperties.HeadingLevel="Level2" />
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="12">
+                            <TextBlock x:Name="ResolutionLabel" Text="分辨率" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                            <TextBlock Grid.Column="1" Text="{Binding DeviceControls.ResolutionText}" TextAlignment="Right"
+                                       AutomationProperties.LabeledBy="{Binding ElementName=ResolutionLabel}" />
+                            <TextBlock x:Name="FirmwareLabel" Grid.Row="1" Text="固件" Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DeviceControls.FirmwareText}" TextWrapping="Wrap" TextAlignment="Right"
+                                       AutomationProperties.LabeledBy="{Binding ElementName=FirmwareLabel}" />
+                            <TextBlock x:Name="RequestedBrightnessLabel" Grid.Row="2" Text="已受理亮度"
+                                       Style="{StaticResource WorkspaceSupportingTextStyle}" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DeviceControls.RequestedBrightnessText}" TextAlignment="Right"
+                                       AutomationProperties.LabeledBy="{Binding ElementName=RequestedBrightnessLabel}" />
+                        </Grid>
+                    </StackPanel>
+                </Grid>
 
                 <TextBlock Text="{Binding ApplicationText}"
                            Visibility="{Binding ApplicationText, Converter={StaticResource DeviceValueVisibility}}"
@@ -135,21 +159,23 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="1" BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
-            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12">
-                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center"
+        <Border Grid.Row="1" BorderBrush="{ThemeResource WorkspaceDividerBrush}" BorderThickness="0,1,0,0" Padding="0,19,0,0">
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12">
+                <Button Content="恢复默认" Command="{Binding RestoreDefaultsCommand}" MinWidth="112"
+                        Style="{StaticResource WorkspaceGhostButton}" />
+                <TextBlock x:Name="FooterStatus" Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center"
                            Style="{StaticResource WorkspaceSupportingTextStyle}" AutomationProperties.LiveSetting="Polite" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Content="恢复默认" Command="{Binding RestoreDefaultsCommand}" />
-                    <Button Content="撤销" Command="{Binding UndoCommand}" />
-                    <Button Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}" Style="{StaticResource AccentButtonStyle}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <Button Content="撤销" Command="{Binding UndoCommand}" MinWidth="96" Style="{StaticResource WorkspaceGhostButton}" />
+                    <Button x:Name="ApplyOutputButton" Content="应用图像输出" Command="{Binding ApplyCommand}" MinWidth="182"
+                            Style="{StaticResource WorkspacePrimaryButton}" />
                     <Button Content="取消应用" Command="{Binding ApplyCancelCommand}"
                             Visibility="{Binding IsApplying, Converter={StaticResource DeviceValueVisibility}}" />
                     <Button Content="重试保存图像输出"
                             Command="{Binding RetryApplicationSaveCommand}"
                             Visibility="{Binding HasApplicationSave, Converter={StaticResource DeviceValueVisibility}}" />
                 </StackPanel>
-                <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" IsIndeterminate="True" Margin="0,8,0,0"
+                <ProgressBar Grid.Row="1" Grid.ColumnSpan="3" IsIndeterminate="True" Margin="0,8,0,0"
                              Visibility="{Binding IsBusy, Converter={StaticResource DeviceValueVisibility}}"
                              AutomationProperties.Name="设备设置处理进度" />
             </Grid>

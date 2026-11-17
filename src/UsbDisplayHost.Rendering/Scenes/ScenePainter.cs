@@ -8,7 +8,7 @@ using UsbDisplayHost.Core.Themes;
 
 namespace UsbDisplayHost.Rendering.Scenes;
 
-internal sealed class ScenePainter(TimeProvider timeProvider)
+internal sealed partial class ScenePainter(TimeProvider timeProvider)
 {
     private static readonly Lazy<BitmapSource> BuiltInBackground = new(LoadBuiltInBackground);
     private readonly MetricFreshness freshness = new(timeProvider);
@@ -26,6 +26,9 @@ internal sealed class ScenePainter(TimeProvider timeProvider)
                 break;
             case ThemeContent.Dashboard content:
                 DrawDashboard(drawing, request, content, width, height);
+                break;
+            case ThemeContent.Scene content:
+                DrawScene(drawing, request, content, width, height, image);
                 break;
             default:
                 throw new InvalidDataException("Unsupported theme type.");

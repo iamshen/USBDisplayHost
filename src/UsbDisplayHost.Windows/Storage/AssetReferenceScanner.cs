@@ -22,7 +22,7 @@ internal static class AssetReferenceScanner
         var root = await VerifyRootAsync(paths, token).ConfigureAwait(false);
         if (root is OperationResult<int>.Failure rootFailure) { return new OperationResult<AssetReferenceInventory>.Failure(rootFailure.Error); }
         files = ((OperationResult<int>.Success)root).Value;
-        foreach (var directory in new[] { paths.Profiles, paths.Drafts, paths.DeviceSettingsDrafts })
+        foreach (var directory in new[] { paths.Profiles, paths.Drafts, paths.DeviceSettingsDrafts, paths.Themes })
         {
             token.ThrowIfCancellationRequested();
             if (!IsExistingDirectory(directory)) { continue; }
@@ -49,6 +49,20 @@ internal static class AssetReferenceScanner
                     return Blocked("AssetInventoryUnknownVersion", "配置格式或版本未核实，不能判断素材可清理");
                 }
                 var payload = envelope.Data;
+                if (directory == paths.Themes)
+                {
+                    if (!Guid.TryParseExact(Path.GetFileNameWithoutExtension(primary), "N", out var id)
+                        || id == Guid.Empty || FileProfileStore.DecodeSavedTheme(payload, id)
+                            is not OperationResult<SavedTheme>.Success savedTheme)
+                    {
+                        return Blocked("AssetInventoryInvalidTheme", "保存的主题内容未完整核实");
+                    }
+                    if (savedTheme.Value.Content.GetImageAssetId() is { } libraryAsset)
+                    {
+                        references.Add(libraryAsset.ToLowerInvariant());
+                    }
+                    continue;
+                }
                 if (!payload.TryGetProperty("deviceKey", out var keyValue)
                     || keyValue.ValueKind is not (JsonValueKind.String or JsonValueKind.Null))
                 {
@@ -99,7 +113,7 @@ internal static class AssetReferenceScanner
                 {
                     return Blocked("AssetInventoryOwnershipMismatch", "配置文件名与设备归属不匹配");
                 }
-                if (content is ThemeContent.Image { AssetId: not null } image) { references.Add(image.AssetId.ToLowerInvariant()); }
+                if (content?.GetImageAssetId() is { } assetId) { references.Add(assetId.ToLowerInvariant()); }
             }
         }
         return Success(references, files);
@@ -109,7 +123,7 @@ internal static class AssetReferenceScanner
     {
         var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            paths.Profiles, paths.Drafts, paths.DeviceSettingsDrafts, paths.Assets, Path.Combine(paths.Root, "diagnostics")
+            paths.Profiles, paths.Drafts, paths.DeviceSettingsDrafts, paths.Themes, paths.Assets, Path.Combine(paths.Root, "diagnostics")
         };
         int settingsFiles = 0;
         int entries = 0;
@@ -117,7 +131,7 @@ internal static class AssetReferenceScanner
         {
             token.ThrowIfCancellationRequested();
             var attributes = File.GetAttributes(entry);
-            if (++entries > 8 || (attributes & FileAttributes.ReparsePoint) != 0)
+            if (++entries > 9 || (attributes & FileAttributes.ReparsePoint) != 0)
             {
                 return RootBlocked("AssetInventoryUnknownRoot", "数据目录存在未核实的顶层条目或重解析项");
             }
